@@ -1,0 +1,52 @@
+@startuml
+
+package "Client" as client {}
+package "Admin Panel" as admin {}
+package "PostgreSQL" as db {}
+package "File API" as api {}
+
+package "Auth Service" as auth {}
+package "GeoIP Server" as geo {
+  note "Получение данных по IP" as N2
+}
+
+together {
+package "RabbitMQ" as rabbit {
+  object rabbit.Exchange
+  rabbit.Exchange : FILES
+
+  object rabbit.Queue
+  rabbit.Queue : COPY_FILE
+}
+
+package "Redis" as redis {
+    note "Идемпотентность" as N3
+}
+
+package "S3 Servers" as s3 {
+    object s3.Server
+    s3.Server : Server1_1
+    s3.Server : Server1_2
+    s3.Server : Server2_1
+    s3.Server : Server2_2
+}
+  package "File Worker" as worker {
+  note "Репликация файлов" as N1
+}
+  }
+
+client --> api
+client --> admin
+client --> s3
+admin <--> db
+api <--> db
+api <-- geo
+s3 --> api
+admin <--> auth
+api --> rabbit
+rabbit --> worker
+worker <--> s3
+worker <--> redis
+
+
+@enduml
