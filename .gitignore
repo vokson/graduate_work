@@ -1,3 +1,12 @@
-venv/
-storage/
+/.vscode
+/.idea
+
+**/__pycache__
+**/.pytest_cache
+**/.idea
+
 .env
+.env.prod
+.env.dev
+
+/venv

@@ -1,3 +1,36 @@
+# Спринт 7 - Auth 2
+https://github.com/vokson/Auth_sprint_2
+
+## Переменные окружения
+Создайте файл .env.prod и заполните его. Используйте .env.prod.example в качестве примера.
+
+## Docker
+Запустите Docker контейнеры:
+```console
+make up
+```
+
+Выполнить миграции:
+```console
+make migrate
+```
+
+Создать суперпользователя:
+```console
+make createsuperuser
+```
+
+## Сервис авторизации
+API доступно по адресу:
+- $HOST/auth/api/
+
+## Сервис кинотеатра
+[https://github.com/vokson/Async_API_sprint_2](https://github.com/vokson/Async_API_sprint_2)
+
+API доступно по адресу:
+- $HOST/movies/api/
+
+
 # Проектная работа: диплом
 
 Вопрос: непонятно зачем в кинотеатре загрузка файлов пользователями?
