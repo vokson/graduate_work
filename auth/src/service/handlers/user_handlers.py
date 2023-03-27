@@ -1,11 +1,11 @@
 # from __future__ import annotations
 # from typing import TYPE_CHECKING
 # from allocation.adapters import email, redis_eventpublisher
+# from allocation.domain.model import OrderLine
 from src.domain import commands, events
-from src.domain.models import user
+from src.domain.models.user import User
+from src.service.uow import AbstractUnitOfWork
 
-from allocation.domain.model import OrderLine
-from src.service.unit_of_work import AbstractUnitOfWork
 
 # if TYPE_CHECKING:
 #     from . import unit_of_work
@@ -14,18 +14,20 @@ from src.service.unit_of_work import AbstractUnitOfWork
 # class InvalidSku(Exception):
 #     pass
 
-def create_user(
+
+async def create_user(
     cmd: commands.CreateUser,
     uow: AbstractUnitOfWork,
 ):
-    with uow:
-        user = uow.users.get(username=cmd.username)
+    async with uow:
+        user = await uow.users.get_by_username(cmd.username)
 
         if user is None:
-            user = model.User(username=cmd.username, password=cmd.password)
-            uow.users.add(user)
+            user = User(username=cmd.username, password=cmd.password)
+            await uow.users.add(user)
 
-        uow.commit()
+        await uow.commit()
+
 
 # def add_batch(
 #     cmd: commands.CreateBatch,

@@ -4,7 +4,6 @@ import os
 from logging import config as logging_config
 
 from pydantic import BaseModel, BaseSettings
-
 from src.core.logger import LOGGING
 
 
@@ -24,8 +23,7 @@ class DatabaseSettings(BaseModel):
 
 
 class Settings(BaseSettings):
-    db: DatabaseSettings
-
+    auth_db: DatabaseSettings
 
     class Config:
         #  Для локальной разработки вне docker
@@ -39,9 +37,9 @@ class Settings(BaseSettings):
 settings = Settings()
 
 db_dsl = {
-    "host": settings.db.host,
-    "port": settings.db.port,
-    "user": settings.db.user,
-    "database": settings.db.dbname,
-    "password": settings.db.password,
+    "host": settings.auth_db.host,
+    "port": settings.auth_db.port,
+    "user": settings.auth_db.user,
+    "database": settings.auth_db.dbname,
+    "password": settings.auth_db.password,
 }

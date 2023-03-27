@@ -1,12 +1,16 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional, List, Set
+from typing import List, Optional, Set
+
 from . import commands, events
 
 
 class Product:
-    def __init__(self, sku: str, batches: List[Batch], version_number: int = 0):
+    def __init__(
+        self, sku: str, batches: List[Batch], version_number: int = 0
+    ):
         self.sku = sku
         self.batches = batches
         self.version_number = version_number
@@ -14,7 +18,9 @@ class Product:
 
     def allocate(self, line: OrderLine) -> str:
         try:
-            batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
+            batch = next(
+                b for b in sorted(self.batches) if b.can_allocate(line)
+            )
             batch.allocate(line)
             self.version_number += 1
             self.events.append(
@@ -35,7 +41,9 @@ class Product:
         batch._purchased_quantity = qty
         while batch.available_quantity < 0:
             line = batch.deallocate_one()
-            self.events.append(commands.Allocate(line.orderid, line.sku, line.qty))
+            self.events.append(
+                commands.Allocate(line.orderid, line.sku, line.qty)
+            )
 
 
 @dataclass(unsafe_hash=True)

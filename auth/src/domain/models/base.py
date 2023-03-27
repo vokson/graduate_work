@@ -1,6 +1,8 @@
+import datetime
+from uuid import UUID
+
 import orjson
 from pydantic import BaseModel
-from uuid import UUID
 
 
 def orjson_dumps(v, *, default):
@@ -12,13 +14,17 @@ class AbstractModel(BaseModel):
         json_loads = orjson.loads
         json_dumps = orjson_dumps
 
+
 class IdMixin(BaseModel):
     id: UUID
 
+
 class CreatedModifiedMixin(BaseModel):
-    created: datetime
-    modified: datetime
+    created: datetime.datetime
+    modified: datetime.datetime
 
-class AbstractIdCreatedMofidifiedModel(AbstractModel, IdMixin, CreatedModifiedMixin):
+
+class AbstractIdCreatedMofidifiedModel(
+    AbstractModel, IdMixin, CreatedModifiedMixin
+):
     pass
-

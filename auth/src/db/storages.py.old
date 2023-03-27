@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 
 import asyncpg
-
 from tools.decorators import backoff
 
 
