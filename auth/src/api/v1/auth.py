@@ -1,3 +1,4 @@
+from src.api.transformers import transform_command_result
 from src.api.v1.schemes import RegisterUserRequest
 from src.domain import commands
 # from src.api.decorators import auth, trace
@@ -17,13 +18,16 @@ bus = get_message_bus()
     status_code=status.HTTP_201_CREATED,
     summary="Регистрация пользователя",
 )
-# @exception_wrapper("user")
 # @rate_limit()
 async def register(
     credentials: RegisterUserRequest,
-) -> User:
-    return await bus.handle(
+)-> User:
+
+    results = await bus.handle(
         commands.CreateUser(
-            username=credentials.username, password=credentials.password
+            username=credentials.username, password=credentials.password,
+            email=credentials.email, first_name=credentials.first_name, last_name=credentials.last_name
         )
     )
+
+    return transform_command_result(results)

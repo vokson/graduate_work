@@ -1,31 +1,26 @@
 # from __future__ import annotations
 from abc import ABC, abstractmethod
 
-# from sqlalchemy import create_engine
-from src.adapters import repository
 from src.adapters.db import get_conn_pool
+# from sqlalchemy import create_engine
+from src.adapters.repositories.user import UserRepository
 from src.core.config import db_dsl
 
 
 conn_pool = None
 
+
 async def pool_factory():
-    print('HERE 1')
     global conn_pool
 
     if not conn_pool:
         conn_pool = await anext(get_conn_pool(**db_dsl))
-        print('------------------------')
 
-    print('HERE 2')
     return conn_pool
-
 
 
 async def init_conn_func():
     pool = await pool_factory()
-    print('*******************')
-    print(pool)
     return await pool.acquire()
 
 
@@ -70,21 +65,24 @@ class UnitOfWork(AbstractUnitOfWork):
         self._release_conn = release_conn_func
 
     async def __aenter__(self):
-        print(self._init_conn)
+        self._is_done = False
         self._conn = await self._init_conn()
         self._transaction = self._conn.transaction()
         await self._transaction.start()
 
-        self.users = repository.UserRepository(self._conn)
+        self.users = UserRepository(self._conn)
 
         return self
 
     async def __aexit__(self, *args):
-        super().__aexit__()
+        if not self._is_done:
+            await super().__aexit__()
         await self._release_conn(self._conn)
 
     async def commit(self):
+        self._is_done = True
         await self._transaction.commit()
 
     async def rollback(self):
+        self._is_done = True
         await self._transaction.rollback()

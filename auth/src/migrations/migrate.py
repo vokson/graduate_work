@@ -39,6 +39,7 @@ async def create_migrations(conn):
         """
     )
 
+
 async def apply_migration(conn, name, query):
     try:
         await conn.execute(query)
@@ -47,13 +48,14 @@ async def apply_migration(conn, name, query):
             INSERT INTO __migrations__ (name, created)
             VALUES ($1, CURRENT_TIMESTAMP);
             """,
-            name
+            name,
         )
         return True
 
     except Exception as e:
         logger.error(e)
         return False
+
 
 def get_filenames(path):
     return next(walk(path), (None, None, []))[2]
@@ -71,12 +73,11 @@ async def main():
 
     migrations = {x["name"] for x in await get_migrations(conn)}
     filenames = set(get_filenames(SQL_DIR))
-    
+
     not_applied_migrations = filenames - migrations
 
     for filename in sorted(list(not_applied_migrations)):
         with open(os.path.join(SQL_DIR, filename)) as f:
-
             is_ok = await apply_migration(conn, filename, f.read())
 
             if is_ok:

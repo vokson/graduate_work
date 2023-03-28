@@ -1,18 +1,15 @@
-# from __future__ import annotations
-# from typing import TYPE_CHECKING
-# from allocation.adapters import email, redis_eventpublisher
-# from allocation.domain.model import OrderLine
-from src.domain import commands, events
+import logging
+from datetime import datetime
+from uuid import uuid4
+from asyncpg.exceptions import PostgresError
+
+from src.core import exceptions
+from src.domain import command_results, commands, events
 from src.domain.models.user import User
 from src.service.uow import AbstractUnitOfWork
 
 
-# if TYPE_CHECKING:
-#     from . import unit_of_work
-
-
-# class InvalidSku(Exception):
-#     pass
+logger = logging.getLogger(__name__)
 
 
 async def create_user(
@@ -22,11 +19,24 @@ async def create_user(
     async with uow:
         user = await uow.users.get_by_username(cmd.username)
 
-        if user is None:
-            user = User(username=cmd.username, password=cmd.password)
-            await uow.users.add(user)
+        if user:
+            raise exceptions.UserAlreadyExists
 
+        user = User(
+            id=uuid4(),
+            username=cmd.username,
+            password=cmd.password,
+            email=cmd.email,
+            first_name=cmd.first_name,
+            last_name=cmd.last_name,
+            is_superuser=False,
+            created=datetime.now(),
+        )
+
+        await uow.users.add(user)
         await uow.commit()
+
+    return command_results.PositiveCommandResult(user.dict())
 
 
 # def add_batch(

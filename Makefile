@@ -3,4 +3,4 @@ up:
 createsuperuser:
 	docker compose --env-file .env.prod exec flask flask -A src.app:app users createsuperuser
 migrate:
-	docker compose --env-file .env.prod exec --workdir /opt/app/src flask alembic upgrade head
+	docker compose exec --workdir /opt/app/src flask alembic upgrade head
