@@ -59,7 +59,9 @@ class UserRepository:
                     WHERE id = $1;
                     """
 
-    GET_BY_USERNAME_QUERY = f"SELECT * FROM {__tablename__} WHERE username = $1;"
+    GET_BY_USERNAME_QUERY = (
+        f"SELECT * FROM {__tablename__} WHERE username = $1;"
+    )
 
     def __init__(self, conn):
         self._conn = conn

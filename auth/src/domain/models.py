@@ -40,7 +40,7 @@ class User(AbstractIdCreatedUpdatedModel):
     access_token: str | None
     refresh_token: str | None
     access_token_expire_at: int | None
-    refresh_token_expire_at : int | None
+    refresh_token_expire_at: int | None
 
 
 # class Token(BaseModel):

@@ -1,8 +1,9 @@
 import logging
-from datetime import datetime
-from uuid import uuid4, UUID
 import time
+from datetime import datetime
+from uuid import UUID, uuid4
 
+import jwt
 from asyncpg.exceptions import PostgresError
 from src.core import exceptions
 from src.core.config import settings
@@ -10,7 +11,6 @@ from src.domain import command_results, commands, events
 from src.domain.models import User
 from src.service.uow import AbstractUnitOfWork
 from src.tools.hasher import PBKDF2PasswordHasher
-import jwt
 
 
 logger = logging.getLogger(__name__)
@@ -59,9 +59,8 @@ def encode_token(payload: dict) -> str:
 def generate_token_pair(
     user_id: UUID,
     is_superuser: bool,
-    perms: list[str], 
+    perms: list[str],
 ) -> tuple[str, str, int, int]:
-
     timestamp = round(time.time())
     # perms = set()
 
@@ -126,6 +125,8 @@ async def login_by_credentials(
             refresh_token_expire_at,
         ) = generate_token_pair(user.id, user.is_superuser, permissions)
 
+        await dispose_token_pair(uow, user)
+
         user.access_token = access_token
         user.refresh_token = refresh_token
         user.access_token_expire_at = access_token_expire_at
@@ -137,4 +138,20 @@ async def login_by_credentials(
 
     return command_results.PositiveCommandResult(
         {"access_token": access_token, "refresh_token": refresh_token}
+    )
+
+
+async def dispose_token_pair(
+    uow: AbstractUnitOfWork,
+    user: User,
+):
+    await uow.cache.set(
+        user.access_token,
+        1,
+        expire_at=user.access_token_expire_at,
+    )
+    await uow.cache.set(
+        user.refresh_token,
+        1,
+        expire_at=user.refresh_token_expire_at,
     )

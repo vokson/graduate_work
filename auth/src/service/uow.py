@@ -1,32 +1,41 @@
-# from __future__ import annotations
 from abc import ABC, abstractmethod
 
+from src.adapters.cache import get_cache_conn
 from src.adapters.db import get_conn_pool
-# from sqlalchemy import create_engine
 from src.adapters.repositories.user import UserRepository
-from src.core.config import db_dsl
+from src.core.config import cache_dsl, db_dsl
 
 
-conn_pool = None
+db_conn_pool = None
+cache_conn = None
 
 
-async def pool_factory():
-    global conn_pool
+async def db_pool_factory():
+    global db_conn_pool
 
-    if not conn_pool:
-        conn_pool = await anext(get_conn_pool(**db_dsl))
+    if not db_conn_pool:
+        db_conn_pool = await anext(get_conn_pool(**db_dsl))
 
-    return conn_pool
+    return db_conn_pool
 
 
-async def init_conn_func():
-    pool = await pool_factory()
+async def init_db_conn_func():
+    pool = await db_pool_factory()
     return await pool.acquire()
 
 
-async def release_conn_func(conn):
-    pool = await pool_factory()
+async def release_db_conn_func(conn):
+    pool = await db_pool_factory()
     return await pool.release(conn)
+
+
+async def get_cache():
+    global cache_conn
+
+    if not cache_conn:
+        cache_conn = await anext(get_cache_conn(**cache_dsl))
+
+    return cache_conn
 
 
 class AbstractUnitOfWork(ABC):
@@ -58,18 +67,23 @@ class AbstractUnitOfWork(ABC):
 
 class UnitOfWork(AbstractUnitOfWork):
     def __init__(
-        self, init_conn=init_conn_func, release_conn=release_conn_func
+        self,
+        init_db_conn=init_db_conn_func,
+        release_db_conn=release_db_conn_func,
+        get_cache=get_cache,
     ):
         super().__init__()
-        self._init_conn = init_conn_func
-        self._release_conn = release_conn_func
+        self._init_db_conn = init_db_conn_func
+        self._release_db_conn = release_db_conn_func
+        self._get_cache_conn = get_cache
 
     async def __aenter__(self):
         self._is_done = False
-        self._conn = await self._init_conn()
+        self._conn = await self._init_db_conn()
         self._transaction = self._conn.transaction()
         await self._transaction.start()
 
+        self.cache = await self._get_cache_conn()
         self.users = UserRepository(self._conn)
 
         return self
@@ -77,7 +91,7 @@ class UnitOfWork(AbstractUnitOfWork):
     async def __aexit__(self, *args):
         if not self._is_done:
             await super().__aexit__()
-        await self._release_conn(self._conn)
+        await self._release_db_conn(self._conn)
 
     async def commit(self):
         self._is_done = True

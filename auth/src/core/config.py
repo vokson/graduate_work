@@ -21,6 +21,12 @@ class DatabaseSettings(BaseModel):
     password: str
     dbname: str
 
+
+class CacheSettings(BaseSettings):
+    host: str
+    port: int
+
+
 class TokenSettings(BaseModel):
     secret_key: str
     algo: str
@@ -30,6 +36,7 @@ class TokenSettings(BaseModel):
 
 class Settings(BaseSettings):
     auth_db: DatabaseSettings
+    cache: CacheSettings
     token: TokenSettings
 
     class Config:
@@ -49,4 +56,9 @@ db_dsl = {
     "user": settings.auth_db.user,
     "database": settings.auth_db.dbname,
     "password": settings.auth_db.password,
+}
+
+cache_dsl = {
+    "host": settings.cache.host,
+    "port": settings.cache.port,
 }
