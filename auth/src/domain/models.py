@@ -28,3 +28,21 @@ class AbstractIdCreatedUpdatedModel(
     AbstractModel, IdMixin, CreatedUpdatedMixin
 ):
     pass
+
+
+class User(AbstractIdCreatedUpdatedModel):
+    username: str
+    password: str
+    email: str
+    first_name: str
+    last_name: str
+    is_superuser: bool
+    access_token: str | None
+    refresh_token: str | None
+    access_token_expire_at: int | None
+    refresh_token_expire_at : int | None
+
+
+# class Token(BaseModel):
+#     access_token: str
+#     refresh_token: str

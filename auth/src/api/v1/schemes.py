@@ -11,3 +11,21 @@ class RegisterUserRequest(BaseModel):
     email: str
     first_name: str
     last_name: str
+
+
+class RegisterUserResponse(BaseModel):
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    is_superuser: bool
+
+
+class LoginByCredentialsRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginByCredentialsResponse(BaseModel):
+    access_token: str
+    refresh_token: str

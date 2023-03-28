@@ -22,6 +22,7 @@ EVENT_HANDLERS = {
 
 COMMAND_HANDLERS = {
     commands.CreateUser: user_handlers.create_user,
+    commands.LoginByCredentials: user_handlers.login_by_credentials,
     # commands.Allocate: handlers.allocate,
     # commands.CreateBatch: handlers.add_batch,
     # commands.ChangeBatchQuantity: handlers.change_batch_quantity,
@@ -32,7 +33,9 @@ RESULTS = {
     UniqueViolationError: command_results.UniqueViolationDatabaseError,
     PydanticValidationError: command_results.ValidationError,
     # exceptions.BadRequest: command_results.BadRequest,
+    exceptions.UserDoesNotExists: command_results.UserDoesNotExists,
     exceptions.UserAlreadyExists: command_results.UserAlreadyExists,
+    exceptions.WrongCredentials: command_results.WrongCredentials,
 }
 
 

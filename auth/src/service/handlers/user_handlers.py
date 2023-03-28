@@ -1,15 +1,20 @@
 import logging
 from datetime import datetime
-from uuid import uuid4
-from asyncpg.exceptions import PostgresError
+from uuid import uuid4, UUID
+import time
 
+from asyncpg.exceptions import PostgresError
 from src.core import exceptions
+from src.core.config import settings
 from src.domain import command_results, commands, events
-from src.domain.models.user import User
+from src.domain.models import User
 from src.service.uow import AbstractUnitOfWork
+from src.tools.hasher import PBKDF2PasswordHasher
+import jwt
 
 
 logger = logging.getLogger(__name__)
+hasher = PBKDF2PasswordHasher()
 
 
 async def create_user(
@@ -22,10 +27,12 @@ async def create_user(
         if user:
             raise exceptions.UserAlreadyExists
 
+        hashed_password = hasher.encode(cmd.password, hasher.salt())
+
         user = User(
             id=uuid4(),
             username=cmd.username,
-            password=cmd.password,
+            password=hashed_password,
             email=cmd.email,
             first_name=cmd.first_name,
             last_name=cmd.last_name,
@@ -36,61 +43,98 @@ async def create_user(
         await uow.users.add(user)
         await uow.commit()
 
-    return command_results.PositiveCommandResult(user.dict())
+    return command_results.PositiveCommandResult(
+        user.dict(exclude={"password"})
+    )
 
 
-# def add_batch(
-#     cmd: commands.CreateBatch,
-#     uow: unit_of_work.AbstractUnitOfWork,
-# ):
-#     with uow:
-#         product = uow.products.get(sku=cmd.sku)
-#         if product is None:
-#             product = model.Product(cmd.sku, batches=[])
-#             uow.products.add(product)
-#         product.batches.append(model.Batch(cmd.ref, cmd.sku, cmd.qty, cmd.eta))
-#         uow.commit()
+def encode_token(payload: dict) -> str:
+    return jwt.encode(
+        payload,
+        settings.token.secret_key,
+        algorithm=settings.token.algo,
+    )
 
 
-# def allocate(
-#     cmd: commands.Allocate,
-#     uow: unit_of_work.AbstractUnitOfWork,
-# ) -> str:
-#     line = OrderLine(cmd.orderid, cmd.sku, cmd.qty)
-#     with uow:
-#         product = uow.products.get(sku=line.sku)
-#         if product is None:
-#             raise InvalidSku(f"Invalid sku {line.sku}")
-#         batchref = product.allocate(line)
-#         uow.commit()
-#         return batchref
+def generate_token_pair(
+    user_id: UUID,
+    is_superuser: bool,
+    perms: list[str], 
+) -> tuple[str, str, int, int]:
+
+    timestamp = round(time.time())
+    # perms = set()
+
+    # for role in user["roles"]:
+    #     for permission in role["permissions"]:
+    #         perms.add(permission["name"])
+
+    base_token = {
+        "user_id": str(user_id),
+        #  Минус секунда для компенсации рассинхрона
+        #  времени на разных серверах
+        "iat": timestamp - 1,
+        "permissions": perms,
+        "is_superuser": is_superuser,
+    }
+
+    access_token_expire_at = timestamp + settings.token.access_lifetime
+    access_token = {
+        **base_token,
+        **{
+            "exp": access_token_expire_at,
+            "token_type": "access",
+        },
+    }
+
+    refresh_token_expire_at = timestamp + settings.token.refresh_lifetime
+    refresh_token = {
+        **base_token,
+        **{
+            "exp": refresh_token_expire_at,
+            "token_type": "refresh",
+        },
+    }
+
+    return (
+        encode_token(access_token),
+        encode_token(refresh_token),
+        access_token_expire_at,
+        refresh_token_expire_at,
+    )
 
 
-# def change_batch_quantity(
-#     cmd: commands.ChangeBatchQuantity,
-#     uow: unit_of_work.AbstractUnitOfWork,
-# ):
-#     with uow:
-#         product = uow.products.get_by_batchref(batchref=cmd.ref)
-#         product.change_batch_quantity(ref=cmd.ref, qty=cmd.qty)
-#         uow.commit()
+async def login_by_credentials(
+    cmd: commands.LoginByCredentials,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        user = await uow.users.get_by_username(cmd.username)
 
+        if not user:
+            raise exceptions.UserDoesNotExists
 
-# # pylint: disable=unused-argument
+        if not hasher.verify(cmd.password, user.password):
+            raise exceptions.WrongCredentials
 
+        permissions = ["can_view", "can_add"]
 
-# def send_out_of_stock_notification(
-#     event: events.OutOfStock,
-#     uow: unit_of_work.AbstractUnitOfWork,
-# ):
-#     email.send(
-#         "stock@made.com",
-#         f"Out of stock for {event.sku}",
-#     )
+        (
+            access_token,
+            refresh_token,
+            access_token_expire_at,
+            refresh_token_expire_at,
+        ) = generate_token_pair(user.id, user.is_superuser, permissions)
 
+        user.access_token = access_token
+        user.refresh_token = refresh_token
+        user.access_token_expire_at = access_token_expire_at
+        user.refresh_token_expire_at = refresh_token_expire_at
+        user.updated = datetime.now()
 
-# def publish_allocated_event(
-#     event: events.Allocated,
-#     uow: unit_of_work.AbstractUnitOfWork,
-# ):
-#     redis_eventpublisher.publish("line_allocated", event)
+        await uow.users.update(user)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult(
+        {"access_token": access_token, "refresh_token": refresh_token}
+    )

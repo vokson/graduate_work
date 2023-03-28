@@ -21,9 +21,16 @@ class DatabaseSettings(BaseModel):
     password: str
     dbname: str
 
+class TokenSettings(BaseModel):
+    secret_key: str
+    algo: str
+    access_lifetime: int
+    refresh_lifetime: int
+
 
 class Settings(BaseSettings):
     auth_db: DatabaseSettings
+    token: TokenSettings
 
     class Config:
         #  Для локальной разработки вне docker

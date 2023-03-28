@@ -11,3 +11,8 @@ class CreateUser(Command):
     email: str
     first_name: str
     last_name: str
+
+
+class LoginByCredentials(Command):
+    username: str
+    password: str

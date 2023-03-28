@@ -56,14 +56,26 @@ class CommandResults:
 class DatabaseError(NegativeCommandResult):
     pass
 
+
 class UniqueViolationDatabaseError(NegativeCommandResult):
     pass
+
 
 class ValidationError(NegativeCommandResult):
     pass
 
+
 # class BadRequest(NegativeCommandResult):
 #     pass
 
+
+class UserDoesNotExists(NegativeCommandResult):
+    pass
+
+
 class UserAlreadyExists(NegativeCommandResult):
+    pass
+
+
+class WrongCredentials(NegativeCommandResult):
     pass
