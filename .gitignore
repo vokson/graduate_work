@@ -10,3 +10,4 @@
 .env.dev
 
 /venv
+/storage
