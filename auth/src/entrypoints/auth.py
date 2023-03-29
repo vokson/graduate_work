@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(
 sys.path.append(BASE_DIR)
 
 
-from src.api.v1 import auth
+from src.api.v1 import auth, users
 from src.core.config import settings
 from src.service.messagebus import MessageBus
 from src.service.uow import UnitOfWork
@@ -44,3 +44,4 @@ async def validation_exception_handler(request, exc):
 
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])

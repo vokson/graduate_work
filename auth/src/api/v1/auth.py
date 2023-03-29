@@ -1,4 +1,3 @@
-from typing import Annotated
 from uuid import UUID
 
 from src.api.dependables import required_permissions_dependable
@@ -6,7 +5,6 @@ from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
-# from src.api.decorators import auth, trace
 from src.domain.models import User
 from src.service.messagebus import get_message_bus
 
@@ -19,7 +17,7 @@ bus = get_message_bus()
 
 @router.post(
     "/register",
-    response_model=schemes.RegisterUserResponse,
+    response_model=schemes.UserResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_201_CREATED,
     summary="Регистрация пользователя",
@@ -27,7 +25,7 @@ bus = get_message_bus()
 # @rate_limit()
 async def register(
     credentials: schemes.RegisterUserRequest,
-) -> schemes.RegisterUserResponse:
+) -> schemes.UserResponse:
     return transform_command_result(
         await bus.handle(
             commands.CreateUser(

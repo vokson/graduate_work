@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import logging
 import os
@@ -40,21 +41,24 @@ async def create_migrations(conn):
     )
 
 
-async def apply_migration(conn, name, query):
-    try:
-        await conn.execute(query)
-        await conn.execute(
-            """
-            INSERT INTO __migrations__ (name, created)
-            VALUES ($1, CURRENT_TIMESTAMP);
-            """,
-            name,
-        )
-        return True
+async def apply_migration(conn, path, filename):
+    with open(os.path.join(path, filename)) as f:
+        query = f.read()
 
-    except Exception as e:
-        logger.error(e)
-        return False
+        try:
+            await conn.execute(query)
+            await conn.execute(
+                """
+                INSERT INTO __migrations__ (name, created)
+                VALUES ($1, CURRENT_TIMESTAMP);
+                """,
+                filename,
+            )
+            logger.info(f"{filename} - OK")
+
+        except Exception as e:
+            logger.error(e)
+            logger.info(f"{filename} - FAIL")
 
 
 def get_filenames(path):
@@ -66,24 +70,21 @@ async def main():
 
     migrations = await get_migrations(conn)
 
+    #  Создаем таблицу __migrations__
     if migrations is None:
         logger.info("Creating __migrations__ table.")
         await create_migrations(conn)
         logger.warning("__migrations__ table has been created.")
 
+    #  Анализируем записи в __migrations__ и файлы на диске
     migrations = {x["name"] for x in await get_migrations(conn)}
     filenames = set(get_filenames(SQL_DIR))
 
     not_applied_migrations = filenames - migrations
 
+    #  Применяем миграции
     for filename in sorted(list(not_applied_migrations)):
-        with open(os.path.join(SQL_DIR, filename)) as f:
-            is_ok = await apply_migration(conn, filename, f.read())
-
-            if is_ok:
-                logger.info(f"{filename} - OK")
-            else:
-                logger.error(f"{filename} - FAIL")
+        await apply_migration(conn, SQL_DIR, filename)
 
     await conn.close()
 

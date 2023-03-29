@@ -30,10 +30,6 @@ class AbstractIdCreatedUpdatedModel(
     pass
 
 
-class Permission(AbstractModel, IdMixin):
-    name: str
-
-
 class User(AbstractIdCreatedUpdatedModel):
     username: str
     password: str
@@ -45,7 +41,7 @@ class User(AbstractIdCreatedUpdatedModel):
     refresh_token: str | None
     access_token_expire_at: int | None
     refresh_token_expire_at: int | None
-    permissions: list[Permission] = Field(default=[])
+    permissions: list[str] = Field(default=[])
 
 
 # class Token(BaseModel):

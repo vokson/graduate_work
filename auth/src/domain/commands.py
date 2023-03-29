@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Command(BaseModel):
@@ -13,6 +13,11 @@ class CreateUser(Command):
     email: str
     first_name: str
     last_name: str
+    permissions: list[str] = Field(default=[])
+
+
+class GetUserById(Command):
+    user_id: UUID
 
 
 class LoginByCredentials(Command):

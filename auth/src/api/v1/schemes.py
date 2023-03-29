@@ -22,12 +22,13 @@ class RegisterUserRequest(BaseModel):
     last_name: str
 
 
-class RegisterUserResponse(BaseModel):
+class UserResponse(BaseModel):
     username: str
     email: str
     first_name: str
     last_name: str
     is_superuser: bool
+    permissions: list[str]
 
 
 class LoginByCredentialsRequest(BaseModel):

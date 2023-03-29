@@ -38,10 +38,26 @@ async def create_user(
             last_name=cmd.last_name,
             is_superuser=False,
             created=datetime.now(),
+            permissions=cmd.permissions,
         )
 
         await uow.users.add(user)
         await uow.commit()
+
+    return command_results.PositiveCommandResult(
+        user.dict(exclude={"password"})
+    )
+
+
+async def get_user_by_id(
+    cmd: commands.GetUserById,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        user = await uow.users.get_by_id(cmd.user_id)
+
+        if not user:
+            raise exceptions.UserDoesNotExists
 
     return command_results.PositiveCommandResult(
         user.dict(exclude={"password"})
