@@ -7,16 +7,6 @@ from src.domain.models import User
 logger = logging.getLogger(__name__)
 
 
-# class AbstractRepository(ABC):
-#     @abstractmethod
-#     async def add(self, obj: AbstractModel):
-#         raise NotImplementedError
-
-# @abstractmethod
-# async def get_by_username(self, reference) -> AbstractModel:
-#     raise NotImplementedError
-
-
 class UserRepository:
     __tablename__ = "users"
 
@@ -59,6 +49,8 @@ class UserRepository:
                     WHERE id = $1;
                     """
 
+    GET_BY_ID_QUERY = f"SELECT * FROM {__tablename__} WHERE id = $1;"
+
     GET_BY_USERNAME_QUERY = (
         f"SELECT * FROM {__tablename__} WHERE username = $1;"
     )
@@ -80,6 +72,14 @@ class UserRepository:
             obj.created,
             obj.updated,
         )
+
+    async def get_by_id(self, id) -> User:
+        logger.debug(f"Get user with id {id}")
+        row = await self._conn.fetchrow(self.GET_BY_ID_QUERY, id)
+        if not row:
+            return
+
+        return User(**{k: v for k, v in row.items()})
 
     async def get_by_username(self, username) -> User:
         logger.debug(f"Get user with username {username}")

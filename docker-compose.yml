@@ -2,7 +2,7 @@ version: '3.9'
 
 volumes:
   auth_db_data: null
-  # redis_data: null
+  redis_data: null
 
 services:
   auth_db:
@@ -38,13 +38,13 @@ services:
   #     - "80:80"
   #   restart: always
 
-  # redis:
-  #   image: redis:7.0.5-alpine
-  #   volumes:
-  #     - redis_data:/var/lib/redis
-  #   restart: always
-  #   ports:
-  #     - "6379:6379"
+  redis:
+    image: redis:7.0.5-alpine
+    volumes:
+      - redis_data:/var/lib/redis
+    restart: always
+    ports:
+      - "${CACHE__PORT}:${CACHE__PORT}"
 
   # fastapi:
   #   build: fastapi

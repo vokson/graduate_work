@@ -65,8 +65,24 @@ class ValidationError(NegativeCommandResult):
     pass
 
 
-# class BadRequest(NegativeCommandResult):
-#     pass
+class AuthTokenMissedException(NegativeCommandResult):
+    pass
+
+
+class AuthTokenWithWrongSignatureException(NegativeCommandResult):
+    pass
+
+
+class AuthTokenOutdatedException(NegativeCommandResult):
+    pass
+
+
+class AuthTokenWrongPayloadException(NegativeCommandResult):
+    pass
+
+
+class AuthNoPermissionException(NegativeCommandResult):
+    pass
 
 
 class UserDoesNotExists(NegativeCommandResult):

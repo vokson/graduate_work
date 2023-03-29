@@ -6,7 +6,7 @@ from asyncpg.exceptions import PostgresError, UniqueViolationError
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from src.core import exceptions
 from src.domain import command_results, commands, events
-from src.service.handlers import user_handlers
+from src.service.handlers import permission_handlers, user_handlers
 from src.service.uow import AbstractUnitOfWork, UnitOfWork
 
 
@@ -17,26 +17,47 @@ Message = commands.Command | events.Event
 
 EVENT_HANDLERS = {
     # events.Allocated: [handlers.publish_allocated_event],
-    # events.OutOfStock: [handlers.send_out_of_stock_notification],
 }
 
 COMMAND_HANDLERS = {
+    commands.CheckRequiredPermissions: permission_handlers.check_required_permissions,
     commands.CreateUser: user_handlers.create_user,
     commands.LoginByCredentials: user_handlers.login_by_credentials,
-    # commands.Allocate: handlers.allocate,
-    # commands.CreateBatch: handlers.add_batch,
-    # commands.ChangeBatchQuantity: handlers.change_batch_quantity,
+    commands.RefreshTokens: user_handlers.refresh_tokens,
+    commands.VerifyToken: user_handlers.verify_token,
 }
 
 RESULTS = {
     PostgresError: command_results.DatabaseError,
     UniqueViolationError: command_results.UniqueViolationDatabaseError,
     PydanticValidationError: command_results.ValidationError,
-    # exceptions.BadRequest: command_results.BadRequest,
+    exceptions.AuthTokenMissedException: command_results.AuthTokenMissedException,
+    exceptions.AuthTokenWithWrongSignatureException: command_results.AuthTokenWithWrongSignatureException,
+    exceptions.AuthTokenOutdatedException: command_results.AuthTokenOutdatedException,
+    exceptions.AuthTokenWrongPayloadException: command_results.AuthTokenWrongPayloadException,
+    exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
     exceptions.UserDoesNotExists: command_results.UserDoesNotExists,
     exceptions.UserAlreadyExists: command_results.UserAlreadyExists,
     exceptions.WrongCredentials: command_results.WrongCredentials,
 }
+
+# def print_exception():
+#     exc_type, exc_obj, tb = sys.exc_info()
+#     f = tb.tb_frame
+#     lineno = tb.tb_lineno
+#     filename = f.f_code.co_filename
+#     linecache.checkcache(filename)
+#     line = linecache.getline(filename, lineno, f.f_globals)
+#     logger.info(f'EXCEPTION IN ({filename}, LINE {lineno} "{line.strip()}"): {exc_obj}')
+
+from sys import exc_info
+from traceback import format_exception
+
+
+def print_exception():
+    etype, value, tb = exc_info()
+    info, error = format_exception(etype, value, tb)[-2:]
+    logger.info(f"EXCEPTION IN:\n{info}\n{error}")
 
 
 class MessageBus:
@@ -70,6 +91,7 @@ class MessageBus:
                     raise Exception(f"{message} was not an Event or Command")
 
         except Exception as e:
+            print_exception()
             results.add(message, e)
 
         return results

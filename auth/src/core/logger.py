@@ -1,7 +1,7 @@
 """Настройки логирования"""
 
 
-LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+LOG_FORMAT = "%(asctime)s - %(levelname)s  - %(name)s[%(lineno)d]- %(message)s"
 LOG_DEFAULT_HANDLERS = [
     "console",
 ]

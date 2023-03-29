@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -16,3 +18,19 @@ class CreateUser(Command):
 class LoginByCredentials(Command):
     username: str
     password: str
+
+
+class CheckRequiredPermissions(Command):
+    required_permissions: list[str]
+    auth_header: str
+    is_access_token: bool
+
+
+class RefreshTokens(Command):
+    user_id: UUID
+
+
+class VerifyToken(Command):
+    is_superuser: bool
+    required_permissions: list[str]
+    existing_permissions: list[str]

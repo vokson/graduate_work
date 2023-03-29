@@ -11,12 +11,10 @@ def transform_command_result(results):
         return first_command_result.data
 
     if results.is_first_result_negative:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=COMMAND_RESULTS_RESPONSE_CODES[
-                first_command_result.__class__
-            ],
-        )
+        code, detail = COMMAND_RESULTS_RESPONSE_CODES[
+            first_command_result.__class__
+        ]
+        raise HTTPException(status_code=code, detail=detail)
 
     raise Exception(
         f"Transform command result function has received {first_command_result} not even CommandResult"

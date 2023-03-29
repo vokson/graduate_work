@@ -5,6 +5,15 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
+class EmptyResponse(BaseModel):
+    pass
+
+
+class ErrorResponse(BaseModel):
+    error: str
+    detail: str | None
+
+
 class RegisterUserRequest(BaseModel):
     username: str
     password: str
@@ -29,3 +38,11 @@ class LoginByCredentialsRequest(BaseModel):
 class LoginByCredentialsResponse(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class RefreshTokensResponse(LoginByCredentialsResponse):
+    pass
+
+
+class VerifyTokenRequest(BaseModel):
+    permissions: list[str]

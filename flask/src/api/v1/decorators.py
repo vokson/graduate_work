@@ -190,8 +190,8 @@ def required_permissions(
 
             additional_kwargs = {
                 "_user_id": user_id,
-                "_is_superuser": is_superuser,
-                "_token_permissions": token_permissions,
+                # "_is_superuser": is_superuser,
+                # "_token_permissions": token_permissions,
             }
 
             if token_type == "refresh":  # noqa: S105

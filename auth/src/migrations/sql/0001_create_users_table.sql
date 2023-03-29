@@ -1,3 +1,9 @@
+CREATE TABLE permissions
+(
+    id UUID PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE users
 (
     id UUID PRIMARY KEY,
@@ -13,4 +19,12 @@ CREATE TABLE users
     refresh_token_expire_at  integer,
     created TIMESTAMP,
     updated TIMESTAMP
+);
+
+CREATE TABLE user_permissions
+(
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users (id),
+    permission_id UUID REFERENCES permissions (id),
+    UNIQUE (user_id, permission_id)
 );
