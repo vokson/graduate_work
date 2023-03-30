@@ -36,7 +36,7 @@ async def create_user(
             email=cmd.email,
             first_name=cmd.first_name,
             last_name=cmd.last_name,
-            is_superuser=False,
+            is_superuser=cmd.is_superuser,
             created=datetime.now(),
             permissions=cmd.permissions,
         )
@@ -179,6 +179,22 @@ async def login_by_credentials(
     return command_results.PositiveCommandResult(
         {"access_token": access_token, "refresh_token": refresh_token}
     )
+
+async def logout(
+    cmd: commands.Logout,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        #  Получаем данные пользователя
+        user = await uow.users.get_by_id(cmd.user_id)
+
+        if not user:
+            raise exceptions.UserDoesNotExists
+
+        #  Сбрасываем токены
+        await dispose_token_pair(uow, user)
+
+    return command_results.PositiveCommandResult({})
 
 
 async def refresh_tokens(

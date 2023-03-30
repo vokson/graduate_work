@@ -92,15 +92,15 @@ class NegativeResponse extends Response {
     };
   }
 }
-// class EmptyPositiveResponse extends Response {
-//   get schema() {
-//     return {
-//       type: "object",
-//       properties: {},
-//       additionalProperties: false,
-//     };
-//   }
-// }
+class EmptyPositiveResponse extends Response {
+  get schema() {
+    return {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    };
+  }
+}
 
 // class PositiveFileResponse extends Response {
 //   get schema() {
@@ -134,6 +134,9 @@ class LoginCredentialsResponse extends Response {
     return Tokens;
   }
 }
+
+class LogoutRequest extends Request { }
+class LogoutResponse extends EmptyPositiveResponse {}
 
 class MyCredentialsRequest extends Request { }
 class MyCredentialsResponse extends Response {
@@ -493,22 +496,20 @@ class RefreshTokensResponse extends Response {
 // }
 // class DeleteFolderResponse extends EmptyPositiveResponse {}
 
-// class UploadFileToFolderRequest extends Request {
-//   // file = https://developer.mozilla.org/ru/docs/Web/API/File
-//   get schema() {
-//     return {
-//       type: "object",
-//       properties: {
-//         id: { type: "string" },
-//         folder_id: { type: "integer" },
-//         usergroup_id: { type: "integer" },
-//         original_file: { type: "object" },
-//       },
-//       additionalProperties: false,
-//     };
-//   }
-// }
-// class UploadFileToFolderResponse extends EmptyPositiveResponse {}
+class UploadFileRequest extends Request {
+  // file = https://developer.mozilla.org/ru/docs/Web/API/File
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        original_file: { type: "object" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class UploadFileResponse extends EmptyPositiveResponse {}
 
 // class DownloadFileFromFolderRequest extends Request {
 //   get schema() {
@@ -1962,6 +1963,10 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  logout = () => {
+    throw new NotImplementedError();
+  };
+
   // login_with_token = () => {
   //   throw new NotImplementedError();
   // };
@@ -2062,9 +2067,9 @@ class AbstractApi {
   //   throw new NotImplementedError();
   // };
 
-  // upload_file_to_folder = () => {
-  //   throw new NotImplementedError();
-  // };
+  upload_file = () => {
+    throw new NotImplementedError();
+  };
 
   // download_file_from_folder = () => {
   //   throw new NotImplementedError();
@@ -2424,6 +2429,8 @@ export {
   // LOGIN
   LoginCredentialsRequest,
   LoginCredentialsResponse,
+  LogoutRequest,
+  LogoutResponse,
   MyCredentialsRequest,
   MyCredentialsResponse,
   RefreshTokensRequest,
@@ -2539,8 +2546,8 @@ export {
   // RemoveDocumentFromCartRequest,
   // RemoveDocumentFromCartResponse,
   // // FILE
-  // UploadFileToFolderRequest,
-  // UploadFileToFolderResponse,
+  UploadFileRequest,
+  UploadFileResponse,
   // DownloadFileFromFolderRequest,
   // DownloadFileFromFolderResponse,
   // DownloadManyDocumentsFilesAsArchiveRequest,

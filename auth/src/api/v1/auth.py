@@ -59,6 +59,20 @@ async def login(
         )
     )
 
+@router.post(
+    "/logout",
+    response_model=schemes.EmptyResponse,
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Выход пользователя",
+)
+async def logout(
+    commons: dict = Depends(required_permissions_dependable([]))
+) -> schemes.EmptyResponse:
+    return transform_command_result(
+        await bus.handle(commands.Logout(user_id=commons["user_id"]))
+    )
+
 
 @router.post(
     "/token/refresh",

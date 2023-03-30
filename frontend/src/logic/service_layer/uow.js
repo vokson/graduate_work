@@ -6,7 +6,7 @@ import { VueTokenRepository } from "../adapters/token_repository";
 // import { VueFolderRepository } from "../adapters/folder_repository";
 // import { VueDocRepository } from "../adapters/doc_repository";
 // import { VueFileBoxRepository } from "../adapters/file_box_repository";
-// import { VueFileFlatRepository } from "../adapters/file_flat_repository";
+import { VueFileFlatRepository } from "../adapters/file_flat_repository";
 // import { VueUserFolderSettingsRepository } from "../adapters/user_folder_settings_repository";
 // import { VuePermissionRepository } from "../adapters/permission_repository";
 // import { VueRolePermissionsRepository } from "../adapters/role_permissions_repository";
@@ -54,7 +54,7 @@ class VueUnitOfWork extends AbstractUnitOfWork {
     // this.file_in_folder_repository = new VueFileBoxRepository(
     //   "files_in_folders"
     // );
-    // this.file_common_repository = new VueFileFlatRepository("files_common");
+    this.file_repository = new VueFileFlatRepository("files");
     // this.permission_repository = new VuePermissionRepository("permissions");
     // this.download_progress = new VueFileFlatRepository("download_progress");
 

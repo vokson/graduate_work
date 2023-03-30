@@ -2,6 +2,8 @@ import {
   NegativeResponse,
   LoginCredentialsRequest,
   LoginCredentialsResponse,
+  LogoutRequest,
+  LogoutResponse,
   MyCredentialsRequest,
   MyCredentialsResponse,
   RefreshTokensRequest,
@@ -116,6 +118,7 @@ const refresh_tokens = async (event, uow) => {
   const refresh_token = uow.token_repository.get_refresh_token()
 
   if (!refresh_token) {
+    console.log('REFRESH TOKEN', refresh_token)
     uow.push_message(new RefreshTokenOutdated());
     return;
   }
@@ -131,8 +134,10 @@ const refresh_tokens = async (event, uow) => {
   const response = await uow.api.call(request);
 
   if (response instanceof NegativeResponse) {
-    if (response.data.code === 'Auth.Error.TokenOutdated')
+    if (response.data.code === 'Auth.Error.TokenOutdated') {
+      console.log('REFRESH TOKEN', response);
       uow.push_message(new RefreshTokenOutdated());
+    }
     else
       uow.push_message(new ApiError(response.data.code));
     return;
@@ -149,10 +154,23 @@ const refresh_tokens = async (event, uow) => {
   throw new WrongResponseError();
 };
 
-const logout = (event, uow) => {
-  uow.user_repository.reset();
-  uow.token_repository.reset();
-  uow.push_message(new UserLogoutSuccess());
+const logout = async (event, uow) => {
+  const request = new LogoutRequest();
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof LogoutResponse) {
+    uow.user_repository.reset();
+    uow.token_repository.reset();
+    uow.push_message(new UserLogoutSuccess());
+    return;
+  }
+
+  throw new WrongResponseError();
 };
 
 // const get_users = async (event, uow) => {

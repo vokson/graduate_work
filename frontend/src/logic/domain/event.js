@@ -29,19 +29,19 @@ class UserLogoutSuccess extends Event {}
 // class FoldersUpdateSuccess extends Event {}
 // class FoldersDeleteSuccess extends Event {}
 
-// class UploadFileError extends Event {
-//   constructor(filename) {
-//     super();
-//     this.filename = filename;
-//   }
-// }
+class UploadFileError extends Event {
+  constructor(filename) {
+    super();
+    this.filename = filename;
+  }
+}
 
-// class UploadEmptyFileError extends UploadFileError {}
-// class UploadFileTooBigError extends UploadFileError {}
+class UploadEmptyFileError extends UploadFileError {}
+class UploadFileTooBigError extends UploadFileError {}
 // class UploadFileWrongExtensionError extends UploadFileError {}
 // class UploadFileWrongFilenameError extends UploadFileError {}
 
-// class UploadFileSuccess extends Event {}
+class UploadFileSuccess extends Event {}
 
 // class SaveManyDocumentsSuccess extends Event {}
 // class DeleteManyDocumentsSuccess extends Event {}
@@ -177,13 +177,13 @@ export {
   // FoldersUpdateSuccess,
   // FoldersDeleteSuccess,
 
-  // // FILE
-  // UploadFileError,
-  // UploadEmptyFileError,
-  // UploadFileTooBigError,
+  // FILE
+  UploadFileError,
+  UploadEmptyFileError,
+  UploadFileTooBigError,
   // UploadFileWrongFilenameError,
   // UploadFileWrongExtensionError,
-  // UploadFileSuccess,
+  UploadFileSuccess,
   // DocumentFilesAreUploading,
   // FileUpdatedSuccess,
   // FileDeletedSuccess,

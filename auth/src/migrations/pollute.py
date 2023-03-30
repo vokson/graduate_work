@@ -26,6 +26,7 @@ async def main():
             email="admin@mail.ru",
             first_name="John",
             last_name="Doe",
+            is_superuser=True,
             permissions=["can_upload_file", "can_download_file"],
         )
     )

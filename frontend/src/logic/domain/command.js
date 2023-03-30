@@ -689,14 +689,14 @@ class RefreshTokens extends Command {}
 
 // class GetShareFiles extends Command {}
 
-// class UploadShareFile extends Command {
-//   constructor(id, file) {
-//     super();
-//     this.id = id;
-//     // Здесь file это https://developer.mozilla.org/ru/docs/Web/API/File
-//     this.file = file;
-//   }
-// }
+class UploadFile extends Command {
+  constructor(id, file) {
+    super();
+    this.id = id;
+    // Здесь file это https://developer.mozilla.org/ru/docs/Web/API/File
+    this.file = file;
+  }
+}
 
 // class DeleteShareFile extends Command {
 //   constructor(id) {
@@ -1306,6 +1306,7 @@ export {
   RefreshTokens,
   // LoginWithToken,
   Logout,
+  UploadFile
   // GetUsers,
   // SetUser,
   // DeleteUser,

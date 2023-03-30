@@ -15,7 +15,7 @@ export default {
     provide("tokens", {});
 
     // provide("permissions", {});
-    // provide("files_in_folders", {});
+    provide("files", {});
   },
 };
 </script>

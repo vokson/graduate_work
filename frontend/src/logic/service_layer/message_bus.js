@@ -21,12 +21,12 @@ import {
 // } from "./command_handlers/permission_handlers";
 
 
-// import {
-//   upload_file_to_folder,
+import {
+  upload_file,
 //   download_file_from_folder,
 //   get_file_info,
 //   delete_file_from_folder,
-// } from "./command_handlers/file_handlers";
+} from "./command_handlers/file_handlers";
 
 
 import {
@@ -52,7 +52,7 @@ const COMMAND_HANDLERS = {
   Logout: [logout],
 
   // FILE
-  // UploadFileToFolder: [upload_file_to_folder],
+  UploadFile: [upload_file],
   // DownloadFileFromFolder: [download_file_from_folder],
   // DeleteFileFromFolder: [delete_file_from_folder],
   // GetFileInfo: [get_file_info],

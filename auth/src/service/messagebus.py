@@ -24,6 +24,7 @@ COMMAND_HANDLERS = {
     commands.CreateUser: user_handlers.create_user,
     commands.GetUserById: user_handlers.get_user_by_id,
     commands.LoginByCredentials: user_handlers.login_by_credentials,
+    commands.Logout: user_handlers.logout,
     commands.RefreshTokens: user_handlers.refresh_tokens,
     commands.VerifyToken: user_handlers.verify_token,
 }

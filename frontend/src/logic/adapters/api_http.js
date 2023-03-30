@@ -13,6 +13,8 @@ import {
   LoginCredentialsResponse,
   MyCredentialsResponse,
   RefreshTokensResponse,
+  LogoutResponse,
+  UploadFileResponse,
   // LoginTokenResponse,
   // GetUsersResponse,
   // SetUserResponse,
@@ -122,9 +124,6 @@ import {
   // FILES
   // GetSpareFilesResponse,
   // GetUploadProgressResponse,
-  // UpdateFileFromFolderResponse,
-
-  // SERVICE - PDF MERGE
   // UploadFileToFolderResponse,
   // DownloadFileFromFolderResponse,
   // DownloadManyDocumentsFilesAsArchiveResponse,
@@ -185,6 +184,7 @@ class HttpApi extends AbstractApi {
 
       // USER
       LoginCredentialsRequest: this.login_with_credentials,
+      LogoutRequest: this.logout,
       MyCredentialsRequest: this.my_credentials,
       RefreshTokensRequest: this.refresh_tokens,
       // LoginTokenRequest: this.login_with_token,
@@ -279,7 +279,7 @@ class HttpApi extends AbstractApi {
       // RemoveDocumentFromCartRequest: this.remove_document_from_cart,
 
       // FILES
-      // UploadFileToFolderRequest: this.upload_file_to_folder,
+      UploadFileRequest: this.upload_file,
       // DownloadFileFromFolderRequest: this.download_file_from_folder,
       // DownloadManyDocumentsFilesAsArchiveRequest:
       //   this.download_many_documents_files_as_archive,
@@ -532,6 +532,16 @@ class HttpApi extends AbstractApi {
           username: request.data.username,
           password: request.data.password,
         }),
+      }
+    );
+  };
+
+  logout = async () => {
+    return await this.perform_request(
+      LogoutResponse,
+      `/auth/logout/`,
+      {
+        method: "post",
       }
     );
   };
@@ -951,24 +961,24 @@ class HttpApi extends AbstractApi {
   //     );
   //   };
 
-  //   upload_file_to_folder = async (request) => {
-  //     const data = new FormData();
-  //     data.append("id", request.data.id);
-  //     data.append("file", request.data.original_file);
+    upload_file = async (request) => {
+      const data = new FormData();
+      data.append("id", request.data.id);
+      data.append("file", request.data.original_file);
 
-  //     return await this.perform_request(
-  //       UploadFileToFolderResponse,
-  //       `/folders/${request.data.folder_id}/usergroups/${request.data.usergroup_id}/files/`,
-  //       {
-  //         method: "post",
-  //         content_type: null,
-  //         data: data,
-  //         headers: {
-  //           "X-FILE-ID": request.data.id,
-  //         },
-  //       }
-  //     );
-  //   };
+      return await this.perform_request(
+        UploadFileResponse,
+        `/files/`,
+        {
+          method: "post",
+          content_type: null,
+          data: data,
+          headers: {
+            "X-FILE-ID": request.data.id,
+          },
+        }
+      );
+    };
 
   //   download_file_from_folder = async (request) => {
   //     return await this.perform_request(

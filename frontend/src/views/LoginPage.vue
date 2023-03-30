@@ -28,6 +28,7 @@
         type="primary"
       />
       <btn-component
+        v-if="is_authenticated"
         class="page__button"
         @click="logout_action"
         caption="Выйти"
@@ -63,6 +64,8 @@ export default {
     const uow = new VueUnitOfWork();
     const user = uow.user_repository.get_current();
 
+    const is_authenticated = uow.user_repository.is_authenticated();
+
     const login_action = async () => {
       const message = new LoginWithCredentials(
         credentials.username,
@@ -77,7 +80,6 @@ export default {
               ? "/"
               : decodeURIComponent(route.query.url),
         });
-        
     };
 
     const logout_action = async () => {
@@ -85,7 +87,14 @@ export default {
       await MessageBus.handle(message, uow);
     };
 
-    return { user, credentials, login_action, logout_action, uow };
+    return {
+      is_authenticated,
+      user,
+      credentials,
+      login_action,
+      logout_action,
+      uow,
+    };
   },
 };
 </script>

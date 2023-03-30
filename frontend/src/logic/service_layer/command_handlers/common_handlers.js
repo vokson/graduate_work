@@ -11,7 +11,7 @@ import { Notify } from "../../domain/command";
 // } from "../../domain/event";
 
 // class WrongResponseError extends Error {}
-class WrongErrorType extends Error {}
+class WrongErrorType extends Error { }
 
 const notify = (event, uow) => {
   const actions = {
@@ -32,6 +32,7 @@ const notify_api_error = (event, uow) => {
   const errors = {
     "User.DoesNotExists": ["error", "Неверные учетные данные"],
     "Auth.Error.TokenOutdated": ["error", "Время жизни токена истекло"],
+    "Auth.Error.WrongTokenPayload": ["error", 'Неверный payload токена'],
     "Request.Error.Validation": ["error", "Неверный запрос"],
     // "Auth.Token.Fail": ["error", "Неверные учетные данные"],
     // "Auth.Token.Blocked": ["error", "Учетная запись заблокирована"],

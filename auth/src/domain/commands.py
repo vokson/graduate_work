@@ -13,6 +13,7 @@ class CreateUser(Command):
     email: str
     first_name: str
     last_name: str
+    is_superuser: bool = Field(False)
     permissions: list[str] = Field(default=[])
 
 
@@ -23,6 +24,9 @@ class GetUserById(Command):
 class LoginByCredentials(Command):
     username: str
     password: str
+
+class Logout(Command):
+    user_id: UUID
 
 
 class CheckRequiredPermissions(Command):
