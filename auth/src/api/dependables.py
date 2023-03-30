@@ -12,7 +12,7 @@ def required_permissions_dependable(
     permissions: list[str], is_access_token: bool = True
 ):
     async def inner(
-        authorization: str | None = Header(default=None),
+        authorization: str = Header(),
     ):
         results = await bus.handle(
             commands.CheckRequiredPermissions(

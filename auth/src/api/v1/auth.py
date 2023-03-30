@@ -40,7 +40,7 @@ async def register(
 
 
 @router.post(
-    "/login",
+    "/login/credentials",
     response_model=schemes.LoginByCredentialsResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,
