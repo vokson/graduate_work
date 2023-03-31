@@ -6,168 +6,17 @@ import {
   AbstractApi,
   NegativeResponse,
 
-  // INFO
-  // GetInfoResponse,
-
   // USER
   LoginCredentialsResponse,
   MyCredentialsResponse,
   RefreshTokensResponse,
   LogoutResponse,
+
+  // CDN SERVER
+  GetCdnServersResponse,
+
+  // FILE
   UploadFileResponse,
-  // LoginTokenResponse,
-  // GetUsersResponse,
-  // SetUserResponse,
-  // DeleteUserResponse,
-  // GetUserReplacementsResponse,
-  // AddUserReplacementResponse,
-  // DeleteUserReplacementResponse,
-  // GetUserReplacementsOfUserResponse,
-  // AddUserReplacementToUserResponse,
-  // DeleteUserReplacementFromUserResponse,
-  // GetOnBehalfUsersResponse,
-  // SetOnBehalfUserResponse,
-  // DeleteOnBehalfUserResponse,
-
-  // FOLDER
-  // GetFoldersResponse,
-  // AddFolderResponse,
-  // DeleteFolderResponse,
-  // UpdateFolderResponse,
-
-  // ROLE
-  // GetRolesResponse,
-  // AddRoleResponse,
-  // DeleteRoleResponse,
-
-  // USER FOLDER SETTINGS
-  // GetUserFolderSettingsResponse,
-  // AddUserFolderSettingsResponse,
-  // UpdateUserFolderSettingsResponse,
-  // DeleteUserFolderSettingsResponse,
-
-  // PERMISSIONS
-  // GetPermissionsResponse,
-  // AddPermissionResponse,
-  // DeletePermissionResponse,
-  // GetUserPermissionsResponse,
-  // GetUserPermissionsForFolderResponse,
-
-  // USER SEARCH SCHEMA
-  // GetUserSearchSchemaResponse,
-  // SetUserSearchSchemaResponse,
-  // DeleteUserSearchSchemaResponse,
-
-  // DOCUMENTS
-  // GetDocumentResponse,
-  // GetManyDocumentsResponse,
-  // SaveManyDocumentsResponse,
-  // DeleteManyDocumentsResponse,
-  // DuplicateDocumentToUsergroupResponse,
-  // DuplicateManyDocumentsToUsergroupResponse,
-  // GetPreviousDocumentsResponse,
-  // PushDocumentButtonResponse,
-
-  // TRANSMITTAL
-  // DownloadTransmittalCoverSheetResponse,
-
-  // DOCUMENT APPROVALS
-  // GetManyDocumentsApprovalsResponse,
-  // GetDocumentApprovalsResponse,
-  // AddDocumentApprovalResponse,
-  // UpdateDocumentApprovalResponse,
-  // DeleteDocumentApprovalResponse,
-  // DelegateDocumentApprovalResponse,
-  // GetDocumentApprovalSpareFilesResponse,
-  // UploadDocumentApprovalFileResponse,
-  // DeleteDocumentApprovalFileResponse,
-  // GetWaitingDocumentApprovalsResponse,
-
-  // DOCUMENT APPROVAL FLOW
-  // GetDocumentApprovalFlowResponse,
-  // SetDocumentApprovalFlowResponse,
-  // StartDocumentApprovalFlowResponse,
-  // StopDocumentApprovalFlowResponse,
-
-  // CART
-  // EmptyCartResponse,
-  // GetCartDocumentsResponse,
-  // AddDocumentToCartResponse,
-  // AddManyDocumentsToCartResponse,
-  // RemoveDocumentFromCartResponse,
-
-  // SERVER SETTINGS
-  // GetServerSettingsResponse,
-  // UpdateServerSettingResponse,
-
-  // MAILBOXES
-  // GetMailBoxesResponse,
-  // AddMailBoxResponse,
-  // UpdateMailBoxResponse,
-  // DeleteMailBoxResponse,
-  // AddMailChannelToMailBoxResponse,
-  // DeleteMailChannelFromMailBoxResponse,
-
-  // MAIL CHANNELS
-  // GetMailChannelsResponse,
-  // AddMailChannelResponse,
-  // UpdateMailChannelResponse,
-  // DeleteMailChannelResponse,
-  // FetchMailChannelResponse,
-
-  // MAIL MESSAGES
-  // GetMailMessagesResponse,
-  // DeleteMailMessageResponse,
-  // DownloadMailMessageResponse,
-  // DownloadMailMessageAttachmentResponse,
-
-  // FILES
-  // GetSpareFilesResponse,
-  // GetUploadProgressResponse,
-  // UploadFileToFolderResponse,
-  // DownloadFileFromFolderResponse,
-  // DownloadManyDocumentsFilesAsArchiveResponse,
-  // DownloadDocumentFilesAsArchiveResponse,
-  // DeleteFileFromFolderResponse,
-  // GetFileInfoResponse,
-  // GetPdfMergeFilesResponse,
-  // UploadPdfMergeFileResponse,
-  // UpdatePdfMergeFileResponse,
-  // DeletePdfMergeFileResponse,
-  // DownloadPdfMergeResultResponse,
-  // DownloadPdfMixResultResponse,
-
-  // SERVICE - SHARE FILE
-  // GetShareFilesResponse,
-  // UploadShareFileResponse,
-  // DownloadShareFileResponse,
-  // DeleteShareFileResponse,
-
-  // SERVICE - COUNTER
-  // GetCountersResponse,
-  // AddCounterResponse,
-  // UpdateCounterResponse,
-  // DeleteCounterResponse,
-
-  // USER GROUPS
-  // GetUserGroupsResponse,
-  // AddUserGroupResponse,
-  // SetUserGroupResponse,
-  // DeleteUserGroupResponse,
-  // AddUserToUserGroupResponse,
-  // DeleteUserFromUserGroupResponse,
-
-  // WORKFLOW - FLOW
-  // GetFlowsResponse,
-  // AddFlowResponse,
-  // UpdateFlowResponse,
-  // DeleteFlowResponse,
-
-  // WORKFLOW - FLOW ITEM
-  // GetFlowItemResponse,
-  // RestartFlowItemResponse,
-  // GetManyFlowItemsResponse,
-  // GetFlowItemStepsResponse,
 } from "./api";
 
 class HttpApiError extends Error { }
@@ -177,178 +26,19 @@ class HttpApi extends AbstractApi {
     super();
     this.api_url = api_url;
 
-    // REQUEST_HANDLERS находятся в дочернем классе иначе функции буду цепляться от родительского класса
     this.REQUEST_HANDLERS = {
-      // INFO
-      // GetInfoRequest: this.get_info,
 
       // USER
       LoginCredentialsRequest: this.login_with_credentials,
       LogoutRequest: this.logout,
       MyCredentialsRequest: this.my_credentials,
       RefreshTokensRequest: this.refresh_tokens,
-      // LoginTokenRequest: this.login_with_token,
-      // GetUsersRequest: this.get_users,
-      // SetUserRequest: this.set_user,
-      // DeleteUserRequest: this.delete_user,
-      // GetUserReplacementsRequest: this.get_user_replacements,
-      // AddUserReplacementRequest: this.add_user_replacement,
-      // DeleteUserReplacementRequest: this.delete_user_replacement,
-      // GetUserReplacementsOfUserRequest: this.get_user_replacements_of_user,
-      // AddUserReplacementToUserRequest: this.add_user_replacement_to_user,
-      // DeleteUserReplacementFromUserRequest: this.delete_user_replacement_from_user,
-      // GetOnBehalfUsersRequest: this.get_on_behalf_users,
-      // SetOnBehalfUserRequest: this.set_on_behalf_user,
-      // DeleteOnBehalfUserRequest: this.delete_on_behalf_user,
 
-      // USER GROUP
-      // GetUserGroupsRequest: this.get_user_groups,
-      // AddUserGroupRequest: this.add_user_group,
-      // SetUserGroupRequest: this.set_user_group,
-      // DeleteUserGroupRequest: this.delete_user_group,
-      // AddUserToUserGroupRequest: this.add_user_to_user_group,
-      // DeleteUserFromUserGroupRequest: this.delete_user_from_user_group,
+      // CDN SERVER
+      GetCdnServersRequest: this.get_cdn_servers,
 
-      // FOLDER
-      // GetFoldersRequest: this.get_folders,
-      // AddFolderRequest: this.add_folder,
-      // DeleteFolderRequest: this.delete_folder,
-      // UpdateFolderRequest: this.update_folder,
-
-      // ROLE
-      // GetRolesRequest: this.get_roles,
-      // AddRoleRequest: this.add_role,
-      // DeleteRoleRequest: this.delete_role,
-
-      // USER FOLDER SETTING
-      // GetUserFolderSettingsRequest: this.get_user_folder_settings,
-      // AddUserFolderSettingsRequest: this.add_user_folder_settings,
-      // UpdateUserFolderSettingsRequest: this.set_user_folder_settings,
-      // DeleteUserFolderSettingsRequest: this.delete_user_folder_settings,
-
-      // PERMISSION
-      // GetPermissionsRequest: this.get_permissions,
-      // AddPermissionRequest: this.add_permission,
-      // DeletePermissionRequest: this.delete_permission,
-      // GetUserPermissionsRequest: this.get_user_permissions,
-      // GetUserPermissionsForFolderRequest: this.get_user_permissions_for_folder,
-
-      // USER SEARCH SCHEMA
-      // GetUserSearchSchemaRequest: this.get_user_search_schema,
-      // SetUserSearchSchemaRequest: this.set_user_search_schema,
-      // DeleteUserSearchSchemaRequest: this.delete_user_search_schema,
-
-      // DOCUMENTS
-      // GetDocumentRequest: this.get_document,
-      // GetManyDocumentsRequest: this.get_many_documents,
-      // GetWaitingDocumentApprovalsRequest: this.get_waiting_document_approvals,
-      // SaveManyDocumentsRequest: this.save_many_documents,
-      // DeleteManyDocumentsRequest: this.delete_many_documents,
-      // DuplicateDocumentToUsergroupRequest: this.duplicate_document_to_usergroup,
-      // DuplicateManyDocumentsToUsergroupRequest:
-      //   this.duplicate_many_documents_to_usergroup,
-      // GetPreviousDocumentsRequest: this.get_previous_documents,
-      // PushDocumentButtonRequest: this.push_document_button,
-
-      // TRANSMITTAL
-      // DownloadTransmittalCoverSheetRequest: this.download_transmittal_cover_sheet,
-
-      // DOCUMENT APPROVALS
-      // GetManyDocumentsApprovalsRequest: this.get_many_documents_approvals,
-      // GetDocumentApprovalsRequest: this.get_document_approvals,
-      // AddDocumentApprovalRequest: this.add_document_approval,
-      // UpdateDocumentApprovalRequest: this.update_document_approval,
-      // DeleteDocumentApprovalRequest: this.delete_document_approval,
-      // DelegateDocumentApprovalRequest: this.delegate_document_approval,
-      // GetDocumentApprovalSpareFilesRequest:
-      //   this.get_document_approval_spare_files,
-      // UploadDocumentApprovalFileRequest: this.upload_document_approval_file,
-      // DeleteDocumentApprovalFileRequest: this.delete_document_approval_file,
-
-      // DOCUMENT APPROVAL FLOW
-      // GetDocumentApprovalFlowRequest: this.get_document_approval_flow,
-      // SetDocumentApprovalFlowRequest: this.set_document_approval_flow,
-      // StartDocumentApprovalFlowRequest: this.start_document_approval_flow,
-      // StopDocumentApprovalFlowRequest: this.stop_document_approval_flow,
-
-      // CART
-      // EmptyCartRequest: this.empty_cart,
-      // GetCartDocumentsRequest: this.get_cart_documents,
-      // AddDocumentToCartRequest: this.add_document_to_cart,
-      // AddManyDocumentsToCartRequest: this.add_many_documents_to_cart,
-      // RemoveDocumentFromCartRequest: this.remove_document_from_cart,
-
-      // FILES
+      // FILE
       UploadFileRequest: this.upload_file,
-      // DownloadFileFromFolderRequest: this.download_file_from_folder,
-      // DownloadManyDocumentsFilesAsArchiveRequest:
-      //   this.download_many_documents_files_as_archive,
-      // DownloadDocumentFilesAsArchiveRequest:
-      //   this.download_document_files_as_archive,
-      // DeleteFileFromFolderRequest: this.delete_file_from_folder,
-      // UpdateFileFromFolderRequest: this.update_file_from_folder,
-      // GetFileInfoRequest: this.get_file_info,
-      // GetSpareFilesRequest: this.get_spare_files,
-      // GetUploadProgressRequest: this.get_upload_progress,
-
-      // SERVER SETTINGS
-      // GetServerSettingsRequest: this.get_server_settings,
-      // UpdateServerSettingRequest: this.update_server_setting,
-
-      // MAILBOXES
-      // GetMailBoxesRequest: this.get_mailboxes,
-      // AddMailBoxRequest: this.add_mailbox,
-      // UpdateMailBoxRequest: this.update_mailbox,
-      // DeleteMailBoxRequest: this.delete_mailbox,
-
-      // MAIL CHANNELS
-      // GetMailChannelsRequest: this.get_mail_channels,
-      // AddMailChannelRequest: this.add_mail_channel,
-      // UpdateMailChannelRequest: this.update_mail_channel,
-      // DeleteMailChannelRequest: this.delete_mail_channel,
-      // AddMailChannelToMailBoxRequest: this.add_mail_channel_to_mailbox,
-      // DeleteMailChannelFromMailBoxRequest:
-      //   this.delete_mail_channel_from_mailbox,
-      // FetchMailChannelRequest: this.fetch_mail_channel,
-
-      // MAIL MESSAGES
-      // GetMailMessagesRequest: this.get_mail_messages,
-      // DeleteMailMessageRequest: this.delete_mail_message,
-      // DownloadMailMessageRequest: this.download_mail_message,
-      // DownloadMailMessageAttachmentRequest:
-      //   this.download_mail_message_attachment,
-
-      // SERVICE - PDF MERGE
-      // GetPdfMergeFilesRequest: this.get_pdf_merge_files,
-      // UploadPdfMergeFileRequest: this.upload_pdf_merge_file,
-      // UpdatePdfMergeFileRequest: this.update_pdf_merge_file,
-      // DeletePdfMergeFileRequest: this.delete_pdf_merge_file,
-      // DownloadPdfMergeResultRequest: this.download_pdf_merge_result,
-      // DownloadPdfMixResultRequest: this.download_pdf_mix_result,
-
-      // SERVICE - SHARE FILE
-      // GetShareFilesRequest: this.get_share_files,
-      // UploadShareFileRequest: this.upload_share_file,
-      // DownloadShareFileRequest: this.download_share_file,
-      // DeleteShareFileRequest: this.delete_share_file,
-
-      // SERVICE - COUNTER
-      // GetCountersRequest: this.get_counters,
-      // AddCounterRequest: this.add_counter,
-      // UpdateCounterRequest: this.update_counter,
-      // DeleteCounterRequest: this.delete_counter,
-
-      // WORKFLOW - FLOW
-      // GetFlowsRequest: this.get_flows,
-      // AddFlowRequest: this.add_flow,
-      // UpdateFlowRequest: this.update_flow,
-      // DeleteFlowRequest: this.delete_flow,
-
-      // WORKFLOW - FLOW ITEM
-      // GetFlowItemRequest: this.get_flow_item,
-      // RestartFlowItemRequest: this.restart_flow_item,
-      // GetManyFlowItemsRequest: this.get_many_flow_items,
-      // GetFlowItemStepsRequest: this.get_flow_item_steps,
     };
   }
 
@@ -436,12 +126,6 @@ class HttpApi extends AbstractApi {
       };
 
       xhr.onload = function () {
-        // Если сервер доступен, но код ответа не OK
-        // if (xhr.status < 200 || xhr.status >= 300) {
-        //   console.log("HTTP status " + xhr.status);
-        //   reject(new HttpApiError("Api.Server.InternalError"));
-        // }
-
         const content_type = xhr.getResponseHeader("Content-Type");
         const content_length = Number.parseInt(
           xhr.getResponseHeader("Content-Length")
@@ -512,12 +196,6 @@ class HttpApi extends AbstractApi {
       throw new HttpApiError(json_data.error);
     }
 
-    // Если код ответа нормальный, формат JSON, но запрос не успешен
-    // if (!json_data.success || json_data.code) {
-    //   console.log("Response error code ", json_data.code);
-    //   throw new HttpApiError(json_data.code);
-    // }
-
     // Если код ответа нормальный, формат JSON, запрос успешен
     return json_data;
   }
@@ -525,7 +203,7 @@ class HttpApi extends AbstractApi {
   login_with_credentials = async (request) => {
     return await this.perform_request(
       LoginCredentialsResponse,
-      `/auth/login/credentials/`,
+      `/users/api/v1/auth/login/credentials/`,
       {
         method: "post",
         data: JSON.stringify({
@@ -539,7 +217,7 @@ class HttpApi extends AbstractApi {
   logout = async () => {
     return await this.perform_request(
       LogoutResponse,
-      `/auth/logout/`,
+      `/users/api/v1/auth/logout/`,
       {
         method: "post",
       }
@@ -547,16 +225,23 @@ class HttpApi extends AbstractApi {
   };
 
   my_credentials = async () => {
-    return await this.perform_request(MyCredentialsResponse, `/users/me/`);
+    return await this.perform_request(MyCredentialsResponse, `/users/api/v1/users/me/`);
   };
 
   refresh_tokens = async () => {
     return await this.perform_request(
       RefreshTokensResponse,
-      `/auth/token/refresh/`,
+      `/users/api/v1/auth/token/refresh/`,
       {
         method: "post",
       }
+    );
+  };
+
+  get_cdn_servers = async () => {
+    return await this.perform_request(
+      GetCdnServersResponse,
+      `/storage/api/v1/servers/`
     );
   };
 
@@ -968,7 +653,7 @@ class HttpApi extends AbstractApi {
 
       return await this.perform_request(
         UploadFileResponse,
-        `/files/`,
+        `/storage/api/v1/files/`,
         {
           method: "post",
           content_type: null,

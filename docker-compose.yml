@@ -2,6 +2,7 @@ version: '3.9'
 
 volumes:
   auth_db_data: null
+  storage_db_data: null
   redis_data: null
 
 services:
@@ -16,27 +17,32 @@ services:
       - POSTGRES_DB=${AUTH_DB__DBNAME}
     ports:
       - "${AUTH_DB__PORT}:${AUTH_DB__PORT}"
+    command: -p ${AUTH_DB__PORT}
 
-  # flask:
-  #   build: flask
-  #   depends_on:
-  #     - db
-  #   restart: always
-  #   env_file:
-  #     - ./.env.prod
-  #   command: ["/bin/bash", "-c", "./entrypoint.sh && uwsgi --strict --ini uwsgi.ini"]
+  storage_db:
+    image: postgres:14.5-alpine
+    volumes:
+      - storage_db_data:/var/lib/postgresql/data/
+    restart: always
+    environment:
+      - POSTGRES_USER=${STORAGE_DB__USER}
+      - POSTGRES_PASSWORD=${STORAGE_DB__PASSWORD}
+      - POSTGRES_DB=${STORAGE_DB__DBNAME}
+    ports:
+      - "${STORAGE_DB__PORT}:${STORAGE_DB__PORT}"
+    command: -p ${STORAGE_DB__PORT}
 
-  # nginx:
-  #   image: nginx:1.23.1
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./nginx/site.conf:/etc/nginx/conf.d/default.conf:ro
-  #   depends_on:
-  #     - flask
-  #     - fastapi
-  #   ports:
-  #     - "80:80"
-  #   restart: always
+  nginx:
+    image: nginx:1.23.1
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/site.conf:/etc/nginx/conf.d/default.conf:ro
+    # depends_on:
+      # - auth
+      # - storage
+    ports:
+      - "80:80"
+    restart: always
 
   redis:
     image: redis:7.0.5-alpine
@@ -46,16 +52,24 @@ services:
     ports:
       - "${CACHE__PORT}:${CACHE__PORT}"
 
-  # fastapi:
-  #   build: fastapi
-  #   depends_on:
-  #     - flask
-  #   restart: always
-  #   env_file:
-  #     - ./.env.prod
-
-  # jaeger:
-  #   image: jaegertracing/all-in-one:1.39.0
-  #   ports:
-  #     - "16686:16686"
-  #   restart: always
+  auth:
+    build: auth
+    depends_on:
+      - auth_db
+      - redis
+    restart: always
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+  
+  storage:
+    build: storage
+    depends_on:
+      - storage_db
+      - redis
+    restart: always
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env

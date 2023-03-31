@@ -21,6 +21,9 @@ class DatabaseSettings(BaseModel):
     password: str
     dbname: str
 
+class AuthServiceSettings(BaseSettings):
+    host: str
+    port: int
 
 
 class CacheSettings(BaseSettings):
@@ -28,17 +31,10 @@ class CacheSettings(BaseSettings):
     port: int
 
 
-class TokenSettings(BaseModel):
-    secret_key: str
-    algo: str
-    access_lifetime: int
-    refresh_lifetime: int
-
-
 class Settings(BaseSettings):
-    auth_db: DatabaseSettings
+    auth: AuthServiceSettings
+    storage_db: DatabaseSettings
     cache: CacheSettings
-    token: TokenSettings
 
     class Config:
         #  Для локальной разработки вне docker
@@ -52,11 +48,11 @@ class Settings(BaseSettings):
 settings = Settings()
 
 db_dsl = {
-    "host": settings.auth_db.host,
-    "port": settings.auth_db.port,
-    "user": settings.auth_db.user,
-    "database": settings.auth_db.dbname,
-    "password": settings.auth_db.password,
+    "host": settings.storage_db.host,
+    "port": settings.storage_db.port,
+    "user": settings.storage_db.user,
+    "database": settings.storage_db.dbname,
+    "password": settings.storage_db.password,
 }
 
 cache_dsl = {

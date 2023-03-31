@@ -1,4 +1,4 @@
-// import { VueFlatRepository } from "../adapters/flat_repository";
+import { VueFlatRepository } from "../adapters/flat_repository";
 // import { VueBoxRepository } from "../adapters/box_repository";
 import { VueUserRepository } from "../adapters/user_repository";
 // import { VueUserGroupRepository } from "../adapters/usergroup_repository";
@@ -49,6 +49,7 @@ class VueUnitOfWork extends AbstractUnitOfWork {
 
     // this.info_repository = new VueInfoRepository("info");
     this.user_repository = new VueUserRepository("users");
+    this.cdn_server_repository = new VueFlatRepository("cdn_servers");
     this.token_repository = new VueTokenRepository("tokens")
 
     // this.file_in_folder_repository = new VueFileBoxRepository(

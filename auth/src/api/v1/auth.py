@@ -16,7 +16,7 @@ bus = get_message_bus()
 
 
 @router.post(
-    "/register",
+    "/register/",
     response_model=schemes.UserResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_201_CREATED,
@@ -40,7 +40,7 @@ async def register(
 
 
 @router.post(
-    "/login/credentials",
+    "/login/credentials/",
     response_model=schemes.LoginByCredentialsResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,
@@ -60,7 +60,7 @@ async def login(
     )
 
 @router.post(
-    "/logout",
+    "/logout/",
     response_model=schemes.EmptyResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,
@@ -75,7 +75,7 @@ async def logout(
 
 
 @router.post(
-    "/token/refresh",
+    "/token/refresh/",
     response_model=schemes.LoginByCredentialsResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,
@@ -91,7 +91,7 @@ async def refresh_tokens(
 
 
 @router.post(
-    "/token/verify",
+    "/token/verify/",
     response_model=schemes.EmptyResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,

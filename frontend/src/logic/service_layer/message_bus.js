@@ -20,6 +20,12 @@ import {
 //   get_permissions,
 // } from "./command_handlers/permission_handlers";
 
+import {
+  get_cdn_servers,
+//   download_file_from_folder,
+//   get_file_info,
+//   delete_file_from_folder,
+} from "./command_handlers/cdn_server_handlers";
 
 import {
   upload_file,
@@ -50,6 +56,9 @@ const COMMAND_HANDLERS = {
   RefreshTokens: [refresh_tokens],
   // LoginWithToken: [login_with_token],
   Logout: [logout],
+
+  // CDN SERVERS
+  GetCdnServers: [get_cdn_servers],
 
   // FILE
   UploadFile: [upload_file],

@@ -16,7 +16,7 @@ bus = get_message_bus()
 
 
 @router.get(
-    "/me/",
+    "/me",
     response_model=schemes.UserResponse,
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,

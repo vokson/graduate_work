@@ -14,7 +14,7 @@ export default {
     provide("users", {});
     provide("tokens", {});
 
-    // provide("permissions", {});
+    provide("cdn_servers", {});
     provide("files", {});
   },
 };

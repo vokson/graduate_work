@@ -1,4 +1,4 @@
-class Command {}
+class Command { }
 
 class Notify extends Command {
   constructor(level, text) {
@@ -23,10 +23,12 @@ class LoginWithCredentials extends Command {
   }
 }
 
-class Logout extends Command {}
+class Logout extends Command { }
 
-class MyCredentials extends Command {}
-class RefreshTokens extends Command {}
+class MyCredentials extends Command { }
+class RefreshTokens extends Command { }
+
+class GetCdnServers extends Command { }
 
 // class LoginWithToken extends Command {}
 
@@ -1299,13 +1301,14 @@ export {
   Command,
   Notify,
   NotifyApiError,
-  // GetInfo,
   // USER
   LoginWithCredentials,
   MyCredentials,
   RefreshTokens,
-  // LoginWithToken,
   Logout,
+  // CDN SERVERS
+  GetCdnServers,
+  // FILE
   UploadFile
   // GetUsers,
   // SetUser,

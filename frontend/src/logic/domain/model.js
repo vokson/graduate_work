@@ -85,6 +85,43 @@ class User {
   }
 }
 
+class CdnServer {
+  constructor(
+    id,
+    name,
+    location,
+    latitude,
+    longitude,
+  ) {
+    this._id = id;
+    this._name = name;
+    this._location = location;
+    this._latitude = latitude;
+    this._longitude = longitude;
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get location() {
+    return this._location;
+  }
+
+  get latitude() {
+    return this._latitude;
+  }
+
+  get longitude() {
+    return this._longitude;
+  }
+
+}
+
 class BaseFile {
   constructor(id, name, total_size) {
     this._id = id;
@@ -156,5 +193,6 @@ class BaseFile {
 
 export {
   User,
+  CdnServer,
   BaseFile,
 };

@@ -2,12 +2,11 @@ import { DataClass } from "../domain/dataclass";
 // import { Info } from "./api_responses/models/info";
 import { Tokens } from "./api_responses/models/tokens";
 import {
-  User
+  Single as UserSingle
 } from "./api_responses/models/user";
-// import {
-//   Single as FolderSingle,
-//   List as FolderList,
-// } from "./api_responses/models/folder";
+import {
+  List as CdnServerList,
+} from "./api_responses/models/cdn_server";
 // import {
 //   Single as RoleSingle,
 //   List as RoleList,
@@ -136,12 +135,12 @@ class LoginCredentialsResponse extends Response {
 }
 
 class LogoutRequest extends Request { }
-class LogoutResponse extends EmptyPositiveResponse {}
+class LogoutResponse extends EmptyPositiveResponse { }
 
 class MyCredentialsRequest extends Request { }
 class MyCredentialsResponse extends Response {
   get schema() {
-    return User;
+    return UserSingle;
   }
 }
 
@@ -149,6 +148,13 @@ class RefreshTokensRequest extends Request { }
 class RefreshTokensResponse extends Response {
   get schema() {
     return Tokens;
+  }
+}
+
+class GetCdnServersRequest extends Request { }
+class GetCdnServersResponse extends Response {
+  get schema() {
+    return CdnServerList;
   }
 }
 
@@ -509,7 +515,7 @@ class UploadFileRequest extends Request {
     };
   }
 }
-class UploadFileResponse extends EmptyPositiveResponse {}
+class UploadFileResponse extends EmptyPositiveResponse { }
 
 // class DownloadFileFromFolderRequest extends Request {
 //   get schema() {
@@ -1967,465 +1973,20 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
-  // login_with_token = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_info = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_users = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // set_user = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_user = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_user_replacements = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_user_replacement = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_user_replacement = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_on_behalf_users = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // set_on_behalf_user = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_on_behalf_user = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_user_groups = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // set_user_groups = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_user_groups = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_user_groups = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_user_to_user_group = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_user_from_user_group = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_folders = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_folder = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_folder = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_folder = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_document = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_previous_documents = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_many_documents = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_waiting_document_approvals = () => {
-  //   throw new NotImplementedError();
-  // };
+  get_cdn_servers = () => {
+    throw new NotImplementedError();
+  };
 
   upload_file = () => {
     throw new NotImplementedError();
   };
 
-  // download_file_from_folder = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_many_documents_files_as_archive = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_document_files_as_archive = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_file_from_folder = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_file_from_folder = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_roles = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_role = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_role = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_user_folder_settings = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_user_folder_settings = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // set_user_folder_settings = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_user_folder_settings = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_permissions = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_permission = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_permission = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_permissions_by_roles = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_user_permissions = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_user_permissions_for_folder = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_user_search_schema = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // set_user_search_schema = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_user_search_schema = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_spare_files = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // save_document = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // save_many_documents = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_document = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_many_documents = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // duplicate_document_to_usergroup = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // duplicate_many_documents_to_usergroup = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // push_document_button = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_upload_progress = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_pdf_merge_files = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // upload_pdf_merge_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_pdf_merge_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_pdf_merge_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_pdf_merge_result = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_pdf_mix_result = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_share_files = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // upload_share_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_share_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_share_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_flows = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_flow = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_flow = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_flow = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_flow_item = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // restart_flow_item = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_many_flow_items = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_flow_item_steps = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_many_documents_approvals = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_document_approvals = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_document_approval = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_document_approval = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_document_approval = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_document_approval_spare_files = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // upload_document_approval_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_document_approval_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delegate_document_approval_file = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // empty_cart = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_cart_documents = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_document_to_cart = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_many_documents_to_cart = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // remove_document_from_cart = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_document_approval_flow = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // set_document_approval_flow = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // start_document_approval_flow = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // stop_document_approval_flow = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_server_settings = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_server_setting = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_mailboxes = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_mailbox = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_mailbox = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_mailbox = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_mail_channels = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_mail_channel = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_mail_channel = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_mail_channel = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_mail_channel_to_mailbox = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_mail_channel_from_mailbox = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // fetch_mail_channel = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // get_mail_messages = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_mail_message = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_mail_message = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_mail_message_attachment = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // add_counter = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // update_counter = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // delete_counter = () => {
-  //   throw new NotImplementedError();
-  // };
-
-  // download_transmittal_cover_sheet = () => {
-  //   throw new NotImplementedError();
-  // }
 }
 
 export {
   AbstractApi,
   NegativeResponse,
-  // // INFO
-  // GetInfoRequest,
-  // GetInfoResponse,
+
   // LOGIN
   LoginCredentialsRequest,
   LoginCredentialsResponse,
@@ -2435,254 +1996,12 @@ export {
   MyCredentialsResponse,
   RefreshTokensRequest,
   RefreshTokensResponse,
-  // LoginTokenRequest,
-  // LoginTokenResponse,
-  // // USER
-  // GetUsersRequest,
-  // GetUsersResponse,
-  // SetUserRequest,
-  // SetUserResponse,
-  // DeleteUserRequest,
-  // DeleteUserResponse,
-  // GetUserReplacementsRequest,
-  // GetUserReplacementsResponse,
-  // AddUserReplacementRequest,
-  // AddUserReplacementResponse,
-  // DeleteUserReplacementRequest,
-  // DeleteUserReplacementResponse,
-  // GetUserReplacementsOfUserRequest,
-  // GetUserReplacementsOfUserResponse,
-  // AddUserReplacementToUserRequest,
-  // AddUserReplacementToUserResponse,
-  // DeleteUserReplacementFromUserRequest,
-  // DeleteUserReplacementFromUserResponse,
-  // GetOnBehalfUsersRequest,
-  // GetOnBehalfUsersResponse,
-  // SetOnBehalfUserRequest,
-  // SetOnBehalfUserResponse,
-  // DeleteOnBehalfUserRequest,
-  // DeleteOnBehalfUserResponse,
-  // // USER GROUPS
-  // GetUserGroupsRequest,
-  // GetUserGroupsResponse,
-  // AddUserGroupRequest,
-  // AddUserGroupResponse,
-  // SetUserGroupRequest,
-  // SetUserGroupResponse,
-  // DeleteUserGroupRequest,
-  // DeleteUserGroupResponse,
-  // AddUserToUserGroupRequest,
-  // AddUserToUserGroupResponse,
-  // DeleteUserFromUserGroupRequest,
-  // DeleteUserFromUserGroupResponse,
-  // // FOLDER
-  // GetFoldersRequest,
-  // GetFoldersResponse,
-  // AddFolderRequest,
-  // AddFolderResponse,
-  // DeleteFolderRequest,
-  // DeleteFolderResponse,
-  // UpdateFolderRequest,
-  // UpdateFolderResponse,
-  // // DOCUMENT
-  // GetDocumentRequest,
-  // GetDocumentResponse,
-  // GetManyDocumentsRequest,
-  // GetManyDocumentsResponse,
-  // GetWaitingDocumentApprovalsRequest,
-  // GetWaitingDocumentApprovalsResponse,
-  // SaveManyDocumentsRequest,
-  // SaveManyDocumentsResponse,
-  // DeleteManyDocumentsRequest,
-  // DeleteManyDocumentsResponse,
-  // DuplicateDocumentToUsergroupRequest,
-  // DuplicateDocumentToUsergroupResponse,
-  // DuplicateManyDocumentsToUsergroupRequest,
-  // DuplicateManyDocumentsToUsergroupResponse,
-  // GetPreviousDocumentsRequest,
-  // GetPreviousDocumentsResponse,
-  // PushDocumentButtonRequest,
-  // PushDocumentButtonResponse,
-  // // TRANSMITTAL
-  // DownloadTransmittalCoverSheetRequest,
-  // DownloadTransmittalCoverSheetResponse,
-  // // DOCUMENT APPROVAL
-  // GetManyDocumentsApprovalsRequest,
-  // GetManyDocumentsApprovalsResponse,
-  // GetDocumentApprovalsRequest,
-  // GetDocumentApprovalsResponse,
-  // AddDocumentApprovalRequest,
-  // AddDocumentApprovalResponse,
-  // UpdateDocumentApprovalRequest,
-  // UpdateDocumentApprovalResponse,
-  // DeleteDocumentApprovalRequest,
-  // DeleteDocumentApprovalResponse,
-  // DelegateDocumentApprovalRequest,
-  // DelegateDocumentApprovalResponse,
-  // GetDocumentApprovalSpareFilesRequest,
-  // GetDocumentApprovalSpareFilesResponse,
-  // UploadDocumentApprovalFileRequest,
-  // UploadDocumentApprovalFileResponse,
-  // DeleteDocumentApprovalFileRequest,
-  // DeleteDocumentApprovalFileResponse,
-  // // DOCUMENT APPROVAL FLOW
-  // GetDocumentApprovalFlowRequest,
-  // GetDocumentApprovalFlowResponse,
-  // SetDocumentApprovalFlowRequest,
-  // SetDocumentApprovalFlowResponse,
-  // StartDocumentApprovalFlowRequest,
-  // StartDocumentApprovalFlowResponse,
-  // StopDocumentApprovalFlowRequest,
-  // StopDocumentApprovalFlowResponse,
-  // // CART
-  // EmptyCartRequest,
-  // EmptyCartResponse,
-  // GetCartDocumentsRequest,
-  // GetCartDocumentsResponse,
-  // AddDocumentToCartRequest,
-  // AddDocumentToCartResponse,
-  // AddManyDocumentsToCartRequest,
-  // AddManyDocumentsToCartResponse,
-  // RemoveDocumentFromCartRequest,
-  // RemoveDocumentFromCartResponse,
-  // // FILE
+
+  // CDN SERVER
+  GetCdnServersRequest,
+  GetCdnServersResponse,
+
+  // FILE
   UploadFileRequest,
   UploadFileResponse,
-  // DownloadFileFromFolderRequest,
-  // DownloadFileFromFolderResponse,
-  // DownloadManyDocumentsFilesAsArchiveRequest,
-  // DownloadManyDocumentsFilesAsArchiveResponse,
-  // DownloadDocumentFilesAsArchiveRequest,
-  // DownloadDocumentFilesAsArchiveResponse,
-  // DeleteFileFromFolderRequest,
-  // DeleteFileFromFolderResponse,
-  // UpdateFileFromFolderRequest,
-  // UpdateFileFromFolderResponse,
-  // GetFileInfoRequest,
-  // GetFileInfoResponse,
-  // GetSpareFilesRequest,
-  // GetSpareFilesResponse,
-  // GetUploadProgressRequest,
-  // GetUploadProgressResponse,
-  // // ROLE
-  // GetRolesRequest,
-  // GetRolesResponse,
-  // AddRoleRequest,
-  // AddRoleResponse,
-  // DeleteRoleRequest,
-  // DeleteRoleResponse,
-  // // USER FOLDER SETTING
-  // GetUserFolderSettingsRequest,
-  // GetUserFolderSettingsResponse,
-  // AddUserFolderSettingsRequest,
-  // AddUserFolderSettingsResponse,
-  // UpdateUserFolderSettingsRequest,
-  // UpdateUserFolderSettingsResponse,
-  // DeleteUserFolderSettingsRequest,
-  // DeleteUserFolderSettingsResponse,
-  // // PERMISSION
-  // GetPermissionsRequest,
-  // GetPermissionsResponse,
-  // AddPermissionRequest,
-  // AddPermissionResponse,
-  // DeletePermissionRequest,
-  // DeletePermissionResponse,
-  // GetUserPermissionsRequest,
-  // GetUserPermissionsResponse,
-  // GetUserPermissionsForFolderRequest,
-  // GetUserPermissionsForFolderResponse,
-  // // USER SEARCH SCHEMA
-  // GetUserSearchSchemaRequest,
-  // GetUserSearchSchemaResponse,
-  // SetUserSearchSchemaRequest,
-  // SetUserSearchSchemaResponse,
-  // DeleteUserSearchSchemaRequest,
-  // DeleteUserSearchSchemaResponse,
-  // // SERVER SETTINGS
-  // GetServerSettingsRequest,
-  // GetServerSettingsResponse,
-  // UpdateServerSettingRequest,
-  // UpdateServerSettingResponse,
-  // // MAILBOXES
-  // GetMailBoxesRequest,
-  // GetMailBoxesResponse,
-  // AddMailBoxRequest,
-  // AddMailBoxResponse,
-  // UpdateMailBoxRequest,
-  // UpdateMailBoxResponse,
-  // DeleteMailBoxRequest,
-  // DeleteMailBoxResponse,
-  // // MAIL CHANNELS
-  // GetMailChannelsRequest,
-  // GetMailChannelsResponse,
-  // AddMailChannelRequest,
-  // AddMailChannelResponse,
-  // UpdateMailChannelRequest,
-  // UpdateMailChannelResponse,
-  // DeleteMailChannelRequest,
-  // DeleteMailChannelResponse,
-  // AddMailChannelToMailBoxRequest,
-  // AddMailChannelToMailBoxResponse,
-  // DeleteMailChannelFromMailBoxRequest,
-  // DeleteMailChannelFromMailBoxResponse,
-  // FetchMailChannelRequest,
-  // FetchMailChannelResponse,
-  // // MAIL MESSAGES
-  // GetMailMessagesRequest,
-  // GetMailMessagesResponse,
-  // DeleteMailMessageRequest,
-  // DeleteMailMessageResponse,
-  // DownloadMailMessageRequest,
-  // DownloadMailMessageResponse,
-  // DownloadMailMessageAttachmentRequest,
-  // DownloadMailMessageAttachmentResponse,
-  // // SERVICE - PDF MERGE
-  // GetPdfMergeFilesRequest,
-  // GetPdfMergeFilesResponse,
-  // UploadPdfMergeFileRequest,
-  // UploadPdfMergeFileResponse,
-  // UpdatePdfMergeFileRequest,
-  // UpdatePdfMergeFileResponse,
-  // DeletePdfMergeFileRequest,
-  // DeletePdfMergeFileResponse,
-  // DownloadPdfMergeResultRequest,
-  // DownloadPdfMergeResultResponse,
-  // DownloadPdfMixResultRequest,
-  // DownloadPdfMixResultResponse,
-  // // SERVICE - SHARE FILE
-  // GetShareFilesRequest,
-  // GetShareFilesResponse,
-  // UploadShareFileRequest,
-  // UploadShareFileResponse,
-  // DownloadShareFileRequest,
-  // DownloadShareFileResponse,
-  // DeleteShareFileRequest,
-  // DeleteShareFileResponse,
-  // // SERVICE - COUNTER
-  // GetCountersRequest,
-  // GetCountersResponse,
-  // AddCounterRequest,
-  // AddCounterResponse,
-  // UpdateCounterRequest,
-  // UpdateCounterResponse,
-  // DeleteCounterRequest,
-  // DeleteCounterResponse,
-  // // WORKFLOW - FLOW
-  // GetFlowsRequest,
-  // GetFlowsResponse,
-  // AddFlowRequest,
-  // AddFlowResponse,
-  // UpdateFlowRequest,
-  // UpdateFlowResponse,
-  // DeleteFlowRequest,
-  // DeleteFlowResponse,
-  // // WORKFLOW - FLOW ITEM
-  // GetFlowItemRequest,
-  // GetFlowItemResponse,
-  // RestartFlowItemRequest,
-  // RestartFlowItemResponse,
-  // GetManyFlowItemsRequest,
-  // GetManyFlowItemsResponse,
-  // GetFlowItemStepsRequest,
-  // GetFlowItemStepsResponse,
 };

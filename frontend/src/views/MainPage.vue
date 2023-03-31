@@ -66,7 +66,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { ref, computed, onMounted } from "vue";
 import { VueUnitOfWork } from "../logic/service_layer/uow";
-import { RefreshTokens, UploadFile } from "../logic/domain/command";
+import { GetCdnServers, RefreshTokens, UploadFile } from "../logic/domain/command";
 import { UploadFileTooBigError } from "../logic/domain/event";
 import HeadingComponent from "../components/HeadingComponent.vue";
 import FileList from "../components/file/FileList.vue";
@@ -156,6 +156,7 @@ export default {
 
     onMounted(async () => {
       await useBeforeEnterPage(uow, []);
+      await MessageBus.handle(new GetCdnServers(), uow);
     });
 
     return {
