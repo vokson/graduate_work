@@ -1,8 +1,8 @@
-import datetime
+from datetime import datetime
 from uuid import UUID
 
 import orjson
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 def orjson_dumps(v, *, default):
@@ -20,8 +20,8 @@ class IdMixin(BaseModel):
 
 
 class CreatedUpdatedMixin(BaseModel):
-    created: datetime.datetime
-    updated: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    created: datetime | None
+    updated: datetime | None
 
 
 class AbstractIdModel(

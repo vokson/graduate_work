@@ -10,8 +10,18 @@ const Single = {
     size: {
       type: "number",
     },
+    created: {
+      type: "string",
+    },
+    updated: {
+      type: "string",
+    },
+    servers: {
+      type: "array",
+      items: { type: "string" }
+    },
   },
-  required: ["id", "name", "size"],
+  required: ["id", "name", "size", "created", "updated", "servers"],
   additionalProperties: false,
 };
 

@@ -53,12 +53,12 @@ class CommandResults:
         return result
 
 
-# class DatabaseError(NegativeCommandResult):
-#     pass
+class DatabaseError(NegativeCommandResult):
+    pass
 
 
-# class UniqueViolationDatabaseError(NegativeCommandResult):
-#     pass
+class UniqueViolationDatabaseError(NegativeCommandResult):
+    pass
 
 
 # class ValidationError(NegativeCommandResult):

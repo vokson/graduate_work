@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 
-class NotImplementedError extends Error {}
+class NotImplementedError extends Error { }
 
 class AbstractTimer {
   constructor(period) {
@@ -16,10 +16,14 @@ class AbstractTimer {
   };
 
   start = () => {
-    this._timer = setInterval(this._callback, this._period);
+    if (!this._timer) {
+      this._timer = setInterval(this._callback, this._period);
+      console.log('START TIMER', this._timer, this._period)
+    }
   };
 
   stop = () => {
+    console.log('STOP TIMER', this._timer, this._period)
     clearInterval(this._timer);
     this._timer = null;
   };
@@ -83,21 +87,24 @@ class WaitSecondsTimer {
   };
 }
 
-class TokenTimer {
-  constructor(period) {
-    this._timer = null;
-    this._period = period;
-  }
+// class CallFunctionTimer {
+//   constructor(period, func) {
+//     console.log('TIMER', period)
+//     this._timer = null;
+//     this._period = period;
+//   }
 
-  start = (func) => {
-    this._timer = setInterval(func, this._period);
-  };
+//   start = (func) => {
+//     console.log('START TIMER', func);
+//     if (this._timer) this.stop()
+//     this._timer = setInterval(func, this._period);
+//   };
 
-  stop = () => {
-    clearInterval(this._timer);
-    this._timer = null;
-  };
+//   stop = () => {
+//     clearInterval(this._timer);
+//     this._timer = null;
+//   };
 
-}
+// }
 
-export { UploadProgressTimer, WaitSecondsTimer, TokenTimer };
+export { AbstractTimer, UploadProgressTimer, WaitSecondsTimer };

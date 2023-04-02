@@ -106,7 +106,6 @@ const my_credentials = async (event, uow) => {
     uow.user_repository.set_current(
       convert_user_response_obj_to_model(response.data)
     );
-    console.log(response)
     return;
   }
 
@@ -117,8 +116,9 @@ const refresh_tokens = async (event, uow) => {
   const access_token = uow.token_repository.get_access_token()
   const refresh_token = uow.token_repository.get_refresh_token()
 
+  console.log('CURRENT REFRESH TOKEN', refresh_token);
+
   if (!refresh_token) {
-    console.log('REFRESH TOKEN', refresh_token)
     uow.push_message(new RefreshTokenOutdated());
     return;
   }
@@ -127,15 +127,16 @@ const refresh_tokens = async (event, uow) => {
     return;
   }
 
-  uow.token_repository.reset();
+  // uow.token_timer.stop()
+  // uow.token_repository.reset();
   uow.api.set_auth_token(refresh_token);
+  console.log('SET AUTH TOKEN - REFRESH')
 
   const request = new RefreshTokensRequest();
   const response = await uow.api.call(request);
 
   if (response instanceof NegativeResponse) {
     if (response.data.code === 'Auth.Error.TokenOutdated') {
-      console.log('REFRESH TOKEN', response);
       uow.push_message(new RefreshTokenOutdated());
     }
     else
@@ -144,10 +145,12 @@ const refresh_tokens = async (event, uow) => {
   }
 
   if (response instanceof RefreshTokensResponse) {
-    console.log(response)
+    console.log('NEW REFRESH TOKEN', response.data.refresh_token);
     uow.token_repository.set_access_token(response.data.access_token);
     uow.token_repository.set_refresh_token(response.data.refresh_token);
     uow.api.set_auth_token(response.data.access_token);
+    console.log('SET AUTH TOKEN - NEW ACCESS')
+    uow.token_timer.start()
     return;
   }
 

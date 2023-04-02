@@ -1,20 +1,17 @@
 import {
   Notify,
   NotifyApiError,
-  RefreshTokens,
+  // RefreshTokens,
   // MyCredentials,
   // ValidateDocument,
   // GetRoles,
   // GetInfo,
   // GetPermissionsByRoles,
 } from "../domain/command";
-import { MessageBus } from "../service_layer/message_bus";
+// import { MessageBus } from "../service_layer/message_bus";
 import router from "../../router";
 
 const handle_api_error = (event, uow) => {
-  if (event.code === "Auth.Token.Fail") {
-    return;
-  }
   uow.push_message(new NotifyApiError(event.code));
 };
 
@@ -30,8 +27,8 @@ const user_login_success = async (event, uow) => {
 
 const access_token_outdated = async (event, uow) => {
   uow.push_message(new Notify("error", "Время жизни Access Token истекло"));
-  uow.push_message(new Notify("warning", "Пробуем обновить Access Token"));
-  await MessageBus.handle(new RefreshTokens(), uow);
+  // uow.push_message(new Notify("warning", "Пробуем обновить Access Token"));
+  // await MessageBus.handle(new RefreshTokens(), uow);
 };
 
 const refresh_token_outdated = async (event, uow) => {

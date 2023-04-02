@@ -28,6 +28,7 @@ import {
 } from "./command_handlers/cdn_server_handlers";
 
 import {
+  get_files,
   upload_file,
 //   download_file_from_folder,
 //   get_file_info,
@@ -61,6 +62,7 @@ const COMMAND_HANDLERS = {
   GetCdnServers: [get_cdn_servers],
 
   // FILE
+  GetFiles: [get_files],
   UploadFile: [upload_file],
   // DownloadFileFromFolder: [download_file_from_folder],
   // DeleteFileFromFolder: [delete_file_from_folder],

@@ -180,6 +180,7 @@ async def login_by_credentials(
         {"access_token": access_token, "refresh_token": refresh_token}
     )
 
+
 async def logout(
     cmd: commands.Logout,
     uow: AbstractUnitOfWork,
@@ -209,8 +210,12 @@ async def refresh_tokens(
             raise exceptions.UserDoesNotExists
 
         #  Обновление токенов пользователя
-        access_token, refresh_token = await refresh_tokens_of_user(uow, user)
-        await uow.commit()
+        try:
+            access_token, refresh_token = await refresh_tokens_of_user(uow, user)
+            await uow.commit()
+        except Exception as e:
+            print('***************')
+            print(e)
 
     return command_results.PositiveCommandResult(
         {"access_token": access_token, "refresh_token": refresh_token}

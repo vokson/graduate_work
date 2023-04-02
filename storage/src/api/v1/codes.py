@@ -2,11 +2,11 @@ from src.domain import command_results
 
 
 COMMAND_RESULTS_RESPONSE_CODES = {
-    # command_results.DatabaseError: (400, "Database.Error"),
-    # command_results.UniqueViolationDatabaseError: (
-    #     400,
-    #     "Database.Error.UniqueViolation",
-    # ),
+    command_results.DatabaseError: (400, "Database.Error"),
+    command_results.UniqueViolationDatabaseError: (
+        400,
+        "Database.Error.UniqueViolation",
+    ),
     # command_results.ValidationError: (400, "Request.Error.Validation"),
     # command_results.UserDoesNotExists: (400, "User.DoesNotExists"),
     command_results.CdnServerAlreadyExists: (400, "CdnServer.AlreadyExists"),

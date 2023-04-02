@@ -27,7 +27,7 @@ def auth(permissions: list[str], timeout: int = 1):
 
             auth_header = request.headers.get("Authorization")
             if not auth_header:
-                raise HTTPException(status_code=status.HTTP_401_UNATHORIZED, detail="Auth.Error.TokenMissed")
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Auth.Error.TokenMissed")
 
 
             url = (

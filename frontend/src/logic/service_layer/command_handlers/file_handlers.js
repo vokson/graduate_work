@@ -1,5 +1,7 @@
 import {
   NegativeResponse,
+  GetFilesRequest,
+  GetFilesResponse,
   UploadFileRequest,
   UploadFileResponse,
   // DownloadFileFromFolderRequest,
@@ -31,14 +33,52 @@ import {
   // FilesAllocated,
 } from "../../domain/event";
 
-import { BaseFile } from "../../domain/model";
+import { File } from "../../domain/model";
 // import { js_download_file } from "../utils/file_download";
 // import { v4 as uuidv4 } from "uuid";
 
 class WrongResponseError extends Error {}
 
+const convert_file_response_obj_to_model = (obj) => {
+  const user = new File(
+    obj.id,
+    obj.name,
+    obj.size,
+    obj.servers,
+    obj.created,
+    obj.updated,
+    obj.size,
+  );
+
+  return user;
+};
+
+const get_files = async (event, uow) => {
+  console.log('GET FILES', uow.api.get_auth_token());
+  
+  const request = new GetFilesRequest();
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof GetFilesResponse) {
+    uow.file_repository.reset_keeping_refs();
+    response.data.forEach((obj) =>
+      uow.file_repository.set(obj.id,
+        convert_file_response_obj_to_model(obj)
+      ))
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+
 const upload_file = async (event, uow) => {
-  const file = new BaseFile(event.id, event.file.name, event.file.size);
+  const file = new File(event.id, event.file.name, event.file.size);
   uow.file_repository.set(event.id, file);
 
   // Добавляем файл в таймер. Стартуем обновления процесса загрузки
@@ -510,6 +550,7 @@ const upload_file = async (event, uow) => {
 
 export {
   upload_file,
+  get_files,
 //   upload_file_to_folder,
 //   download_file_from_folder,
 //   download_many_documents_files_as_archive,

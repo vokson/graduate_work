@@ -16,6 +16,7 @@ import {
   GetCdnServersResponse,
 
   // FILE
+  GetFilesResponse,
   UploadFileResponse,
 } from "./api";
 
@@ -38,6 +39,7 @@ class HttpApi extends AbstractApi {
       GetCdnServersRequest: this.get_cdn_servers,
 
       // FILE
+      GetFilesRequest: this.get_files,
       UploadFileRequest: this.upload_file,
     };
   }
@@ -203,7 +205,7 @@ class HttpApi extends AbstractApi {
   login_with_credentials = async (request) => {
     return await this.perform_request(
       LoginCredentialsResponse,
-      `/users/api/v1/auth/login/credentials/`,
+      `/users/api/v1/auth/login/`,
       {
         method: "post",
         data: JSON.stringify({
@@ -242,6 +244,13 @@ class HttpApi extends AbstractApi {
     return await this.perform_request(
       GetCdnServersResponse,
       `/storage/api/v1/servers/`
+    );
+  };
+
+  get_files = async () => {
+    return await this.perform_request(
+      GetFilesResponse,
+      `/storage/api/v1/files/`
     );
   };
 

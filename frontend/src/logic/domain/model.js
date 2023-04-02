@@ -122,12 +122,15 @@ class CdnServer {
 
 }
 
-class BaseFile {
-  constructor(id, name, total_size) {
+class File {
+  constructor(id, name, total_size, servers, created, updated, uploaded_size = 0) {
     this._id = id;
     this._name = name;
-    this._uploaded_size = 0;
     this._total_size = total_size;
+    this._servers = servers;
+    this._created = created;
+    this._updated = updated;
+    this._uploaded_size = uploaded_size;
   }
 
   get id() {
@@ -138,12 +141,20 @@ class BaseFile {
     return this._name;
   }
 
-  rename(name) {
-    this._name = name;
-  }
-
   get size() {
     return this._total_size;
+  }
+
+  get servers() {
+    return this._servers;
+  }
+
+  get created() {
+    return this._created;
+  }
+
+  get updated() {
+    return this._updated;
   }
 
   set_total_size(size) {
@@ -194,5 +205,5 @@ class BaseFile {
 export {
   User,
   CdnServer,
-  BaseFile,
+  File,
 };

@@ -6,40 +6,37 @@
       size="middle"
     />
     <div class="page__container">
-      <div v-if="user" class="page__userinfo">
-        <div class="page__userrow">
-          <p class="page__userlabel">Имя пользователя:</p>
-          <p class="page__uservalue">{{ user.username }}</p>
+      <div class="page__topcontainer">
+        <div v-if="user" class="page__userinfo">
+          <div class="page__userrow">
+            <p class="page__userlabel">Имя пользователя:</p>
+            <p class="page__uservalue">{{ user.username }}</p>
+          </div>
+          <div class="page__userrow">
+            <p class="page__userlabel">E-mail:</p>
+            <p class="page__uservalue">{{ user.email }}</p>
+          </div>
+          <div class="page__userrow">
+            <p class="page__userlabel">Имя:</p>
+            <p class="page__uservalue">{{ user.first_name }}</p>
+          </div>
+          <div class="page__userrow">
+            <p class="page__userlabel">Фамилия:</p>
+            <p class="page__uservalue">{{ user.last_name }}</p>
+          </div>
+          <div class="page__userrow">
+            <p class="page__userlabel">Суперпользователь ?:</p>
+            <p class="page__uservalue">
+              {{ user.is_superuser ? "Да" : "Нет" }}
+            </p>
+          </div>
+          <div class="page__userrow">
+            <p class="page__userlabel">Разрешения:</p>
+            <ul class="page__uservalue">
+              <li v-for="perm in user.permissions" :key="perm">{{ perm }}</li>
+            </ul>
+          </div>
         </div>
-        <div class="page__userrow">
-          <p class="page__userlabel">E-mail:</p>
-          <p class="page__uservalue">{{ user.email }}</p>
-        </div>
-        <div class="page__userrow">
-        r  <p class="page__userlabel">Имя:</p>
-          <p class="page__uservalue">{{ user.first_name }}</p>
-        </div>
-        <div class="page__userrow">
-          <p class="page__userlabel">Фамилия:</p>
-          <p class="page__uservalue">{{ user.last_name }}</p>
-        </div>
-        <div class="page__userrow">
-          <p class="page__userlabel">Суперпользователь ?:</p>
-          <p class="page__uservalue">{{ user.is_superuser ? "Да" : "Нет" }}</p>
-        </div>
-        <div class="page__userrow">
-          <p class="page__userlabel">Разрешения:</p>
-          <ul class="page__uservalue">
-            <li v-for="perm in user.permissions" :key="perm">{{ perm }}</li>
-          </ul>
-        </div>
-      </div>
-      <div class="page__servicecontainer">
-        <!-- <document-page-download-progress-row
-          class="page__downloadprogress"
-          :files="downloading_files"
-          :full_format="false"
-        /> -->
         <file-drop-zone
           class="page__filedropzone"
           :class="{ page__filedropzone_dragging: is_drag_above_file_zone }"
@@ -50,15 +47,47 @@
             &lt; {{ max_file_size }} МБ</span
           >
         </file-drop-zone>
-        <file-list
-          class="page__filelist"
-          :files="files"
-          :can_be_dragged="false"
-          :can_be_deleted="true"
-        />
+      </div>
+
+      <div class="page__middlecontainer">
+        <div class="filerowheader">
+          <div class="filerow__name"></div>
+
+          <div
+            v-for="server in servers"
+            :key="server.id"
+            class="filerow__server filerow__server_label"
+          >
+            <p>{{ server.location }}</p>
+            <p>Ш: {{ server.latitude }}</p>
+            <p>Д: {{ server.longitude }}</p>
+          </div>
+        </div>
+
+        <div v-for="file in files" :key="file.id" class="filerow">
+          <div class="filerow__name">
+            {{ file.name }}
+          </div>
+
+          <div
+            v-for="server in servers"
+            :key="server.name"
+            class="filerow__server"
+          >
+            <div
+              class="filerow__img"
+              :class="{
+                filerow__img_yes: file.servers.includes(server.name),
+                filerow__img_no: !file.servers.includes(server.name),
+              }"
+            />
+            <!-- <p>{{ server.location }}</p>
+          <p>Ш: {{ server.latitude }}</p>
+          <p>Д: {{ server.longitude }}</p> -->
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -66,10 +95,15 @@
 import { v4 as uuidv4 } from "uuid";
 import { ref, computed, onMounted } from "vue";
 import { VueUnitOfWork } from "../logic/service_layer/uow";
-import { GetCdnServers, RefreshTokens, UploadFile } from "../logic/domain/command";
+import {
+  GetCdnServers,
+  GetFiles,
+  RefreshTokens,
+  UploadFile,
+} from "../logic/domain/command";
 import { UploadFileTooBigError } from "../logic/domain/event";
 import HeadingComponent from "../components/HeadingComponent.vue";
-import FileList from "../components/file/FileList.vue";
+// import FileList from "../components/file/FileList.vue";
 import FileDropZone from "../components/file/FileDropZone.vue";
 import { MessageBus } from "../logic/service_layer/message_bus";
 
@@ -81,25 +115,25 @@ import { useBeforeEnterPage } from "../logic/service_layer/use_modules";
 export default {
   components: {
     HeadingComponent,
-    FileList,
+    // FileList,
     FileDropZone,
     // FormTextField,
     // FolderTreeNode,
     // FormTextInput,
     // ToggleTextButton,
   },
-  name: "FoldersPage",
+  name: "MainPage",
 
   setup() {
     const uow = new VueUnitOfWork();
     const max_file_size = 100; // MB
 
-    const refresh_tokens = async () =>
-      await MessageBus.handle(new RefreshTokens(), uow);
+    // CDN SERVERS
+    const servers = computed(() =>
+      uow.cdn_server_repository.values().map((obj) => obj.value)
+    );
 
-    uow.token_timer.start(refresh_tokens);
-
-    // PDF FILE DOCUMENTS
+    // FILES
     const files = computed(() =>
       uow.file_repository.values().map((obj) => obj.value)
     );
@@ -144,13 +178,25 @@ export default {
     // };
 
     // TIMERS
+    const refresh_tokens = async () =>
+      await MessageBus.handle(new RefreshTokens(), uow);
+
+    uow.token_timer.set_callback(refresh_tokens);
+    uow.token_timer.start();
+
+    const get_files = async () => {
+      await MessageBus.handle(new GetFiles(), uow);
+    };
+
+    uow.get_files_timer.set_callback(get_files);
+    uow.get_files_timer.start();
+
     // const update_upload_progress = () => {
     //   MessageBus.handle(new UpdateUploadProgress(), uow);
     // };
 
     // uow.upload_progress_timer.set_callback(update_upload_progress);
     // uow.upload_progress_timer.start();
-
 
     const user = uow.user_repository.get_current(); // Ref
 
@@ -160,15 +206,17 @@ export default {
     });
 
     return {
-      // usergroup_id,
-      // folders,
-      // query,
+      // USER
       user,
-      max_file_size,
+
+      // SERVER
+      servers,
+
+      // FILE
       files,
+      max_file_size,
       is_drag_above_file_zone,
       handle_new_file_drop,
-      // is_all_expanded,
     };
   },
 };
@@ -187,12 +235,18 @@ export default {
 }
 .page__container {
   display: flex;
+  flex-direction: column;
+  width: 800px;
+}
+
+.page__topcontainer {
+  display: flex;
+  width: 100%;
 }
 
 .page__userinfo {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
 }
 
 .page__userrow {
@@ -211,22 +265,15 @@ export default {
   flex-grow: 1;
 }
 
-.page__servicecontainer {
-  display: flex;
-  flex-direction: column;
-  min-width: 500px;
-  max-width: 500px;
-  padding: 3px;
-}
-
 .page__filedropzone {
-  height: 80px;
+  width: 100%;
+  height: 100%;
   border: 2px dashed grey;
   border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 10px;
+  margin-left: 20px;
 }
 
 .page__filedropzone_dragging {
@@ -243,4 +290,57 @@ export default {
   font-size: 24px;
 }
 
+.page__middlecontainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.filerow,
+.filerowheader {
+  display: flex;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.filerow:nth-child(odd) {
+  background-color: lightyellow;
+}
+
+.filerow:nth-child(even) {
+  background-color: rgb(215, 242, 255);
+}
+
+.filerow__name {
+  flex-grow: 1;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.filerow__server {
+  min-width: 150px;
+  max-width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.filerow__img {
+  min-width: 26px;
+  max-width: 26px;
+  min-height: 26px;
+  max-height: 26px;
+}
+
+.filerow__img_yes {
+  background: url("../../public/check.png") top left/26px 26px no-repeat;
+}
+
+.filerow__img_no {
+  background: url("../../public/cancel.png") top left/26px 26px no-repeat;
+}
+
+.filerow__server_label {
+  font-weight: 600;
+}
 </style>

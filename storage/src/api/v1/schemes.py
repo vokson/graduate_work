@@ -21,10 +21,11 @@ class CdnServerResponse(BaseModel):
     latitude: float
     longitude: float
 
+
 class FileResponse(BaseModel):
     id: UUID
     name: str
-    size: str
+    size: int
     servers: list[str]
     created: datetime
     updated: datetime

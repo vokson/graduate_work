@@ -29,16 +29,10 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-    "http://10.95.27.163",
-    "http://10.95.27.163:8080",
-]
-
+# For DEV
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

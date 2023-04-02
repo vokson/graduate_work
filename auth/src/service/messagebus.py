@@ -2,7 +2,7 @@
 import logging
 from typing import Callable, Type
 
-from asyncpg.exceptions import PostgresError, UniqueViolationError
+from asyncpg.exceptions import PostgresError, InterfaceError, UniqueViolationError
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from src.core import exceptions
 from src.domain import command_results, commands, events
@@ -31,6 +31,7 @@ COMMAND_HANDLERS = {
 
 RESULTS = {
     PostgresError: command_results.DatabaseError,
+    InterfaceError: command_results.DatabaseError,
     UniqueViolationError: command_results.UniqueViolationDatabaseError,
     PydanticValidationError: command_results.ValidationError,
     exceptions.AuthTokenMissedException: command_results.AuthTokenMissedException,

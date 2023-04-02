@@ -27,8 +27,8 @@ class Logout extends Command { }
 
 class MyCredentials extends Command { }
 class RefreshTokens extends Command { }
-
 class GetCdnServers extends Command { }
+class GetFiles extends Command { }
 
 // class LoginWithToken extends Command {}
 
@@ -1309,6 +1309,7 @@ export {
   // CDN SERVERS
   GetCdnServers,
   // FILE
+  GetFiles,
   UploadFile
   // GetUsers,
   // SetUser,

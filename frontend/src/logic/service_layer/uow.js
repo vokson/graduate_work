@@ -13,12 +13,15 @@ import { VueFileFlatRepository } from "../adapters/file_flat_repository";
 // import { VueFlatCurrentRepository } from "../adapters/flat_current_repository";
 import { HttpApiProvider } from "../adapters/api_provider";
 import { NotyNotificator } from "../adapters/notificator";
-import { TokenTimer } from "../adapters/timer";
+import { AbstractTimer } from "../adapters/timer";
 // import { UploadProgressTimer, WaitSecondsTimer } from "../adapters/timer";
 // import { VueFolderSettings } from "../adapters/folder_settings";
 // import { VueInfoRepository } from "../adapters/info_repository";
 // import { VueCartRepository } from "../adapters/cart_repository";
 // import { VueCountableFlatRepository } from "../adapters/countable_flat_repository";
+
+const token_timer = new AbstractTimer(5000);
+const get_files_timer = new AbstractTimer(2000);
 
 class AbstractUnitOfWork {
   constructor() {
@@ -45,7 +48,8 @@ class VueUnitOfWork extends AbstractUnitOfWork {
     this.notificator = new NotyNotificator();
     // this.upload_progress_timer = new UploadProgressTimer(2000); // Обновлять прогресс каждые 2 сек
     // this.wait_seconds_timer = new WaitSecondsTimer(1000); // Таймер для ожидания активации кнопок
-    this.token_timer = new TokenTimer(5000); // Таймер для ожидания активации кнопок
+    this.token_timer = token_timer
+    this.get_files_timer = get_files_timer
 
     // this.info_repository = new VueInfoRepository("info");
     this.user_repository = new VueUserRepository("users");

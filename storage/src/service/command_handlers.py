@@ -70,6 +70,7 @@ async def get_many_files(
 ):
     async with uow:
         objs = await uow.files.get_all()
+        # await uow.commit()
 
     return command_results.PositiveCommandResult([x.dict() for x in objs])
 

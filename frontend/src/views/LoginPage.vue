@@ -87,6 +87,10 @@ export default {
       await MessageBus.handle(message, uow);
     };
 
+    console.log('----------------------------------')
+    uow.token_timer.stop();
+    uow.get_files_timer.stop()
+
     return {
       is_authenticated,
       user,

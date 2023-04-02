@@ -7,6 +7,9 @@ import {
 import {
   List as CdnServerList,
 } from "./api_responses/models/cdn_server";
+import {
+  List as FileList,
+} from "./api_responses/models/file";
 // import {
 //   Single as RoleSingle,
 //   List as RoleList,
@@ -148,6 +151,13 @@ class RefreshTokensRequest extends Request { }
 class RefreshTokensResponse extends Response {
   get schema() {
     return Tokens;
+  }
+}
+
+class GetFilesRequest extends Request { }
+class GetFilesResponse extends Response {
+  get schema() {
+    return FileList;
   }
 }
 
@@ -1937,6 +1947,10 @@ class AbstractApi {
     this._auth_token = null;
   }
 
+  get_auth_token() {
+    return this._auth_token;
+  }
+
   set_auth_token(token) {
     this._auth_token = token;
   }
@@ -1977,6 +1991,10 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  get_files = () => {
+    throw new NotImplementedError();
+  };
+
   upload_file = () => {
     throw new NotImplementedError();
   };
@@ -2002,6 +2020,8 @@ export {
   GetCdnServersResponse,
 
   // FILE
+  GetFilesRequest,
+  GetFilesResponse,
   UploadFileRequest,
   UploadFileResponse,
 };
