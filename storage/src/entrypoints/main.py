@@ -16,7 +16,7 @@ BASE_DIR = os.path.dirname(
 sys.path.append(BASE_DIR)
 
 
-from src.api.v1 import servers, files
+from src.api.v1 import servers, files, links
 from src.core.config import settings
 from src.service.messagebus import MessageBus
 from src.service.uow import UnitOfWork
@@ -58,3 +58,4 @@ async def validation_exception_handler(request, exc):
 
 app.include_router(servers.router, prefix="/storage/api/v1/servers", tags=["CDN Servers"])
 app.include_router(files.router, prefix="/storage/api/v1/files", tags=["Files"])
+app.include_router(links.router, prefix="/storage/api/v1/links", tags=["Links"])

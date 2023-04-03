@@ -30,11 +30,24 @@ class CacheSettings(BaseSettings):
     host: str
     port: int
 
+class LinkExpireTimeSettings(BaseSettings):
+    upload: str
+    download: str
+
+class S3Settings(BaseSettings):
+    host: str
+    port: int
+    user: str
+    password: str
+    bucket: str
+    link_expire_time: LinkExpireTimeSettings
+
 
 class Settings(BaseSettings):
     auth: AuthServiceSettings
     storage_db: DatabaseSettings
     cache: CacheSettings
+    s3: S3Settings
 
     class Config:
         #  Для локальной разработки вне docker
@@ -58,4 +71,11 @@ db_dsl = {
 cache_dsl = {
     "host": settings.cache.host,
     "port": settings.cache.port,
+}
+
+s3_dsl = {
+    "endpoint": f"{settings.s3.host}:{settings.s3.port}",
+    "access_key": settings.s3.user,
+    "secret_key": settings.s3.password,
+    "secure": False
 }

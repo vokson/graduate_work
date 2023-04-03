@@ -30,6 +30,14 @@ class FileResponse(BaseModel):
     created: datetime
     updated: datetime
 
+class UploadLinkRequest(BaseModel):
+    id: UUID
+    name: str
+    size: int
+
+class LinkResponse(BaseModel):
+    link: str
+
 
 # class RegisterUserRequest(BaseModel):
 #     username: str

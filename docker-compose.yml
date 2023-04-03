@@ -4,6 +4,7 @@ volumes:
   auth_db_data: null
   storage_db_data: null
   redis_data: null
+  s3_1_data: null
 
 services:
   auth_db:
@@ -73,3 +74,18 @@ services:
       - "8002:8002"
     env_file:
       - .env
+
+  minio:
+    # image: 'bitnami/minio:2023.3.24'
+    image: 'quay.io/minio/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9090:9090'
+    volumes:
+      - s3_1_data:/data/
+    environment:
+      - MINIO_ROOT_USER=${S3__USER}
+      - MINIO_ROOT_PASSWORD=${S3__PASSWORD}
+    env_file:
+      - .env
+    command: server /data --console-address ":9090"

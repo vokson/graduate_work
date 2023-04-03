@@ -17,6 +17,7 @@ import {
 
   // FILE
   GetFilesResponse,
+  GetUploadLinkResponse,
   UploadFileResponse,
 } from "./api";
 
@@ -40,6 +41,7 @@ class HttpApi extends AbstractApi {
 
       // FILE
       GetFilesRequest: this.get_files,
+      GetUploadLinkRequest: this.get_upload_link,
       UploadFileRequest: this.upload_file,
     };
   }
@@ -92,14 +94,22 @@ class HttpApi extends AbstractApi {
     set_download_size_method,
     headers
   ) {
-    let url = new URL(`${this.api_url}${path}`);
-    url.search = new URLSearchParams(parameters).toString();
+
+
+    const operation_by_link = path.startsWith('http')
+
+    let url = null
+    if (operation_by_link) {
+      url = new URL(`${path}`)
+    } else {
+      url = new URL(`${this.api_url}${path}`);
+      url.search = new URLSearchParams(parameters).toString();
+    }
 
     let response = null;
     response = await new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest();
       xhr.open(method, url);
-
       xhr.responseType = response_type;
 
       if (content_type !== null) {
@@ -114,12 +124,15 @@ class HttpApi extends AbstractApi {
       }
 
       // Устанавливаем авторизационный токен
-      if (this._auth_token && this._auth_token !== null) {
+      if (this._auth_token && this._auth_token !== null && !operation_by_link) {
         xhr.setRequestHeader("Authorization", "Bearer " + this._auth_token);
       }
 
       if (set_download_size_method !== null)
         xhr.onprogress = (event) => set_download_size_method(event.loaded);
+
+      if (set_upload_size_method !== null)
+        xhr.upload.onprogress = (event) => set_upload_size_method(event.loaded);
 
       // Если сервер недоступен
       xhr.onerror = function () {
@@ -190,7 +203,8 @@ class HttpApi extends AbstractApi {
 
       // Если код ответа нормальный, но формат ответа не JSON
     } catch (err) {
-      throw new HttpApiError("Api.Error.NotJson");
+      if (!operation_by_link)
+        throw new HttpApiError("Api.Error.NotJson");
     }
 
     // Если код ответа не OK
@@ -251,6 +265,21 @@ class HttpApi extends AbstractApi {
     return await this.perform_request(
       GetFilesResponse,
       `/storage/api/v1/files/`
+    );
+  };
+
+  get_upload_link = async (request) => {
+    return await this.perform_request(
+      GetUploadLinkResponse,
+      `/storage/api/v1/links/upload/`,
+      {
+        method: "post",
+        data: JSON.stringify({
+          id: request.data.id,
+          name: request.data.name,
+          size: request.data.size,
+        }),
+      }
     );
   };
 
@@ -655,24 +684,18 @@ class HttpApi extends AbstractApi {
   //     );
   //   };
 
-    upload_file = async (request) => {
-      const data = new FormData();
-      data.append("id", request.data.id);
-      data.append("file", request.data.original_file);
-
-      return await this.perform_request(
-        UploadFileResponse,
-        `/storage/api/v1/files/`,
-        {
-          method: "post",
-          content_type: null,
-          data: data,
-          headers: {
-            "X-FILE-ID": request.data.id,
-          },
-        }
-      );
-    };
+  upload_file = async (request) => {
+    return await this.perform_request(
+      UploadFileResponse,
+      request.data.link,
+      {
+        method: "put",
+        content_type: null,
+        data: request.data.original_file,
+        set_upload_size_method: request.data.on_progress
+      }
+    );
+  };
 
   //   download_file_from_folder = async (request) => {
   //     return await this.perform_request(

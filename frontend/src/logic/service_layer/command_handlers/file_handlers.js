@@ -4,6 +4,8 @@ import {
   GetFilesResponse,
   UploadFileRequest,
   UploadFileResponse,
+  GetUploadLinkRequest,
+  GetUploadLinkResponse,
   // DownloadFileFromFolderRequest,
   // DownloadFileFromFolderResponse,
   // DownloadManyDocumentsFilesAsArchiveRequest,
@@ -23,6 +25,10 @@ import {
 } from "../../adapters/api";
 
 import {
+  UploadFileByLink,
+} from "../../domain/command";
+
+import {
   ApiError,
   UploadFileError,
   UploadFileSuccess,
@@ -37,7 +43,7 @@ import { File } from "../../domain/model";
 // import { js_download_file } from "../utils/file_download";
 // import { v4 as uuidv4 } from "uuid";
 
-class WrongResponseError extends Error {}
+class WrongResponseError extends Error { }
 
 const convert_file_response_obj_to_model = (obj) => {
   const user = new File(
@@ -45,8 +51,8 @@ const convert_file_response_obj_to_model = (obj) => {
     obj.name,
     obj.size,
     obj.servers,
-    obj.created,
-    obj.updated,
+    new Date(obj.created),
+    new Date(obj.updated),
     obj.size,
   );
 
@@ -55,7 +61,7 @@ const convert_file_response_obj_to_model = (obj) => {
 
 const get_files = async (event, uow) => {
   console.log('GET FILES', uow.api.get_auth_token());
-  
+
   const request = new GetFilesRequest();
   const response = await uow.api.call(request);
 
@@ -81,12 +87,34 @@ const upload_file = async (event, uow) => {
   const file = new File(event.id, event.file.name, event.file.size);
   uow.file_repository.set(event.id, file);
 
-  // Добавляем файл в таймер. Стартуем обновления процесса загрузки
-  // uow.upload_progress_timer.add(event.file_id);
-
-  const request = new UploadFileRequest({
+  // Получаем ссылку на загрузку файла
+  const request = new GetUploadLinkRequest({
     id: event.id,
+    name: event.file.name,
+    size: event.file.size,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+  if (response instanceof GetUploadLinkResponse) {
+    uow.push_message(new UploadFileByLink(event.id, response.data.link, event.file));
+    console.log(response)
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+const upload_file_by_link = async (event, uow) => {
+  const file = uow.file_repository.get(event.id) //ref
+  const request = new UploadFileRequest({
+    link: event.link,
     original_file: event.file,
+    on_progress: (x) => file.value.set_size(x)
   });
 
   let response = null;
@@ -97,9 +125,6 @@ const upload_file = async (event, uow) => {
     uow.push_message(new UploadFileError(event.file.name));
     console.log(error);
   }
-
-  // После завершения запроса удаляем файл из таймера
-  // uow.upload_progress_timer.remove(event.file_id);
 
   if (response instanceof NegativeResponse) {
     uow.file_repository.delete(event.id);
@@ -550,21 +575,22 @@ const upload_file = async (event, uow) => {
 
 export {
   upload_file,
+  upload_file_by_link,
   get_files,
-//   upload_file_to_folder,
-//   download_file_from_folder,
-//   download_many_documents_files_as_archive,
-//   download_document_files_as_archive,
-//   get_file_info,
-//   delete_file_from_folder,
-//   update_file_from_folder,
-//   flush_file_container,
-//   get_spare_files,
-//   update_upload_progress,
-//   download_excel_file,
-//   download_json_file,
-//   attach_file_to_document,
-//   detach_file_from_document,
-//   attach_files_to_document_using_pattern,
-//   allocate_files_to_documents_using_pattern,
+  //   upload_file_to_folder,
+  //   download_file_from_folder,
+  //   download_many_documents_files_as_archive,
+  //   download_document_files_as_archive,
+  //   get_file_info,
+  //   delete_file_from_folder,
+  //   update_file_from_folder,
+  //   flush_file_container,
+  //   get_spare_files,
+  //   update_upload_progress,
+  //   download_excel_file,
+  //   download_json_file,
+  //   attach_file_to_document,
+  //   detach_file_from_document,
+  //   attach_files_to_document_using_pattern,
+  //   allocate_files_to_documents_using_pattern,
 };

@@ -695,8 +695,16 @@ class UploadFile extends Command {
   constructor(id, file) {
     super();
     this.id = id;
-    // Здесь file это https://developer.mozilla.org/ru/docs/Web/API/File
-    this.file = file;
+    this.file = file; //https://developer.mozilla.org/ru/docs/Web/API/File
+  }
+}
+
+class UploadFileByLink extends Command {
+  constructor(id, link, file) {
+    super();
+    this.id = id;
+    this.link = link;
+    this.file = file; //https://developer.mozilla.org/ru/docs/Web/API/File
   }
 }
 
@@ -1310,7 +1318,8 @@ export {
   GetCdnServers,
   // FILE
   GetFiles,
-  UploadFile
+  UploadFile,
+  UploadFileByLink
   // GetUsers,
   // SetUser,
   // DeleteUser,

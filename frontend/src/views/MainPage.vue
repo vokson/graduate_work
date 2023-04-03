@@ -51,12 +51,16 @@
 
       <div class="page__middlecontainer">
         <div class="filerowheader">
-          <div class="filerow__name"></div>
+          <div class="filerow__button"/>
+          <div class="filerow__name">Наименование</div>
+
+          <div class="filerow__date">Создан</div>
+          <div class="filerow__date">Изменен</div>
 
           <div
             v-for="server in servers"
             :key="server.id"
-            class="filerow__server filerow__server_label"
+            class="filerow__server"
           >
             <p>{{ server.location }}</p>
             <p>Ш: {{ server.latitude }}</p>
@@ -65,8 +69,20 @@
         </div>
 
         <div v-for="file in files" :key="file.id" class="filerow">
+          <div class="filerow__button">
+            <div class="filerow__img filerow__img_delete" />
+          </div>
+
           <div class="filerow__name">
-            {{ file.name }}
+            <file-block :file="file" />
+          </div>
+
+          <div class="filerow__date">
+            {{ file.created.toLocaleString() }}
+          </div>
+
+          <div class="filerow__date">
+            {{ file.updated.toLocaleString() }}
           </div>
 
           <div
@@ -105,6 +121,7 @@ import { UploadFileTooBigError } from "../logic/domain/event";
 import HeadingComponent from "../components/HeadingComponent.vue";
 // import FileList from "../components/file/FileList.vue";
 import FileDropZone from "../components/file/FileDropZone.vue";
+import FileBlock from "../components/file/FileBlock.vue";
 import { MessageBus } from "../logic/service_layer/message_bus";
 
 // import FormTextField from "../components/fields/FormTextField.vue";
@@ -115,7 +132,7 @@ import { useBeforeEnterPage } from "../logic/service_layer/use_modules";
 export default {
   components: {
     HeadingComponent,
-    // FileList,
+    FileBlock,
     FileDropZone,
     // FormTextField,
     // FolderTreeNode,
@@ -191,18 +208,12 @@ export default {
     uow.get_files_timer.set_callback(get_files);
     uow.get_files_timer.start();
 
-    // const update_upload_progress = () => {
-    //   MessageBus.handle(new UpdateUploadProgress(), uow);
-    // };
-
-    // uow.upload_progress_timer.set_callback(update_upload_progress);
-    // uow.upload_progress_timer.start();
-
     const user = uow.user_repository.get_current(); // Ref
 
     onMounted(async () => {
       await useBeforeEnterPage(uow, []);
       await MessageBus.handle(new GetCdnServers(), uow);
+      await MessageBus.handle(new GetFiles(), uow);
     });
 
     return {
@@ -236,7 +247,7 @@ export default {
 .page__container {
   display: flex;
   flex-direction: column;
-  width: 800px;
+  width: 1000px;
 }
 
 .page__topcontainer {
@@ -301,6 +312,12 @@ export default {
   display: flex;
   padding-top: 5px;
   padding-bottom: 5px;
+  align-items: center;
+}
+
+.filerowheader {
+  font-weight: 600;
+  text-align: center;
 }
 
 .filerow:nth-child(odd) {
@@ -317,12 +334,26 @@ export default {
   padding-right: 5px;
 }
 
+.filerow__button {
+  min-width: 30px;
+  max-width: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .filerow__server {
   min-width: 150px;
   max-width: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.filerow__date {
+  min-width: 100px;
+  max-width: 100px;
+  text-align: center;
 }
 
 .filerow__img {
@@ -340,7 +371,9 @@ export default {
   background: url("../../public/cancel.png") top left/26px 26px no-repeat;
 }
 
-.filerow__server_label {
-  font-weight: 600;
+.filerow__img_delete {
+  background: url("../../public/delete.png") top left/26px 26px no-repeat;
+  cursor: pointer;
 }
+
 </style>

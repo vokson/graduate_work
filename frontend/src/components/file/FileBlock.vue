@@ -6,9 +6,6 @@
       @click="$emit('delete:file')"
       >(X)
     </span>
-    <span class="fileblock__linkbutton" @click="$emit('download:file', false)"
-      >&#129095;
-    </span>
 
     <form-text-input
       v-if="is_rename_active"
@@ -25,7 +22,7 @@
       @dragend="$emit('dragend:file')"
       @click="
         if (is_uploaded === true) {
-          $emit('download:file', true);
+          $emit('download:file', false);
         }
       "
     >

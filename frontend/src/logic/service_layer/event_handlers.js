@@ -84,11 +84,11 @@ const user_logout_success = (event, uow) => {
 //   uow.push_message(new Notify("success", "Удалено"));
 // };
 
-// const handle_upload_file_error = (event, uow) => {
-//   uow.push_message(
-//     new Notify("error", `Ошибка загрузки файла ${event.filename}`)
-//   );
-// };
+const handle_upload_file_error = (event, uow) => {
+  uow.push_message(
+    new Notify("error", `Ошибка загрузки файла ${event.filename}`)
+  );
+};
 
 // const handle_upload_empty_file_error = (event, uow) => {
 //   uow.push_message(
@@ -120,9 +120,9 @@ const user_logout_success = (event, uow) => {
 //   );
 // };
 
-// const handle_upload_file_success = (event, uow) => {
-//   uow.push_message(new Notify("success", `Файл загружен`));
-// };
+const handle_upload_file_success = (event, uow) => {
+  uow.push_message(new Notify("success", `Файл загружен`));
+};
 
 // const handle_save_many_documents_success = (event, uow) => {
 //   uow.push_message(new Notify("success", `Сохранение завершено`));
@@ -375,12 +375,12 @@ export {
   // folders_add_success,
   // folders_update_success,
   // folders_delete_success,
-  // handle_upload_file_error,
+  handle_upload_file_error,
   // handle_upload_empty_file_error,
   // handle_upload_file_too_big_error,
   // handle_upload_file_wrong_extension_error,
   // handle_upload_file_wrong_filename_error,
-  // handle_upload_file_success,
+  handle_upload_file_success,
   // handle_save_many_documents_success,
   // handle_delete_many_documents_success,
   // handle_document_attributes_changed,

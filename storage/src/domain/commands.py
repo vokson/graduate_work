@@ -24,3 +24,8 @@ class CreateFile(Command):
 
 class GetManyFiles(Command):
     pass
+
+class GetUploadLink(Command):
+    id: UUID
+    name: str
+    size: int

@@ -10,6 +10,9 @@ import {
 import {
   List as FileList,
 } from "./api_responses/models/file";
+import {
+  Single as LinkSingle
+} from "./api_responses/models/link";
 // import {
 //   Single as RoleSingle,
 //   List as RoleList,
@@ -165,6 +168,25 @@ class GetCdnServersRequest extends Request { }
 class GetCdnServersResponse extends Response {
   get schema() {
     return CdnServerList;
+  }
+}
+
+class GetUploadLinkRequest extends Request { 
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+        size: { type: "integer" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class GetUploadLinkResponse extends Response {
+  get schema() {
+    return LinkSingle;
   }
 }
 
@@ -518,10 +540,10 @@ class UploadFileRequest extends Request {
     return {
       type: "object",
       properties: {
-        id: { type: "string" },
+        link: { type: "string" },
         original_file: { type: "object" },
       },
-      additionalProperties: false,
+      additionalProperties: true, // progress_method
     };
   }
 }
@@ -2022,6 +2044,8 @@ export {
   // FILE
   GetFilesRequest,
   GetFilesResponse,
+  GetUploadLinkRequest,
+  GetUploadLinkResponse,
   UploadFileRequest,
   UploadFileResponse,
 };

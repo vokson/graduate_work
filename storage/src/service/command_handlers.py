@@ -74,6 +74,30 @@ async def get_many_files(
 
     return command_results.PositiveCommandResult([x.dict() for x in objs])
 
+async def get_upload_link(
+    cmd: commands.GetUploadLink,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        link = uow.s3.get_upload_url(cmd.name)
+
+        #  Сделать user_id foreign key
+        #  Unique Constraint (user_id, name)
+        #  if id exists, update file
+
+        obj = File(
+            id=cmd.id,
+            name=cmd.name,
+            size=cmd.size,
+            servers=[]
+        )
+
+        await uow.files.add(obj)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult({"link": link})
+
+
 # async def get_user_by_id(
 #     cmd: commands.GetUserById,
 #     uow: AbstractUnitOfWork,
