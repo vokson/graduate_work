@@ -2,7 +2,8 @@
 import logging
 from typing import Callable, Type
 
-from asyncpg.exceptions import PostgresError, InterfaceError, UniqueViolationError
+from asyncpg.exceptions import (InterfaceError, PostgresError,
+                                UniqueViolationError)
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from src.core import exceptions
 from src.domain import command_results, commands, events
@@ -22,7 +23,8 @@ EVENT_HANDLERS = {
 COMMAND_HANDLERS = {
     commands.CreateCdnServer: command_handlers.create_cdn_server,
     commands.GetManyCdnServers: command_handlers.get_many_cdn_servers,
-    commands.CreateFile: command_handlers.create_file,
+    # commands.CreateFile: command_handlers.create_file,
+    commands.DeleteFile: command_handlers.delete_file,
     commands.GetManyFiles: command_handlers.get_many_files,
     commands.GetUploadLink: command_handlers.get_upload_link,
     # commands.CreateUser: user_handlers.create_user,
@@ -44,6 +46,8 @@ RESULTS = {
     # exceptions.AuthTokenWrongPayloadException: command_results.AuthTokenWrongPayloadException,
     # exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
     # exceptions.UserDoesNotExists: command_results.UserDoesNotExists,
+    exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
+    exceptions.FileDoesNotExist: command_results.FileDoesNotExist,
     exceptions.CdnServerAlreadyExists: command_results.CdnServerAlreadyExists,
     # exceptions.WrongCredentials: command_results.WrongCredentials,
 }

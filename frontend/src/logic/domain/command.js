@@ -30,6 +30,13 @@ class RefreshTokens extends Command { }
 class GetCdnServers extends Command { }
 class GetFiles extends Command { }
 
+class DeleteFile extends Command {
+  constructor(id) {
+    super();
+    this.id = id;
+  }
+}
+
 // class LoginWithToken extends Command {}
 
 
@@ -692,9 +699,8 @@ class GetFiles extends Command { }
 // class GetShareFiles extends Command {}
 
 class UploadFile extends Command {
-  constructor(id, file) {
+  constructor(file) {
     super();
-    this.id = id;
     this.file = file; //https://developer.mozilla.org/ru/docs/Web/API/File
   }
 }
@@ -1318,6 +1324,7 @@ export {
   GetCdnServers,
   // FILE
   GetFiles,
+  DeleteFile,
   UploadFile,
   UploadFileByLink
   // GetUsers,

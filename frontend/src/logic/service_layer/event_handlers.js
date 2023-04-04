@@ -84,7 +84,7 @@ const user_logout_success = (event, uow) => {
 //   uow.push_message(new Notify("success", "Удалено"));
 // };
 
-const handle_upload_file_error = (event, uow) => {
+const upload_file_error = (event, uow) => {
   uow.push_message(
     new Notify("error", `Ошибка загрузки файла ${event.filename}`)
   );
@@ -120,7 +120,7 @@ const handle_upload_file_error = (event, uow) => {
 //   );
 // };
 
-const handle_upload_file_success = (event, uow) => {
+const upload_file_success = (event, uow) => {
   uow.push_message(new Notify("success", `Файл загружен`));
 };
 
@@ -154,9 +154,9 @@ const handle_upload_file_success = (event, uow) => {
 //   uow.push_message(new Notify("success", `Файл обновлен`));
 // };
 
-// const handle_file_deleted_success = (event, uow) => {
-//   uow.push_message(new Notify("success", `Файл удален`));
-// };
+const delete_file_success = (event, uow) => {
+  uow.push_message(new Notify("success", `Файл удален`));
+};
 
 // const handle_file_attached_to_document = (event, uow) => {
 //   uow.push_message(
@@ -360,80 +360,11 @@ const handle_upload_file_success = (event, uow) => {
 
 export {
   handle_api_error,
-  // handle_access_perm_fail_error,
   user_login_success,
   access_token_outdated,
   refresh_token_outdated,
   user_logout_success,
-  // users_get_success,
-  // users_update_success,
-  // users_delete_success,
-  // user_replacement_add_success,
-  // user_replacement_delete_success,
-  // on_behalf_user_change_success,
-  // on_behalf_user_delete_success,
-  // folders_add_success,
-  // folders_update_success,
-  // folders_delete_success,
-  handle_upload_file_error,
-  // handle_upload_empty_file_error,
-  // handle_upload_file_too_big_error,
-  // handle_upload_file_wrong_extension_error,
-  // handle_upload_file_wrong_filename_error,
-  handle_upload_file_success,
-  // handle_save_many_documents_success,
-  // handle_delete_many_documents_success,
-  // handle_document_attributes_changed,
-  // handle_duplicate_document_to_usergroup_success,
-  // handle_duplicate_many_documents_to_usergroup_success,
-  // handle_document_files_are_uploading,
-  // handle_document_button_pushed,
-  // handle_file_updated_success,
-  // handle_file_deleted_success,
-  // handle_files_allocated,
-  // handle_file_attached_to_document,
-  // handle_file_detached_from_document,
-  // handle_add_role_success,
-  // handle_delete_role_success,
-  // handle_add_user_folder_settings_success,
-  // handle_set_user_folder_settings_success,
-  // handle_delete_user_folder_settings_success,
-  // handle_set_user_search_schema_success,
-  // handle_add_permission_success,
-  // handle_delete_permission_success,
-  // handle_document_link_copied,
-  // handle_file_link_copied,
-  // handle_add_user_group_success,
-  // handle_update_user_group_success,
-  // handle_delete_user_group_success,
-  // handle_user_group_has_not_been_assigned,
-  // handle_document_added_to_cart_success,
-  // handle_document_removed_from_cart_success,
-  // handle_many_documents_added_to_cart_success,
-  // handle_add_flow_success,
-  // handle_update_flow_success,
-  // handle_delete_flow_success,
-  // handle_restart_flow_item_success,
-  // handle_self_testing_replied_success,
-  // handle_self_testing_replied_fail,
-  // handle_document_approval_added_success,
-  // handle_document_approval_updated_success,
-  // handle_document_approval_deleted_success,
-  // handle_document_approval_delegated_success,
-  // handle_empty_approval_flow_saved,
-  // handle_approval_flow_started,
-  // handle_approval_flow_stopped,
-  // handle_approval_flow_upload_error,
-  // handle_server_setting_updated_success,
-  // handle_mailbox_added_success,
-  // handle_mailbox_updated_success,
-  // handle_mailbox_deleted_success,
-  // handle_mail_channel_added_success,
-  // handle_mail_channel_updated_success,
-  // handle_mail_channel_deleted_success,
-  // handle_mail_channel_fetched_success,
-  // handle_mail_message_deleted_success,
-  // handle_counter_added_success,
-  // handle_counter_updated_success,
-  // handle_counter_deleted_success,
+  upload_file_error,
+  upload_file_success,
+  delete_file_success
 };

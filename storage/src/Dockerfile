@@ -16,4 +16,4 @@ RUN  pip install --upgrade pip \
 
 COPY . .
 
-ENTRYPOINT ["gunicorn", "src.entrypoints.main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8002"]
+ENTRYPOINT ["gunicorn", "src.entrypoints.main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8002", "--forwarded-allow-ips", "*"]

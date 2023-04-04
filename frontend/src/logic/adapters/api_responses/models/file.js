@@ -15,13 +15,9 @@ const Single = {
     },
     updated: {
       type: "string",
-    },
-    servers: {
-      type: "array",
-      items: { type: "string" }
-    },
+    }
   },
-  required: ["id", "name", "size", "created", "updated", "servers"],
+  required: ["id", "name", "size", "created", "updated"],
   additionalProperties: false,
 };
 

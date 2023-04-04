@@ -2,6 +2,8 @@ import {
   NegativeResponse,
   GetFilesRequest,
   GetFilesResponse,
+  DeleteFileRequest,
+  DeleteFileResponse,
   UploadFileRequest,
   UploadFileResponse,
   GetUploadLinkRequest,
@@ -33,7 +35,7 @@ import {
   UploadFileError,
   UploadFileSuccess,
   // FileUpdatedSuccess,
-  // FileDeletedSuccess,
+  DeleteFileSuccess,
   // FileAttachedToDocument,
   // FileDetachedFromDocument,
   // FilesAllocated,
@@ -46,17 +48,15 @@ import { File } from "../../domain/model";
 class WrongResponseError extends Error { }
 
 const convert_file_response_obj_to_model = (obj) => {
-  const user = new File(
+  const f = new File(
     obj.id,
     obj.name,
     obj.size,
-    obj.servers,
     new Date(obj.created),
     new Date(obj.updated),
-    obj.size,
   );
 
-  return user;
+  return f;
 };
 
 const get_files = async (event, uow) => {
@@ -72,10 +72,32 @@ const get_files = async (event, uow) => {
 
   if (response instanceof GetFilesResponse) {
     uow.file_repository.reset_keeping_refs();
-    response.data.forEach((obj) =>
-      uow.file_repository.set(obj.id,
-        convert_file_response_obj_to_model(obj)
-      ))
+    response.data.forEach((obj) => {
+      const f = convert_file_response_obj_to_model(obj);
+      f.set_size_complete();
+      uow.file_repository.set(f.id, f);
+    })
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+const delete_file = async (event, uow) => {
+  const request = new DeleteFileRequest({
+    id: event.id,
+  });
+  const response = await uow.api.call(request);
+  console.log(response)
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof DeleteFileResponse) {
+    uow.file_repository.delete(event.id);
+    uow.push_message(new DeleteFileSuccess());
     return;
   }
 
@@ -84,12 +106,8 @@ const get_files = async (event, uow) => {
 
 
 const upload_file = async (event, uow) => {
-  const file = new File(event.id, event.file.name, event.file.size);
-  uow.file_repository.set(event.id, file);
-
   // Получаем ссылку на загрузку файла
   const request = new GetUploadLinkRequest({
-    id: event.id,
     name: event.file.name,
     size: event.file.size,
   });
@@ -101,8 +119,11 @@ const upload_file = async (event, uow) => {
     return;
   }
   if (response instanceof GetUploadLinkResponse) {
-    uow.push_message(new UploadFileByLink(event.id, response.data.link, event.file));
-    console.log(response)
+    const f = convert_file_response_obj_to_model(response.data.file)
+    console.log(f)
+    uow.file_repository.set(f.id, f)
+
+    uow.push_message(new UploadFileByLink(f.id, response.data.link, event.file));
     return;
   }
 
@@ -577,6 +598,7 @@ export {
   upload_file,
   upload_file_by_link,
   get_files,
+  delete_file,
   //   upload_file_to_folder,
   //   download_file_from_folder,
   //   download_many_documents_files_as_archive,

@@ -2,11 +2,10 @@ import asyncio
 import functools
 from functools import wraps
 
-from fastapi import Request, HTTPException, status
-
-from src.core.config import settings
+from fastapi import HTTPException, Request, status
 from src.adapters.http import http_session
 from src.api.middlewares import get_request_var
+from src.core.config import settings
 
 
 # async def get_request(request: Request):
@@ -27,8 +26,10 @@ def auth(permissions: list[str], timeout: int = 1):
 
             auth_header = request.headers.get("Authorization")
             if not auth_header:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Auth.Error.TokenMissed")
-
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Auth.Error.TokenMissed",
+                )
 
             url = (
                 f"http://{settings.auth.host}:{settings.auth.port}"
@@ -47,16 +48,19 @@ def auth(permissions: list[str], timeout: int = 1):
                     json=data,
                     headers=headers,
                 ) as resp:
-
                     if resp.status != status.HTTP_200_OK:
                         json_data = await resp.json()
-                        error = json_data['error']
-                        raise HTTPException(status_code=resp.status, detail=error)
+                        error = json_data["error"]
+                        raise HTTPException(
+                            status_code=resp.status, detail=error
+                        )
 
                     return await func(*args, **kwargs)
 
             except asyncio.TimeoutError:
-                raise HTTPException(status_code=503, detail="Auth.Error.ServerUnavailable")
+                raise HTTPException(
+                    status_code=503, detail="Auth.Error.ServerUnavailable"
+                )
 
         return wrapper
 

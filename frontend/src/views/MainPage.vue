@@ -51,7 +51,7 @@
 
       <div class="page__middlecontainer">
         <div class="filerowheader">
-          <div class="filerow__button"/>
+          <div class="filerow__button" />
           <div class="filerow__name">Наименование</div>
 
           <div class="filerow__date">Создан</div>
@@ -70,7 +70,7 @@
 
         <div v-for="file in files" :key="file.id" class="filerow">
           <div class="filerow__button">
-            <div class="filerow__img filerow__img_delete" />
+            <div class="filerow__img filerow__img_delete" @click="handle_delete(file.id)" />
           </div>
 
           <div class="filerow__name">
@@ -108,7 +108,6 @@
 </template>
 
 <script>
-import { v4 as uuidv4 } from "uuid";
 import { ref, computed, onMounted } from "vue";
 import { VueUnitOfWork } from "../logic/service_layer/uow";
 import {
@@ -116,6 +115,7 @@ import {
   GetFiles,
   RefreshTokens,
   UploadFile,
+  DeleteFile,
 } from "../logic/domain/command";
 import { UploadFileTooBigError } from "../logic/domain/event";
 import HeadingComponent from "../components/HeadingComponent.vue";
@@ -155,6 +155,10 @@ export default {
       uow.file_repository.values().map((obj) => obj.value)
     );
 
+    const handle_delete = async (id) => {
+      await MessageBus.handle(new DeleteFile(id), uow);
+    };
+
     // DRAGGING
     const is_drag_above_file_zone = ref(false);
 
@@ -164,15 +168,10 @@ export default {
       if (file.size > max_file_size * 1024 * 1024) {
         message = new UploadFileTooBigError(file.name);
       } else {
-        message = new UploadFile(uuidv4(), file);
+        message = new UploadFile(file);
       }
       await MessageBus.handle(message, uow);
     };
-
-    // // DELETE
-    // const handle_delete = async (id) => {
-    //   await MessageBus.handle(new DeleteShareFile(id), uow);
-    // };
 
     // // DOWNLOAD
     // const downloading_files = computed(() =>
@@ -199,14 +198,14 @@ export default {
       await MessageBus.handle(new RefreshTokens(), uow);
 
     uow.token_timer.set_callback(refresh_tokens);
-    uow.token_timer.start();
+    // uow.token_timer.start();
 
     const get_files = async () => {
       await MessageBus.handle(new GetFiles(), uow);
     };
 
     uow.get_files_timer.set_callback(get_files);
-    uow.get_files_timer.start();
+    // uow.get_files_timer.start();
 
     const user = uow.user_repository.get_current(); // Ref
 
@@ -228,6 +227,7 @@ export default {
       max_file_size,
       is_drag_above_file_zone,
       handle_new_file_drop,
+      handle_delete,
     };
   },
 };
@@ -247,7 +247,7 @@ export default {
 .page__container {
   display: flex;
   flex-direction: column;
-  width: 1000px;
+  /* width: 1000px; */
 }
 
 .page__topcontainer {
@@ -375,5 +375,4 @@ export default {
   background: url("../../public/delete.png") top left/26px 26px no-repeat;
   cursor: pointer;
 }
-
 </style>

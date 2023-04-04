@@ -28,6 +28,8 @@ async def create_cdn_server(
         obj = CdnServer(
             id=uuid4(),
             name=cmd.name,
+            host=cmd.host,
+            port=cmd.port,
             location=cmd.location,
             latitude=cmd.latitude,
             longitude=cmd.longitude,
@@ -38,6 +40,7 @@ async def create_cdn_server(
 
     return command_results.PositiveCommandResult(obj.dict())
 
+
 async def get_many_cdn_servers(
     cmd: commands.GetManyCdnServers,
     uow: AbstractUnitOfWork,
@@ -47,237 +50,88 @@ async def get_many_cdn_servers(
 
     return command_results.PositiveCommandResult([x.dict() for x in objs])
 
-async def create_file(
-    cmd: commands.CreateFile,
-    uow: AbstractUnitOfWork,
-):
-    async with uow:
-        obj = File(
-            id=uuid4(),
-            name=cmd.name,
-            size=cmd.size,
-            servers=cmd.servers
-        )
 
-        await uow.files.add(obj)
-        await uow.commit()
+# async def create_file(
+#     cmd: commands.CreateFile,
+#     uow: AbstractUnitOfWork,
+# ):
+#     async with uow:
+#         obj = File(
+#             id=uuid4(),
+#             name=cmd.name,
+#             size=cmd.size,
+#             servers=cmd.servers
+#         )
 
-    return command_results.PositiveCommandResult(obj.dict())
+#         await uow.files.add(obj)
+#         await uow.commit()
+
+#     return command_results.PositiveCommandResult(obj.dict())
+
 
 async def get_many_files(
     cmd: commands.GetManyFiles,
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        objs = await uow.files.get_all()
-        # await uow.commit()
+        objs = await uow.files.get_all(user_id=cmd.user_id)
 
     return command_results.PositiveCommandResult([x.dict() for x in objs])
+
+
+async def delete_file(
+    cmd: commands.DeleteFile,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        obj = await uow.files.get_by_id(cmd.id)
+        if not obj:
+            raise exceptions.FileDoesNotExist
+
+        if obj.user_id != cmd.user_id:
+            raise exceptions.FileDoesNotExist
+
+        await uow.files.delete(cmd.id)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult({})
+
 
 async def get_upload_link(
     cmd: commands.GetUploadLink,
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        link = uow.s3.get_upload_url(cmd.name)
+        coordinates = await uow.geoip.get_info(cmd.ip)
+        nearest_server = await uow.cdn_servers.get_nearest(coordinates)
+        logger.info(f"Get upload link for file {cmd.name} on server {nearest_server.name}")
 
-        #  Сделать user_id foreign key
-        #  Unique Constraint (user_id, name)
-        #  if id exists, update file
+        storage = uow.s3_pool.get(nearest_server.host, nearest_server.port)
+        link = storage.get_upload_url(cmd.name)
+        # link = uow.s3.get_upload_url(cmd.name)
+        obj = await uow.files.get_by_name_and_user_id(cmd.name, cmd.user_id)
+        is_new = False if obj else True
 
-        obj = File(
-            id=cmd.id,
-            name=cmd.name,
-            size=cmd.size,
-            servers=[]
-        )
+        dt = datetime.now()
 
-        await uow.files.add(obj)
+        if is_new:
+            obj = File(
+                id=uuid4(),
+                name=cmd.name,
+                size=cmd.size,
+                user_id=cmd.user_id,
+                created=dt,
+                updated=dt,
+                # servers=[]
+            )
+            await uow.files.add(obj)
+
+        else:
+            obj.size = cmd.size
+            obj.updated = dt
+            # obj.servers = []
+            await uow.files.update(obj)
+
         await uow.commit()
 
-    return command_results.PositiveCommandResult({"link": link})
-
-
-# async def get_user_by_id(
-#     cmd: commands.GetUserById,
-#     uow: AbstractUnitOfWork,
-# ):
-#     async with uow:
-#         user = await uow.users.get_by_id(cmd.user_id)
-
-#         if not user:
-#             raise exceptions.UserDoesNotExists
-
-#     return command_results.PositiveCommandResult(
-#         user.dict(exclude={"password"})
-#     )
-
-
-# def encode_token(payload: dict) -> str:
-#     return jwt.encode(
-#         payload,
-#         settings.token.secret_key,
-#         algorithm=settings.token.algo,
-#     )
-
-
-# def generate_token_pair(
-#     user_id: UUID,
-#     is_superuser: bool,
-#     perms: list[str],
-# ) -> tuple[str, str, int, int]:
-#     timestamp = round(time.time())
-#     base_token = {
-#         "user_id": str(user_id),
-#         #  Минус секунда для компенсации рассинхрона
-#         #  времени на разных серверах
-#         "iat": timestamp - 1,
-#         "permissions": perms,
-#         "is_superuser": is_superuser,
-#     }
-
-#     access_token_expire_at = timestamp + settings.token.access_lifetime
-#     access_token = {
-#         **base_token,
-#         **{
-#             "exp": access_token_expire_at,
-#             "token_type": "access",
-#         },
-#     }
-
-#     refresh_token_expire_at = timestamp + settings.token.refresh_lifetime
-#     refresh_token = {
-#         **base_token,
-#         **{
-#             "exp": refresh_token_expire_at,
-#             "token_type": "refresh",
-#         },
-#     }
-
-#     return (
-#         encode_token(access_token),
-#         encode_token(refresh_token),
-#         access_token_expire_at,
-#         refresh_token_expire_at,
-#     )
-
-
-# async def dispose_token_pair(
-#     uow: AbstractUnitOfWork,
-#     user: User,
-# ):
-#     if user.access_token:
-#         await uow.cache.set(
-#             user.access_token,
-#             1,
-#             expire_at=user.access_token_expire_at,
-#         )
-#     if user.refresh_token:
-#         await uow.cache.set(
-#             user.refresh_token,
-#             1,
-#             expire_at=user.refresh_token_expire_at,
-#         )
-
-
-# async def refresh_tokens_of_user(
-#     uow: AbstractUnitOfWork,
-#     user: User,
-# ):
-#     #  Генерируем новые токены
-#     (
-#         access_token,
-#         refresh_token,
-#         access_token_expire_at,
-#         refresh_token_expire_at,
-#     ) = generate_token_pair(user.id, user.is_superuser, user.permissions)
-
-#     #  Сбрасываем старые токены
-#     await dispose_token_pair(uow, user)
-
-#     #  Обновляем данные пользователя
-#     user.access_token = access_token
-#     user.refresh_token = refresh_token
-#     user.access_token_expire_at = access_token_expire_at
-#     user.refresh_token_expire_at = refresh_token_expire_at
-#     user.updated = datetime.now()
-
-#     await uow.users.update(user)
-#     return access_token, refresh_token
-
-
-# async def login_by_credentials(
-#     cmd: commands.LoginByCredentials,
-#     uow: AbstractUnitOfWork,
-# ):
-#     async with uow:
-#         #  Получаем данные пользователя
-#         user = await uow.users.get_by_username(cmd.username)
-
-#         if not user:
-#             raise exceptions.UserDoesNotExists
-
-#         #  Проверка пароля
-#         if not hasher.verify(cmd.password, user.password):
-#             raise exceptions.WrongCredentials
-
-#         #  Обновление токенов пользователя
-#         access_token, refresh_token = await refresh_tokens_of_user(uow, user)
-#         await uow.commit()
-
-#     return command_results.PositiveCommandResult(
-#         {"access_token": access_token, "refresh_token": refresh_token}
-#     )
-
-# async def logout(
-#     cmd: commands.Logout,
-#     uow: AbstractUnitOfWork,
-# ):
-#     async with uow:
-#         #  Получаем данные пользователя
-#         user = await uow.users.get_by_id(cmd.user_id)
-
-#         if not user:
-#             raise exceptions.UserDoesNotExists
-
-#         #  Сбрасываем токены
-#         await dispose_token_pair(uow, user)
-
-#     return command_results.PositiveCommandResult({})
-
-
-# async def refresh_tokens(
-#     cmd: commands.RefreshTokens,
-#     uow: AbstractUnitOfWork,
-# ):
-#     async with uow:
-#         #  Получаем данные пользователя
-#         user = await uow.users.get_by_id(cmd.user_id)
-
-#         if not user:
-#             raise exceptions.UserDoesNotExists
-
-#         #  Обновление токенов пользователя
-#         access_token, refresh_token = await refresh_tokens_of_user(uow, user)
-#         await uow.commit()
-
-#     return command_results.PositiveCommandResult(
-#         {"access_token": access_token, "refresh_token": refresh_token}
-#     )
-
-
-# async def verify_token(
-#     cmd: commands.VerifyToken,
-#     uow: AbstractUnitOfWork,
-# ):
-#     async with uow:
-#         if (
-#             cmd.is_superuser
-#             or len(
-#                 set(cmd.required_permissions) - set(cmd.existing_permissions)
-#             )
-#             == 0
-#         ):
-#             return command_results.PositiveCommandResult({})
-
-#         raise exceptions.AuthNoPermissionException
+    return command_results.PositiveCommandResult({"file": obj, "link": link})

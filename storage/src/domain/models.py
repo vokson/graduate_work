@@ -20,28 +20,29 @@ class IdMixin(BaseModel):
 
 
 class CreatedUpdatedMixin(BaseModel):
-    created: datetime | None
-    updated: datetime | None
+    created: datetime
+    updated: datetime
 
 
-class AbstractIdModel(
-    AbstractModel, IdMixin
-):
+class AbstractIdModel(AbstractModel, IdMixin):
     pass
 
-class AbstractIdCreatedUpdatedModel(
-    AbstractIdModel, CreatedUpdatedMixin
-):
+
+class AbstractIdCreatedUpdatedModel(AbstractIdModel, CreatedUpdatedMixin):
     pass
 
 
 class CdnServer(AbstractIdModel):
     name: str
+    host: str
+    port: int
     location: str
     latitude: float
     longitude: float
 
+
 class File(AbstractIdCreatedUpdatedModel):
     name: str
     size: int
-    servers: list[str]
+    user_id: UUID
+    # servers: list[str]

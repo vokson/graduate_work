@@ -21,6 +21,7 @@ class DatabaseSettings(BaseModel):
     password: str
     dbname: str
 
+
 class AuthServiceSettings(BaseSettings):
     host: str
     port: int
@@ -30,9 +31,11 @@ class CacheSettings(BaseSettings):
     host: str
     port: int
 
+
 class LinkExpireTimeSettings(BaseSettings):
     upload: str
     download: str
+
 
 class S3Settings(BaseSettings):
     host: str
@@ -43,11 +46,16 @@ class S3Settings(BaseSettings):
     link_expire_time: LinkExpireTimeSettings
 
 
+class GeoSettings(BaseSettings):
+    use_real_ip: bool
+
+
 class Settings(BaseSettings):
     auth: AuthServiceSettings
     storage_db: DatabaseSettings
     cache: CacheSettings
     s3: S3Settings
+    geo: GeoSettings
 
     class Config:
         #  Для локальной разработки вне docker
@@ -77,5 +85,5 @@ s3_dsl = {
     "endpoint": f"{settings.s3.host}:{settings.s3.port}",
     "access_key": settings.s3.user,
     "secret_key": settings.s3.password,
-    "secure": False
+    "secure": False,
 }

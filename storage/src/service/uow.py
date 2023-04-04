@@ -1,16 +1,18 @@
 from abc import ABC, abstractmethod
 
 from src.adapters.cache import get_cache_conn
-from src.adapters.s3 import get_s3_conn
 from src.adapters.db import get_conn_pool
+from src.adapters.geoip import get_geo_ip_service
 from src.adapters.repositories.cdn_server import CdnServerRepository
 from src.adapters.repositories.file import FileRepository
+from src.adapters.s3 import get_s3_conn
 from src.core.config import cache_dsl, db_dsl, s3_dsl, settings
 
 
 db_conn_pool = None
 cache_conn = None
 s3_conn = None
+geo_ip_service = None
 
 
 async def db_pool_factory():
@@ -40,6 +42,7 @@ async def get_cache():
 
     return cache_conn
 
+
 async def get_s3():
     global s3_conn
 
@@ -47,6 +50,15 @@ async def get_s3():
         s3_conn = await anext(get_s3_conn(settings.s3.bucket, **s3_dsl))
 
     return s3_conn
+
+
+async def get_geo_ip():
+    global geo_ip_service
+
+    if not geo_ip_service:
+        geo_ip_service = await get_geo_ip_service()
+
+    return geo_ip_service
 
 
 class AbstractUnitOfWork(ABC):
@@ -83,12 +95,14 @@ class UnitOfWork(AbstractUnitOfWork):
         release_db_conn=release_db_conn_func,
         get_cache=get_cache,
         get_s3=get_s3,
+        get_geo_ip=get_geo_ip,
     ):
         super().__init__()
         self._init_db_conn = init_db_conn_func
         self._release_db_conn = release_db_conn_func
         self._get_cache_conn = get_cache
         self._get_s3_conn = get_s3
+        self._get_geo_ip = get_geo_ip
 
     async def __aenter__(self):
         self._is_done = False
@@ -98,6 +112,7 @@ class UnitOfWork(AbstractUnitOfWork):
 
         self.cache = await self._get_cache_conn()
         self.s3 = await self._get_s3_conn()
+        self.geoip = await self._get_geo_ip()
         self.cdn_servers = CdnServerRepository(self._conn)
         self.files = FileRepository(self._conn)
 

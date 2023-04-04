@@ -28,6 +28,7 @@ async def main():
             last_name="Doe",
             is_superuser=True,
             permissions=[
+                "can_delete_file",
                 "can_upload_file",
                 "can_download_file",
                 "can_view_cdnserver",

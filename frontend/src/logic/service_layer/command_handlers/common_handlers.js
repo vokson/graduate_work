@@ -20,9 +20,12 @@ const notify = (event, uow) => {
 const notify_api_error = (event, uow) => {
   const errors = {
     "User.DoesNotExists": ["error", "Неверные учетные данные"],
+    "File.DoesNotExists": ["error", "Файл не существует"],
+    "CdnServer.AlreadyExists": ["error", "Сервер уже существует"],
     "Auth.Error.TokenMissed": ["error", null],
     "Auth.Error.TokenOutdated": ["error", null],
     "Auth.Error.WrongTokenPayload": ["error", null],
+    "Auth.Error.NoPermission": ["error", "Недостаточно прав"],
     "Database.Error": ["error", "Ошибка базы данных"],
     "Request.Error.Validation": ["error", "Неверный запрос"],
     "Api.Server.Unavailable": ["error", "Сервер недоступен"],

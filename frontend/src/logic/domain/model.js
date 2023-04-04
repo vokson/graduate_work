@@ -123,14 +123,14 @@ class CdnServer {
 }
 
 class File {
-  constructor(id, name, total_size, servers = [], created = new Date(), updated = new Date(), uploaded_size = 0) {
+  constructor(id, name, total_size, created, updated) {
     this._id = id;
     this._name = name;
     this._total_size = total_size;
-    this._servers = servers;
+    this._servers = [];
     this._created = created;
     this._updated = updated;
-    this._uploaded_size = uploaded_size;
+    this._uploaded_size = 0;
   }
 
   get id() {
@@ -147,6 +147,10 @@ class File {
 
   get servers() {
     return this._servers;
+  }
+
+  set servers(x) {
+    this._servers = x;
   }
 
   get created() {

@@ -26,16 +26,18 @@ class FileResponse(BaseModel):
     id: UUID
     name: str
     size: int
-    servers: list[str]
+    # servers: list[str]
     created: datetime
     updated: datetime
 
+
 class UploadLinkRequest(BaseModel):
-    id: UUID
     name: str
     size: int
 
+
 class LinkResponse(BaseModel):
+    file: FileResponse
     link: str
 
 

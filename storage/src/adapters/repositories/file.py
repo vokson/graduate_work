@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from src.domain.models import File
 
@@ -19,11 +19,12 @@ class FileRepository:
                             id, 
                             name,
                             size,
+                            user_id,
                             created,
                             updated
                         )
                     VALUES
-                        ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+                        ($1, $2, $3, $4, $5, $6);
                     """
 
     UPDATE_QUERY = f"""
@@ -31,30 +32,40 @@ class FileRepository:
                         (
                             name,
                             size,
+                            user_id,
+                            created,
                             updated
                         ) = (
-                            $1, $2, CURRENT_TIMESTAMP
+                            $2, $3, $4, $5, $6
                         )
                     WHERE id = $1;
                     """
 
     GET_BY_ID_QUERY = f"SELECT * FROM {__files_tablename__} WHERE id = $1;"
 
-    GET_ALL_QUERY = f"""
-                    SELECT
-                        f.id,
-                        f.name,
-                        f.size,
-                        f.created,
-                        f.updated, s.name as server_name
-                    FROM {__file_server_tablename__} fs
-                        LEFT JOIN {__files_tablename__} f ON fs.file_id = f.id
-                        LEFT JOIN {__servers_tablename__} s ON fs.server_id = s.id
-                    """
+    GET_BY_NAME_AND_USER_ID_QUERY = f"""
+                        SELECT * FROM {__files_tablename__}
+                        WHERE name = $1 AND user_id = $2;
+                        """
 
-    # GET_BY_USERNAME_QUERY = (
-    #     f"SELECT * FROM {__users_tablename__} WHERE username = $1;"
-    # )
+    # GET_ALL_QUERY = f"""
+    #                 SELECT
+    #                     f.id,
+    #                     f.name,
+    #                     f.size,
+    #                     f.user_id,
+    #                     f.created,
+    #                     f.updated,
+    #                     s.name as server_name
+    #                 FROM {__file_server_tablename__} fs
+    #                     LEFT JOIN {__files_tablename__} f ON fs.file_id = f.id
+    #                     LEFT JOIN {__servers_tablename__} s ON fs.server_id = s.id
+    #                 WHERE f.user_id = $1;
+    #                 """
+
+    GET_ALL_QUERY = f"SELECT * FROM {__files_tablename__} WHERE user_id = $1;"
+
+    DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
 
     GET_SERVER_NAMES_OF_FILE_QUERY = f"""
                     SELECT s.name FROM {__file_server_tablename__} fs
@@ -80,83 +91,99 @@ class FileRepository:
     def __init__(self, conn):
         self._conn = conn
 
+    def _convert_row_to_obj(self, row) -> File:
+        return File(**{k: v for k, v in row.items()})
+
     async def add(self, obj: File):
         logger.debug(f"Add file: {obj.dict()}")
         await self._conn.execute(
             self.ADD_QUERY,
             obj.id,
             obj.name,
-            obj.size
+            obj.size,
+            obj.user_id,
+            obj.created,
+            obj.updated,
         )
-        if obj.servers:
-            await self._conn.execute(
-                self.SET_SERVERS_TO_FILE, obj.id, obj.servers
-            )
+        # if obj.servers:
+        #     await self._conn.execute(
+        #         self.SET_SERVERS_TO_FILE, obj.id, obj.servers
+        #     )
 
-    async def get_by_id(self, id) -> File:
+    async def get_by_id(self, id: UUID) -> File:
         logger.debug(f"Get file with id {id}")
         row = await self._conn.fetchrow(self.GET_BY_ID_QUERY, id)
         if not row:
             return
 
-        servers = await self._conn.fetch(self.GET_SERVER_NAMES_OF_FILE_QUERY, id)
+        # servers = await self._conn.fetch(self.GET_SERVER_NAMES_OF_FILE_QUERY, id)
+        # return File(
+        #     **{
+        #         **{k: v for k, v in row.items()},
+        #         **{"servers": [x["name"] for x in servers]},
+        #     }
+        # )
 
-        return File(
-            **{
-                **{k: v for k, v in row.items()},
-                **{"servers": [x["name"] for x in servers]},
-            }
+        return self._convert_file_row_to_obj(row)
+
+    async def get_by_name_and_user_id(self, name: str, user_id: UUID) -> UUID:
+        logger.debug(f"Get file with name {name} and user_id {user_id}")
+        row = await self._conn.fetchrow(
+            self.GET_BY_NAME_AND_USER_ID_QUERY, name, user_id
         )
 
-    # async def get_by_username(self, username) -> User:
-    #     logger.debug(f"Get user with username {username}")
-    #     row = await self._conn.fetchrow(self.GET_BY_USERNAME_QUERY, username)
-    #     if not row:
-    #         return
+        if not row:
+            return
 
-    #     perms = await self._conn.fetch(
-    #         self.GET_PERMISSIONS_OF_USER_QUERY, row["id"]
-    #     )
+        return self._convert_row_to_obj(row)
 
-    #     return User(
-    #         **{
-    #             **{k: v for k, v in row.items()},
-    #             **{"permissions": [x["name"] for x in perms]},
-    #         }
-    #     )
+        # servers = await self._conn.fetch(self.GET_SERVER_NAMES_OF_FILE_QUERY, row['id'])
 
-    async def get_all(self) -> list[File]:
+        # return File(
+        #     **{
+        #         **{k: v for k, v in row.items()},
+        #         **{"servers": [x["name"] for x in servers]},
+        #     }
+        # )
+
+    # async def get_all(self, user_id: UUID) -> list[File]:
+    #     logger.debug(f"Get all files")
+    #     rows = await self._conn.fetch(self.GET_ALL_QUERY, user_id)
+    #     print(user_id, rows)
+    #     objs = {}
+    #     for row in rows:
+    #         id = row["id"]
+    #         if id not in objs:
+    #             objs[id] = {
+    #                 "id": id,
+    #                 "name": row["name"],
+    #                 "size": row["size"],
+    #                 "user_id": row["user_id"],
+    #                 "created": row["created"],
+    #                 "updated": row["updated"],
+    #                 "servers": []
+    #             }
+    #         objs[id]["servers"].append(row['server_name'])
+
+    #     return [File(**obj) for obj in objs.values()]
+
+    async def get_all(self, user_id: UUID) -> list[File]:
         logger.debug(f"Get all files")
-        rows = await self._conn.fetch(self.GET_ALL_QUERY)
-        objs = {}
-        for row in rows:
-            id = row["id"]
-            if id not in objs:
-                objs[id] = {
-                    "id": id,
-                    "name": row["name"],
-                    "size": row["size"],
-                    "created": row["created"],
-                    "updated": row["updated"],
-                    "servers": []
-                }
-            objs[id]["servers"].append(row['server_name'])
-
-        # print(objs[0])
-        # print(File(objs[0]))
-
-        return [File(**obj) for obj in objs.values()]
+        rows = await self._conn.fetch(self.GET_ALL_QUERY, user_id)
+        return [self._convert_row_to_obj(row) for row in rows]
 
     async def update(self, obj: File):
         logger.debug(f"Update file: {obj.dict()}")
         await self._conn.execute(
             self.UPDATE_QUERY,
+            obj.id,
             obj.name,
             obj.size,
+            obj.user_id,
+            obj.created,
+            obj.updated,
         )
 
-        await self._conn.execute(self.DELETE_ALL_SERVERS_FROM_FILE, obj.id)
-        if obj.servers:
-            await self._conn.execute(
-                self.SET_SERVERS_TO_FILE, obj.id, obj.servers
-            )
+    async def delete(self, id: UUID):
+        logger.debug(f"Delete file with id {id}")
+        await self._conn.execute(self.DELETE_QUERY, id)

@@ -1,4 +1,7 @@
 import logging
+import math
+import operator
+import random
 from abc import ABC, abstractmethod
 from uuid import uuid4
 
@@ -16,18 +19,20 @@ class CdnServerRepository:
                         (
                             id, 
                             name,
+                            host,
+                            port,
                             location,
                             latitude,
                             longitude
                         )
                     VALUES
-                        ($1, $2, $3, $4, $5);
+                        ($1, $2, $3, $4, $5, $6, $7);
                     """
 
     # UPDATE_QUERY = f"""
     #                 UPDATE {__users_tablename__} SET
     #                     (
-    #                         id, 
+    #                         id,
     #                         username,
     #                         password,
     #                         email,
@@ -47,13 +52,9 @@ class CdnServerRepository:
     #                 """
 
     # GET_BY_ID_QUERY = f"SELECT * FROM {__users_tablename__} WHERE id = $1;"
-    GET_ALL_QUERY = (
-        f"SELECT * FROM {__tablename__};"
-    )
+    GET_ALL_QUERY = f"SELECT * FROM {__tablename__};"
 
-    GET_BY_NAME_QUERY = (
-        f"SELECT * FROM {__tablename__} WHERE name = $1;"
-    )
+    GET_BY_NAME_QUERY = f"SELECT * FROM {__tablename__} WHERE name = $1;"
 
     # ADD_PERMISSIONS_QUERY = f"""
     #                 INSERT INTO {__permissions_tablename__} (id, name)
@@ -85,17 +86,21 @@ class CdnServerRepository:
     def __init__(self, conn):
         self._conn = conn
 
+    def _convert_row_to_obj(self, row) -> CdnServer:
+        return CdnServer(**{k: v for k, v in row.items()})
+
     async def add(self, obj: CdnServer):
         logger.debug(f"Add cdn server: {obj.dict()}")
         await self._conn.execute(
             self.ADD_QUERY,
             obj.id,
             obj.name,
+            obj.host,
+            obj.port,
             obj.location,
             obj.latitude,
-            obj.longitude
+            obj.longitude,
         )
-        
 
     # async def get_by_id(self, id) -> CdnServer:
     #     logger.debug(f"Get user with id {id}")
@@ -119,12 +124,48 @@ class CdnServerRepository:
         if not row:
             return
 
-        return CdnServer(**{k: v for k, v in row.items()})
+        return self._convert_row_to_obj(row)
 
     async def get_all(self) -> list[CdnServer]:
         logger.debug(f"Get all cdn servers")
         rows = await self._conn.fetch(self.GET_ALL_QUERY)
-        return [CdnServer(**{k: v for k, v in row.items()}) for row in rows]
+        return [self._convert_row_to_obj(row) for row in rows]
+
+    def _calculate_distance(
+        self, lat1: float, lon1: float, lat2: float, lon2: float
+    ) -> float:
+        R = 6371  #  Radius of the Earth in km
+        dLat = math.radians(lat2 - lat1)
+        dLon = math.radians(lon2 - lon1)
+        a = math.sin(dLat / 2) * math.sin(dLat / 2) + math.cos(
+            math.radians(lat1)
+        ) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) * math.sin(
+            dLon / 2
+        )
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return R * c  # Distance in km
+
+    async def get_nearest(
+        self, coordinates: tuple[float, float] | None
+    ) -> CdnServer:
+        servers = await self.get_all()
+
+        if not coordinates:
+            logger.debug(f"Get random cdn server")
+            return random.choice(servers)
+
+        logger.debug(f"Get nearest cdn server")
+        lat, lon = coordinates
+        distances = [
+            self._calculate_distance(
+                lat, lon, x.latitude, x.longitude
+            )
+            for x in servers
+        ]
+        min_index, min_value = min(
+            enumerate(distances), key=operator.itemgetter(1)
+        )
+        return servers[min_index]
 
     # async def update(self, obj: User):
     #     logger.debug(f"Update user: {obj.dict()}")

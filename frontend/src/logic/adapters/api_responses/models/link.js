@@ -1,12 +1,16 @@
+import { Single as FileSingle } from "./file";
+
 const Single = {
+
   type: "object",
   properties: {
+    file: FileSingle,
     link: {
       type: "string",
     },
   },
   required: [
-    "link",
+    "file", "link",
   ],
   additionalProperties: false,
 };

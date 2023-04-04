@@ -6,6 +6,10 @@ class BadRequest(ApplicationException):
     pass
 
 
+class AuthNoPermissionException(ApplicationException):
+    pass
+
+
 # class AuthTokenMissedException(ApplicationException):
 #     pass
 
@@ -31,6 +35,10 @@ class BadRequest(ApplicationException):
 
 
 class CdnServerAlreadyExists(ApplicationException):
+    pass
+
+
+class FileDoesNotExist(ApplicationException):
     pass
 
 

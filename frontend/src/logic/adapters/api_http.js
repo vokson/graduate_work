@@ -17,6 +17,7 @@ import {
 
   // FILE
   GetFilesResponse,
+  DeleteFileResponse,
   GetUploadLinkResponse,
   UploadFileResponse,
 } from "./api";
@@ -41,6 +42,7 @@ class HttpApi extends AbstractApi {
 
       // FILE
       GetFilesRequest: this.get_files,
+      DeleteFileRequest: this.delete_file,
       GetUploadLinkRequest: this.get_upload_link,
       UploadFileRequest: this.upload_file,
     };
@@ -203,7 +205,7 @@ class HttpApi extends AbstractApi {
 
       // Если код ответа нормальный, но формат ответа не JSON
     } catch (err) {
-      if (!operation_by_link)
+      if (!operation_by_link && response.status_code != 204)
         throw new HttpApiError("Api.Error.NotJson");
     }
 
@@ -268,6 +270,16 @@ class HttpApi extends AbstractApi {
     );
   };
 
+  delete_file = async (request) => {
+    return await this.perform_request(
+      DeleteFileResponse,
+      `/storage/api/v1/files/${request.data.id}/`,
+      {
+        method: "delete",
+      }
+    );
+  };
+
   get_upload_link = async (request) => {
     return await this.perform_request(
       GetUploadLinkResponse,
@@ -275,7 +287,6 @@ class HttpApi extends AbstractApi {
       {
         method: "post",
         data: JSON.stringify({
-          id: request.data.id,
           name: request.data.name,
           size: request.data.size,
         }),

@@ -164,6 +164,19 @@ class GetFilesResponse extends Response {
   }
 }
 
+class DeleteFileRequest extends Request { 
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class DeleteFileResponse extends EmptyPositiveResponse {}
+
 class GetCdnServersRequest extends Request { }
 class GetCdnServersResponse extends Response {
   get schema() {
@@ -176,7 +189,6 @@ class GetUploadLinkRequest extends Request {
     return {
       type: "object",
       properties: {
-        id: { type: "string" },
         name: { type: "string" },
         size: { type: "integer" },
       },
@@ -2017,6 +2029,10 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  delete_file = () => {
+    throw new NotImplementedError();
+  };
+
   upload_file = () => {
     throw new NotImplementedError();
   };
@@ -2044,6 +2060,8 @@ export {
   // FILE
   GetFilesRequest,
   GetFilesResponse,
+  DeleteFileRequest,
+  DeleteFileResponse,
   GetUploadLinkRequest,
   GetUploadLinkResponse,
   UploadFileRequest,

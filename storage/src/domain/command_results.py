@@ -61,6 +61,10 @@ class UniqueViolationDatabaseError(NegativeCommandResult):
     pass
 
 
+class AuthNoPermissionException(NegativeCommandResult):
+    pass
+
+
 # class ValidationError(NegativeCommandResult):
 #     pass
 
@@ -90,6 +94,10 @@ class UniqueViolationDatabaseError(NegativeCommandResult):
 
 
 class CdnServerAlreadyExists(NegativeCommandResult):
+    pass
+
+
+class FileDoesNotExist(NegativeCommandResult):
     pass
 
 

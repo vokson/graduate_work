@@ -29,6 +29,7 @@ import {
 
 import {
   get_files,
+  delete_file,
   upload_file,
   upload_file_by_link,
 //   download_file_from_folder,
@@ -40,8 +41,9 @@ import {
 import {
   handle_api_error,
   // handle_access_perm_fail_error,
-  handle_upload_file_error,
-  handle_upload_file_success,
+  upload_file_error,
+  upload_file_success,
+  delete_file_success,
   user_login_success,
   access_token_outdated,
   refresh_token_outdated,
@@ -65,6 +67,7 @@ const COMMAND_HANDLERS = {
 
   // FILE
   GetFiles: [get_files],
+  DeleteFile: [delete_file],
   UploadFile: [upload_file],
   UploadFileByLink: [upload_file_by_link],
   // DownloadFileFromFolder: [download_file_from_folder],
@@ -81,8 +84,9 @@ const EVENT_HANDLERS = {
   AccessTokenOutdated: [access_token_outdated],
   RefreshTokenOutdated: [refresh_token_outdated],
   UserLogoutSuccess: [user_logout_success],
-  UploadFileError: [handle_upload_file_error],
-  UploadFileSuccess: [handle_upload_file_success],
+  UploadFileError: [upload_file_error],
+  UploadFileSuccess: [upload_file_success],
+  DeleteFileSuccess: [delete_file_success],
 };
 
 class NotImplementedError extends Error {}

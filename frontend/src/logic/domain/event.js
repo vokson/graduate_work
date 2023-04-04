@@ -61,7 +61,7 @@ class UploadFileSuccess extends Event {}
 // class DocumentFilesAreUploading extends Event {}
 
 // class FileUpdatedSuccess extends Event {}
-// class FileDeletedSuccess extends Event {}
+class DeleteFileSuccess extends Event {}
 
 // class FileAttachedToDocument extends Event {
 //   constructor(folder_id, usergroup_id, document_id, file_id) {
@@ -186,7 +186,7 @@ export {
   UploadFileSuccess,
   // DocumentFilesAreUploading,
   // FileUpdatedSuccess,
-  // FileDeletedSuccess,
+  DeleteFileSuccess,
   // FileAttachedToDocument,
   // FileDetachedFromDocument,
   // FilesAllocated,
