@@ -1,13 +1,38 @@
 import asyncpg
+from asyncpg import Pool
 from src.tools.decorators import backoff
+import logging
 
+
+logger = logging.getLogger(__name__)
+pool: Pool | None = None
 
 @backoff()
 async def create_pool(**dsl):
     return await asyncpg.create_pool(**dsl)
 
+async def init_db(**dsl):
+    global pool
+    if not pool:
+        logger.info(f'Creating DB pool ..')
+        pool = await create_pool(**dsl)
+        logger.info(f'DB pool {id(pool)} has been created')
+    return pool
 
-async def get_conn_pool(**dsl):
-    pool = await create_pool(**dsl)
-    yield pool
-    await pool.close()
+async def get_db_conn(**dsl):
+    pool = await init_db(**dsl)
+    conn = await pool.acquire()
+    logger.debug(f'DB connection {id(conn)} for pool {id(pool)} has been acquired')
+    return conn
+
+async def release_db_conn(conn):
+    logger.debug(f'Releasing DB connection {id(conn)} for pool {id(pool)} ... ')
+    await pool.release(conn)
+    logger.debug(f'DB connection has been created')
+
+async def close_db():
+    global pool
+    if pool:
+        logger.info(f'Closing DB pool {id(pool)} ... ')
+        await pool.close()
+        logger.info(f'DB pool has been closed')

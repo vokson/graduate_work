@@ -7,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 from src.api.middlewares import CustomRequestMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from src.adapters.db import close_db
+from src.adapters.cache import close_cache
+from src.adapters.s3 import close_s3_pool
 
 
 BASE_DIR = os.path.dirname(
@@ -20,6 +23,13 @@ from src.core.config import settings
 from src.service.messagebus import MessageBus
 from src.service.uow import UnitOfWork
 
+# @app.on_event("startup")
+# async def startup_event():
+#     database_instance = db.Database(**db_arguments)
+#     await database_instance.connect()
+#     app.state.db = database_instance
+#     logger.info("Server Startup")
+
 
 app = FastAPI(
     title="Auth API",
@@ -27,6 +37,12 @@ app = FastAPI(
     openapi_url="/storage/api/openapi.json",
     default_response_class=ORJSONResponse,
 )
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await close_db()
+    await close_cache()
+    await close_s3_pool()
 
 # For DEV
 app.add_middleware(

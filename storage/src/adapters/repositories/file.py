@@ -124,7 +124,7 @@ class FileRepository:
         #     }
         # )
 
-        return self._convert_file_row_to_obj(row)
+        return self._convert_row_to_obj(row)
 
     async def get_by_name_and_user_id(self, name: str, user_id: UUID) -> UUID:
         logger.debug(f"Get file with name {name} and user_id {user_id}")

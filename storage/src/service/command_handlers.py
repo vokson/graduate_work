@@ -104,10 +104,15 @@ async def get_upload_link(
     async with uow:
         coordinates = await uow.geoip.get_info(cmd.ip)
         nearest_server = await uow.cdn_servers.get_nearest(coordinates)
-        logger.info(f"Get upload link for file {cmd.name} on server {nearest_server.name}")
+        logger.info(
+            f"Get upload link for file {cmd.name} on server {nearest_server.name}"
+        )
 
-        storage = uow.s3_pool.get(nearest_server.host, nearest_server.port)
-        link = storage.get_upload_url(cmd.name)
+        storage = await uow.s3_pool.get(
+            nearest_server.name, nearest_server.host, nearest_server.port
+        )
+        print(storage)
+        link = await storage.get_upload_url(cmd.name)
         # link = uow.s3.get_upload_url(cmd.name)
         obj = await uow.files.get_by_name_and_user_id(cmd.name, cmd.user_id)
         is_new = False if obj else True

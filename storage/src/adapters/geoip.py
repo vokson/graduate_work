@@ -5,6 +5,10 @@ from contextlib import asynccontextmanager
 import geocoder
 from src.tools.decorators import backoff
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class AbstractGeoIpService(ABC):
     @staticmethod
@@ -30,9 +34,16 @@ class GeoCoderIpService(AbstractGeoIpService):
         if not g.json["ok"]:
             return
 
-
         return g.latlng
 
+geoip: AbstractGeoIpService | None = None
 
-async def get_geo_ip_service():
-    return GeoCoderIpService()
+async def init_geo_ip():
+    global geoip
+
+    if not geoip:
+        logger.info(f'Initialization of geo IP service ..')
+        geoip = GeoCoderIpService()
+        logger.info(f'Geo IP service has been initialized.')
+
+    return geoip

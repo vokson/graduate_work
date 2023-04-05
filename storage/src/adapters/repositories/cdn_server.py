@@ -157,9 +157,7 @@ class CdnServerRepository:
         logger.debug(f"Get nearest cdn server")
         lat, lon = coordinates
         distances = [
-            self._calculate_distance(
-                lat, lon, x.latitude, x.longitude
-            )
+            self._calculate_distance(lat, lon, x.latitude, x.longitude)
             for x in servers
         ]
         min_index, min_value = min(

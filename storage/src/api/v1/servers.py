@@ -7,11 +7,12 @@ from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
 from src.domain.models import CdnServer
-from src.service.messagebus import get_message_bus
+from src.service.messagebus import MessageBus
+from src.api.dependables import get_bus
 
 
 router = APIRouter()
-bus = get_message_bus()
+# bus = get_message_bus()
 
 
 @router.get(
@@ -21,7 +22,9 @@ bus = get_message_bus()
     summary="Получение данных CDN серверов",
 )
 @auth(permissions=["can_view_cdnserver"])
-async def get_many() -> list[schemes.CdnServerResponse]:
+async def get_many(
+    bus: MessageBus = Depends(get_bus()) 
+) -> list[schemes.CdnServerResponse]:
     return transform_command_result(
         await bus.handle(commands.GetManyCdnServers())
     )

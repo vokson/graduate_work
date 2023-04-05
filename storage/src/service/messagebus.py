@@ -138,18 +138,15 @@ class MessageBus:
             return cls(str(error))
 
 
-bus: MessageBus = None
-
-
 def get_message_bus(
-    uow: AbstractUnitOfWork = UnitOfWork(),
+    uow: AbstractUnitOfWork = None,
     event_handlers: dict[Type[events.Event], list[Callable]] = EVENT_HANDLERS,
     command_handlers: dict[
         Type[commands.Command], Callable
     ] = COMMAND_HANDLERS,
 ):
-    global bus
+    if not uow:
+        uow = UnitOfWork()
 
-    if not bus:
-        bus = MessageBus(uow, event_handlers, command_handlers)
+    bus = MessageBus(uow, event_handlers, command_handlers)
     return bus

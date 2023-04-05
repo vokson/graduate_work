@@ -247,7 +247,7 @@ export default {
 .page__container {
   display: flex;
   flex-direction: column;
-  /* width: 1000px; */
+  max-width: 1000px;
 }
 
 .page__topcontainer {

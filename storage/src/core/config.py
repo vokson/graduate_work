@@ -38,8 +38,6 @@ class LinkExpireTimeSettings(BaseSettings):
 
 
 class S3Settings(BaseSettings):
-    host: str
-    port: int
     user: str
     password: str
     bucket: str
@@ -81,9 +79,11 @@ cache_dsl = {
     "port": settings.cache.port,
 }
 
-s3_dsl = {
-    "endpoint": f"{settings.s3.host}:{settings.s3.port}",
-    "access_key": settings.s3.user,
-    "secret_key": settings.s3.password,
-    "secure": False,
-}
+
+def get_s3_dsl(host: str, port: int) -> dict:
+    return {
+        "endpoint": f"{host}:{port}",
+        "access_key": settings.s3.user,
+        "secret_key": settings.s3.password,
+        "secure": False,
+    }
