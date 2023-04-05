@@ -9,3 +9,4 @@ redis==4.5.1
 minio==7.1.14
 geocoder==1.38.1
 Faker==18.3.2
+aioamqp==0.15.0

@@ -48,3 +48,18 @@ async def delete(
     return transform_command_result(
         await bus.handle(commands.DeleteFile(id=file_id, user_id=user_id))
     )
+
+@router.get(
+    "/{file_id}/servers/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Получение серверов, на которых расположен файл",
+)
+@auth(permissions=["can_view_cdnserver"])
+async def get_servers(
+    file_id: UUID,
+    bus: MessageBus = Depends(get_bus()) 
+) -> list[schemes.CdnServerResponse]:
+    return transform_command_result(
+        await bus.handle(commands.GetFileServers(id=file_id))
+    )

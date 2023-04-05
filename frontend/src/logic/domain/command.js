@@ -29,6 +29,12 @@ class MyCredentials extends Command { }
 class RefreshTokens extends Command { }
 class GetCdnServers extends Command { }
 class GetFiles extends Command { }
+class GetFileServers extends Command {
+  constructor(id) {
+    super();
+    this.id = id;
+  }
+}
 
 class DeleteFile extends Command {
   constructor(id) {
@@ -1324,6 +1330,7 @@ export {
   GetCdnServers,
   // FILE
   GetFiles,
+  GetFileServers,
   DeleteFile,
   UploadFile,
   UploadFileByLink

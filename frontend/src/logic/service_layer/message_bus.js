@@ -22,6 +22,7 @@ import {
 
 import {
   get_cdn_servers,
+  get_file_servers,
 //   download_file_from_folder,
 //   get_file_info,
 //   delete_file_from_folder,
@@ -67,6 +68,7 @@ const COMMAND_HANDLERS = {
 
   // FILE
   GetFiles: [get_files],
+  GetFileServers: [get_file_servers],
   DeleteFile: [delete_file],
   UploadFile: [upload_file],
   UploadFileByLink: [upload_file_by_link],

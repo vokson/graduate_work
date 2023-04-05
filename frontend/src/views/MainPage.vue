@@ -70,7 +70,10 @@
 
         <div v-for="file in files" :key="file.id" class="filerow">
           <div class="filerow__button">
-            <div class="filerow__img filerow__img_delete" @click="handle_delete(file.id)" />
+            <div
+              class="filerow__img filerow__img_delete"
+              @click="handle_delete(file.id)"
+            />
           </div>
 
           <div class="filerow__name">
@@ -93,8 +96,8 @@
             <div
               class="filerow__img"
               :class="{
-                filerow__img_yes: file.servers.includes(server.name),
-                filerow__img_no: !file.servers.includes(server.name),
+                filerow__img_yes: file.names_of_servers.includes(server.name),
+                filerow__img_no: !file.names_of_servers.includes(server.name),
               }"
             />
             <!-- <p>{{ server.location }}</p>
@@ -108,11 +111,12 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { VueUnitOfWork } from "../logic/service_layer/uow";
 import {
   GetCdnServers,
   GetFiles,
+  GetFileServers,
   RefreshTokens,
   UploadFile,
   DeleteFile,
@@ -154,6 +158,13 @@ export default {
     const files = computed(() =>
       uow.file_repository.values().map((obj) => obj.value)
     );
+
+    watch(files, async (arr) => {
+      arr.forEach(async (f) => {
+        if (f.servers.length < servers.value.length)
+          await MessageBus.handle(new GetFileServers(f.id), uow);
+      });
+    });
 
     const handle_delete = async (id) => {
       await MessageBus.handle(new DeleteFile(id), uow);
@@ -247,7 +258,7 @@ export default {
 .page__container {
   display: flex;
   flex-direction: column;
-  max-width: 1000px;
+  /* max-width: 1000px; */
 }
 
 .page__topcontainer {
@@ -278,6 +289,7 @@ export default {
 
 .page__filedropzone {
   width: 100%;
+  max-width: 300px;
   height: 100%;
   border: 2px dashed grey;
   border-radius: 5px;

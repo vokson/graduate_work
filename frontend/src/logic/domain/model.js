@@ -149,6 +149,10 @@ class File {
     return this._servers;
   }
 
+  get names_of_servers() {
+    return this._servers.map(x => x.name)
+  }
+
   set servers(x) {
     this._servers = x;
   }

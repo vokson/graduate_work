@@ -74,7 +74,7 @@ async def get_many_files(
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        objs = await uow.files.get_all(user_id=cmd.user_id)
+        objs = await uow.files.get_all(cmd.user_id)
 
     return command_results.PositiveCommandResult([x.dict() for x in objs])
 
@@ -95,6 +95,20 @@ async def delete_file(
         await uow.commit()
 
     return command_results.PositiveCommandResult({})
+
+async def get_file_servers(
+    cmd: commands.GetFileServers,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        objs = []
+        ids_of_servers = await uow.files.get_ids_of_servers(cmd.id)
+
+        if ids_of_servers:
+            servers = await uow.cdn_servers.get_all()
+            objs = [x for x in servers if x.id in ids_of_servers]
+
+    return command_results.PositiveCommandResult([x.dict() for x in objs])
 
 
 async def get_upload_link(

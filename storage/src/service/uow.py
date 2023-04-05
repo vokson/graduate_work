@@ -6,7 +6,8 @@ from src.adapters.geoip import init_geo_ip
 from src.adapters.repositories.cdn_server import CdnServerRepository
 from src.adapters.repositories.file import FileRepository
 from src.adapters.s3 import init_s3_pool
-from src.core.config import cache_dsl, db_dsl, get_s3_dsl, settings
+from src.adapters.broker import init_publisher
+from src.core.config import cache_dsl, db_dsl, get_s3_dsl, settings, rabbit_args
 
 def get_db_connection():
     return get_db_conn(**db_dsl)
@@ -16,6 +17,9 @@ def get_cache_connection():
 
 def get_s3_pool():
     return init_s3_pool(settings.s3.bucket, get_s3_dsl)
+
+def get_publisher():
+    return init_publisher(*rabbit_args)
 
 
 class AbstractUnitOfWork(ABC):
@@ -53,6 +57,7 @@ class UnitOfWork(AbstractUnitOfWork):
         get_cache=get_cache_connection,
         get_geo_ip=init_geo_ip,
         get_s3_pool=get_s3_pool,
+        get_publisher=get_publisher,
     ):
         super().__init__()
         self._get_db_conn = get_db_conn
@@ -60,6 +65,7 @@ class UnitOfWork(AbstractUnitOfWork):
         self._get_cache_conn = get_cache
         self._get_s3_pool = get_s3_pool
         self._get_geo_ip = get_geo_ip
+        self._get_publisher = get_publisher
 
     async def __aenter__(self):
         self._is_done = False
@@ -73,6 +79,7 @@ class UnitOfWork(AbstractUnitOfWork):
         self.geoip = await self._get_geo_ip()
         self.cdn_servers = CdnServerRepository(self._conn)
         self.files = FileRepository(self._conn)
+        self._publisher = await self._get_publisher()
 
         return self
 

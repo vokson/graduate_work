@@ -55,6 +55,17 @@ services:
     ports:
       - "${CACHE__PORT}:${CACHE__PORT}"
 
+  rabbit:
+    image: rabbitmq:3.10-management
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ__USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ__PASSWORD}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ__VHOST}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   auth:
     build: auth
     depends_on:

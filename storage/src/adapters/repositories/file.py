@@ -67,26 +67,28 @@ class FileRepository:
 
     DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
 
-    GET_SERVER_NAMES_OF_FILE_QUERY = f"""
-                    SELECT s.name FROM {__file_server_tablename__} fs
-                    JOIN {__servers_tablename__} s ON fs.server_id  = s.id
-                    WHERE fs.file_id = $1;
-                    """
+    GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
 
-    DELETE_ALL_SERVERS_FROM_FILE = f"""
-                    DELETE FROM {__file_server_tablename__} WHERE file_id = $1;
-                    """
+    # GET_SERVER_NAMES_OF_FILE_QUERY = f"""
+    #                 SELECT s.name FROM {__file_server_tablename__} fs
+    #                 JOIN {__servers_tablename__} s ON fs.server_id  = s.id
+    #                 WHERE fs.file_id = $1;
+    #                 """
 
-    SET_SERVERS_TO_FILE = f"""
-                    INSERT INTO {__file_server_tablename__} (
-                        id, file_id, server_id
-                    ) (
-                        SELECT
-                            uuid_generate_v4(), $1, id
-                        FROM {__servers_tablename__}
-                        WHERE name = ANY($2)
-                    );
-                    """
+    # DELETE_ALL_SERVERS_FROM_FILE = f"""
+    #                 DELETE FROM {__file_server_tablename__} WHERE file_id = $1;
+    #                 """
+
+    # SET_SERVERS_TO_FILE = f"""
+    #                 INSERT INTO {__file_server_tablename__} (
+    #                     id, file_id, server_id
+    #                 ) (
+    #                     SELECT
+    #                         uuid_generate_v4(), $1, id
+    #                     FROM {__servers_tablename__}
+    #                     WHERE name = ANY($2)
+    #                 );
+    #                 """
 
     def __init__(self, conn):
         self._conn = conn
@@ -187,3 +189,8 @@ class FileRepository:
     async def delete(self, id: UUID):
         logger.debug(f"Delete file with id {id}")
         await self._conn.execute(self.DELETE_QUERY, id)
+
+    async def get_ids_of_servers(self, file_id: UUID):
+        logger.debug(f"Get IDs servers of file with ID {id}")
+        rows = await self._conn.fetch(self.GET_IDS_OF_SERVERS, file_id)
+        return [row['server_id'] for row in rows]

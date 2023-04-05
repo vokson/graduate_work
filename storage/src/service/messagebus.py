@@ -26,6 +26,7 @@ COMMAND_HANDLERS = {
     # commands.CreateFile: command_handlers.create_file,
     commands.DeleteFile: command_handlers.delete_file,
     commands.GetManyFiles: command_handlers.get_many_files,
+    commands.GetFileServers: command_handlers.get_file_servers,
     commands.GetUploadLink: command_handlers.get_upload_link,
     # commands.CreateUser: user_handlers.create_user,
     # commands.GetUserById: user_handlers.get_user_by_id,

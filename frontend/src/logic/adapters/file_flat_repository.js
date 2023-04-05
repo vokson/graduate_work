@@ -28,6 +28,11 @@ const VueFileMixin = {
     const file = this.get(file_id).value;
     return file.name;
   },
+
+  set_servers(file_id, servers) {
+    const obj = this.get(file_id).value;
+    if (obj) obj.servers = servers;
+  },
 };
 
 class VueFileFlatRepository extends VueFlatRepository {}

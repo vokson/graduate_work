@@ -17,6 +17,7 @@ import {
 
   // FILE
   GetFilesResponse,
+  GetFileServersResponse,
   DeleteFileResponse,
   GetUploadLinkResponse,
   UploadFileResponse,
@@ -42,6 +43,7 @@ class HttpApi extends AbstractApi {
 
       // FILE
       GetFilesRequest: this.get_files,
+      GetFileServersRequest: this.get_file_servers,
       DeleteFileRequest: this.delete_file,
       GetUploadLinkRequest: this.get_upload_link,
       UploadFileRequest: this.upload_file,
@@ -267,6 +269,13 @@ class HttpApi extends AbstractApi {
     return await this.perform_request(
       GetFilesResponse,
       `/storage/api/v1/files/`
+    );
+  };
+
+  get_file_servers = async (request) => {
+    return await this.perform_request(
+      GetFileServersResponse,
+      `/storage/api/v1/files/${request.data.id}/servers/`,
     );
   };
 

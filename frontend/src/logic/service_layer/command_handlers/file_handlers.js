@@ -83,6 +83,7 @@ const get_files = async (event, uow) => {
   throw new WrongResponseError();
 };
 
+
 const delete_file = async (event, uow) => {
   const request = new DeleteFileRequest({
     id: event.id,

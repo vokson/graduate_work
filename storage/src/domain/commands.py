@@ -36,6 +36,10 @@ class GetManyFiles(Command):
     user_id: UUID
 
 
+class GetFileServers(Command):
+    id: UUID
+
+
 class GetUploadLink(Command):
     name: str
     size: int

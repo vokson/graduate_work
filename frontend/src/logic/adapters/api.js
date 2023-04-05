@@ -164,7 +164,7 @@ class GetFilesResponse extends Response {
   }
 }
 
-class DeleteFileRequest extends Request { 
+class GetFileServersRequest extends Request {
   get schema() {
     return {
       type: "object",
@@ -175,7 +175,25 @@ class DeleteFileRequest extends Request {
     };
   }
 }
-class DeleteFileResponse extends EmptyPositiveResponse {}
+class GetFileServersResponse extends Response {
+  get schema() {
+    return CdnServerList;
+  }
+}
+
+
+class DeleteFileRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class DeleteFileResponse extends EmptyPositiveResponse { }
 
 class GetCdnServersRequest extends Request { }
 class GetCdnServersResponse extends Response {
@@ -184,7 +202,7 @@ class GetCdnServersResponse extends Response {
   }
 }
 
-class GetUploadLinkRequest extends Request { 
+class GetUploadLinkRequest extends Request {
   get schema() {
     return {
       type: "object",
@@ -2029,6 +2047,10 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  get_file_servers = () => {
+    throw new NotImplementedError();
+  };
+
   delete_file = () => {
     throw new NotImplementedError();
   };
@@ -2060,6 +2082,8 @@ export {
   // FILE
   GetFilesRequest,
   GetFilesResponse,
+  GetFileServersRequest,
+  GetFileServersResponse,
   DeleteFileRequest,
   DeleteFileResponse,
   GetUploadLinkRequest,

@@ -47,6 +47,22 @@ class S3Settings(BaseSettings):
 class GeoSettings(BaseSettings):
     use_real_ip: bool
 
+# class RabbitQueueSettings(BaseSettings):
+#     enrich_messages: str
+#     send_emails: str
+#     send_sms: str
+
+
+class RabbitSettings(BaseSettings):
+    host: str
+    port: int
+    user: str
+    password: str
+    vhost: str
+    exchange: str
+    # queues: RabbitQueueSettings
+
+
 
 class Settings(BaseSettings):
     auth: AuthServiceSettings
@@ -54,6 +70,7 @@ class Settings(BaseSettings):
     cache: CacheSettings
     s3: S3Settings
     geo: GeoSettings
+    rabbitmq: RabbitSettings
 
     class Config:
         #  Для локальной разработки вне docker
@@ -87,3 +104,11 @@ def get_s3_dsl(host: str, port: int) -> dict:
         "secret_key": settings.s3.password,
         "secure": False,
     }
+
+rabbitmq_url = (
+    f"amqp://{settings.rabbitmq.user}:"
+    f"{settings.rabbitmq.password}@{settings.rabbitmq.host}:"
+    f"{settings.rabbitmq.port}/{settings.rabbitmq.vhost}"
+)
+
+rabbit_args = (rabbitmq_url, settings.rabbitmq.exchange)
