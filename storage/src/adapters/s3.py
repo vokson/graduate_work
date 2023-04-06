@@ -1,9 +1,9 @@
 """Модуль для работы с S3 Storage."""
+import asyncio
 import logging
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 from typing import Callable
-import asyncio
 
 from miniopy_async import Minio
 from miniopy_async.notificationconfig import NotificationConfig, QueueConfig
@@ -69,7 +69,6 @@ class MinioS3Storage(AbstractS3Storage):
             response_headers={"response-content-type": "application/json"},
         )
 
-
     # async def get_created_events(self):
     #     logger.info('Start to listen events..')
     #     async def agen():
@@ -96,6 +95,7 @@ class MinioS3Storage(AbstractS3Storage):
 
 def get_s3_conn(bucket: str, name: str) -> AbstractS3Storage:
     return MinioS3Storage(bucket, name)
+
 
 class StoragePool:
     def __init__(self, bucket: str, get_dsl: Callable[[str, int], dict]):

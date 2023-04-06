@@ -1,18 +1,19 @@
+import asyncio
 import logging
 import time
+from collections import deque
 from datetime import datetime
 from uuid import UUID, uuid4
-import asyncio
-from collections import deque
 
 import jwt
 from asyncpg.exceptions import PostgresError
+from src.adapters.s3 import AbstractS3Storage
 from src.core import exceptions
 from src.core.config import settings
 from src.domain import command_results, commands, events
-from src.domain.models import CdnServer, File, BrokerMessage, FileStoredBrokerMessage
+from src.domain.models import (BrokerMessage, CdnServer, File,
+                               FileStoredBrokerMessage)
 from src.service.uow import AbstractUnitOfWork
-from src.adapters.s3 import AbstractS3Storage
 
 
 logger = logging.getLogger(__name__)
@@ -79,7 +80,7 @@ async def get_many_files(
     async with uow:
         objs = await uow.files.get_all(cmd.user_id)
 
-    return command_results.PositiveCommandResult([x.dict() for x in objs])
+    return command_results.PositiveCommandResult(objs)
 
 
 async def delete_file(
@@ -112,7 +113,7 @@ async def get_file_servers(
             servers = await uow.cdn_servers.get_all()
             objs = [x for x in servers if x.id in ids_of_servers]
 
-    return command_results.PositiveCommandResult([x.dict() for x in objs])
+    return command_results.PositiveCommandResult(objs)
 
 
 async def get_upload_link(
@@ -126,11 +127,6 @@ async def get_upload_link(
             f"Get upload link for file {cmd.name} on server {nearest_server.name}"
         )
 
-        storage = await uow.s3_pool.get(
-            nearest_server.name, nearest_server.host, nearest_server.port
-        )
-        link = await storage.get_upload_url(cmd.name)
-        # link = uow.s3.get_upload_url(cmd.name)
         obj = await uow.files.get_by_name_and_user_id(cmd.name, cmd.user_id)
         is_new = False if obj else True
 
@@ -144,27 +140,31 @@ async def get_upload_link(
                 user_id=cmd.user_id,
                 created=dt,
                 updated=dt,
-                # servers=[]
             )
             await uow.files.add(obj)
 
         else:
             obj.size = cmd.size
             obj.updated = dt
-            # obj.servers = []
             await uow.files.update(obj)
+
+        storage = await uow.s3_pool.get(
+            nearest_server.name, nearest_server.host, nearest_server.port
+        )
+        link = await storage.get_upload_url(str(obj.id))
 
         await uow.commit()
 
     return command_results.PositiveCommandResult({"file": obj, "link": link})
 
-async def publish_message(uow: AbstractUnitOfWork, broker_message: BrokerMessage):
+
+async def publish_message(
+    uow: AbstractUnitOfWork, broker_message: BrokerMessage
+):
     is_ok = False
     try:
         is_ok = await uow.publisher.push_message(
-            broker_message.app,
-            broker_message.key,
-            broker_message.message
+            broker_message.app, broker_message.key, broker_message.message
         )
 
     except Exception:
@@ -172,10 +172,14 @@ async def publish_message(uow: AbstractUnitOfWork, broker_message: BrokerMessage
 
     finally:
         if is_ok:
-            logger.info(f"Message {broker_message.message} with key {broker_message.key} has been published")
+            logger.info(
+                f"Message {broker_message.message} with key {broker_message.key} has been published"
+            )
 
         else:
-            logger.error(f"Error when publish message {broker_message.message} with key {broker_message.key}")
+            logger.error(
+                f"Error when publish message {broker_message.message} with key {broker_message.key}"
+            )
 
     return is_ok
 
@@ -248,24 +252,25 @@ async def publish_message(uow: AbstractUnitOfWork, broker_message: BrokerMessage
 
 #     return command_results.PositiveCommandResult({"done": total_count})
 
+
 async def handle_s3_event(
     cmd: commands.HandleS3Event,
     uow: AbstractUnitOfWork,
 ):
     # print(cmd.routing_key, cmd.body)
-    
+
     async with uow:
         try:
-            storage_name = cmd.routing_key.split('.', 2)[1]
-            event_name = cmd.body['EventName']
-            action = event_name.split(':', 2)[1]
-            key = cmd.body['Key'].split('/', 1)[1]
+            storage_name = cmd.routing_key.split(".", 2)[1]
+            event_name = cmd.body["EventName"]
+            action = event_name.split(":", 2)[1]
+            key = cmd.body["Key"].split("/", 1)[1]
 
         except Exception as e:
-            logger.error(f'Error during parsing of S3 event {cmd.body}')
+            logger.error(f"Error during parsing of S3 event {cmd.body}")
             logger.info(e)
             raise exceptions.BadS3Event
-        
+
         events_mapping = {
             "ObjectCreated": events.FileStored,
             "ObjectRemoved": events.FileRemovedFromStorage,
@@ -274,9 +279,25 @@ async def handle_s3_event(
         if action not in events_mapping:
             raise exceptions.BadS3Event
 
-        uow.push_message(events_mapping[action](id=key, storage_name=storage_name))
+        uow.push_message(
+            events_mapping[action](id=key, storage_name=storage_name)
+        )
 
     return command_results.PositiveCommandResult({})
 
-        
-        
+async def mark_file_as_stored(
+    cmd: commands.MarkFileAsStored,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        await uow.files.add_server_to_file(cmd.file_id, cmd.server_id)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult({})
+
+async def order_file_to_copy(
+    cmd: commands.OrderFileToCopy,
+    uow: AbstractUnitOfWork,
+):
+    print('ORDER TO COPY', cmd.file_id, cmd.from_server_id, cmd.to_server_id)
+    return command_results.PositiveCommandResult({})

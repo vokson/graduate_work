@@ -230,11 +230,15 @@ export default {
     // uow.token_timer.start();
 
     const get_files = async () => {
-      await MessageBus.handle(new GetFiles(), uow);
+      // await MessageBus.handle(new GetFiles(), uow);
+      files.value.forEach(async (f) => {
+        if (f.servers.length < servers.value.length)
+          await MessageBus.handle(new GetFileServers(f.id), uow);
+      });
     };
 
     uow.get_files_timer.set_callback(get_files);
-    // uow.get_files_timer.start();
+    uow.get_files_timer.start();
 
     const user = uow.user_repository.get_current(); // Ref
 

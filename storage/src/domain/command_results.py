@@ -53,7 +53,6 @@ class CommandResults:
         return True
 
 
-
 class DatabaseError(NegativeCommandResult):
     pass
 
@@ -100,6 +99,7 @@ class CdnServerAlreadyExists(NegativeCommandResult):
 
 class FileDoesNotExist(NegativeCommandResult):
     pass
+
 
 class BadS3Event(NegativeCommandResult):
     pass

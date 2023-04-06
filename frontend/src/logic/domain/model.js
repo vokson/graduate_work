@@ -153,8 +153,8 @@ class File {
     return this._servers.map(x => x.name)
   }
 
-  set servers(x) {
-    this._servers = x;
+  set servers(new_servers) {
+    this._servers = new_servers
   }
 
   get created() {

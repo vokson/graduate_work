@@ -56,10 +56,10 @@ const get_file_servers = async (event, uow) => {
   }
 
   if (response instanceof GetFileServersResponse) {
-    response.data.forEach((obj) => {
-      const server = convert_cdn_server_response_obj_to_model(obj)
-      uow.file_repository.set_servers(server.id, server)
-    })
+    const servers = response.data.map((obj) =>
+      convert_cdn_server_response_obj_to_model(obj))
+
+    uow.file_repository.set_servers(event.id, servers)
     return;
   }
 

@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 from src.tools.delay import DelayCalculator
 
+
 logger = logging.getLogger(__name__)
 
 

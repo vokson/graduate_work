@@ -49,11 +49,11 @@ class File(AbstractIdCreatedUpdatedModel):
     has_deleted: bool = Field(False)
     has_executed: bool = Field(False)
 
+
 class BrokerMessage(BaseModel):
     message: dict
     app: str = Field(settings.app_name)
 
+
 class FileStoredBrokerMessage(BrokerMessage):
-    key: str = Field('FILE.STORED')
-
-
+    key: str = Field("FILE.STORED")

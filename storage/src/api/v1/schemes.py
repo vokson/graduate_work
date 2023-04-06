@@ -26,7 +26,6 @@ class FileResponse(BaseModel):
     id: UUID
     name: str
     size: int
-    # servers: list[str]
     created: datetime
     updated: datetime
 

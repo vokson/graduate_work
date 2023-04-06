@@ -46,9 +46,20 @@ class GetUploadLink(Command):
     user_id: UUID
     ip: str
 
+
 class HandleS3Event(Command):
     routing_key: str
     body: dict
+
+class MarkFileAsStored(Command):
+    file_id: UUID
+    server_id: UUID
+
+class OrderFileToCopy(Command):
+    file_id: UUID
+    from_server_id: UUID
+    to_server_id: UUID
+
 
 # class CollectStorageEvents(Command):
 #     pass

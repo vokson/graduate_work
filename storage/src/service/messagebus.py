@@ -30,6 +30,8 @@ COMMAND_HANDLERS = {
     commands.GetFileServers: command_handlers.get_file_servers,
     commands.GetUploadLink: command_handlers.get_upload_link,
     commands.HandleS3Event: command_handlers.handle_s3_event,
+    commands.MarkFileAsStored: command_handlers.mark_file_as_stored,
+    commands.OrderFileToCopy: command_handlers.order_file_to_copy,
     # commands.CreateUser: user_handlers.create_user,
     # commands.GetUserById: user_handlers.get_user_by_id,
     # commands.LoginByCredentials: user_handlers.login_by_credentials,

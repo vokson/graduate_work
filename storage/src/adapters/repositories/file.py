@@ -72,6 +72,10 @@ class FileRepository:
 
     GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
 
+    ADD_SERVER_TO_FILE = f"""INSERT INTO {__file_server_tablename__} (id, file_id, server_id)
+                            (SELECT uuid_generate_v4(), $1, $2) ON CONFLICT DO NOTHING;
+                        """
+
     # GET_SERVER_NAMES_OF_FILE_QUERY = f"""
     #                 SELECT s.name FROM {__file_server_tablename__} fs
     #                 JOIN {__servers_tablename__} s ON fs.server_id  = s.id
@@ -200,4 +204,9 @@ class FileRepository:
     async def get_ids_of_servers(self, file_id: UUID):
         logger.debug(f"Get IDs servers of file with ID {id}")
         rows = await self._conn.fetch(self.GET_IDS_OF_SERVERS, file_id)
+        print(file_id, rows)
         return [row["server_id"] for row in rows]
+
+    async def add_server_to_file(self, file_id: UUID, server_id: UUID):
+        logger.debug(f"Add server {server_id} to file {file_id}")
+        await self._conn.execute(self.ADD_SERVER_TO_FILE, file_id, server_id)
