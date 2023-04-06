@@ -37,22 +37,28 @@
             </ul>
           </div>
         </div>
-        <file-drop-zone
-          class="page__filedropzone"
-          :class="{ page__filedropzone_dragging: is_drag_above_file_zone }"
-          @add:file="handle_new_file_drop($event)"
-          @update:dragging="is_drag_above_file_zone = $event"
-        >
-          <span v-if="!is_drag_above_file_zone" class="page__dropzonetitle">
-            &lt; {{ max_file_size }} МБ</span
+        <div class="page__filecontainer">
+          <file-drop-zone
+            class="page__filedropzone"
+            :class="{ page__filedropzone_dragging: is_drag_above_file_zone }"
+            @add:file="handle_new_file_drop($event)"
+            @update:dragging="is_drag_above_file_zone = $event"
           >
-        </file-drop-zone>
-        <input
-          type="file"
-          id="file-input"
-          multiple
-          @change="Array.prototype.forEach.call($event.target.files, (f) => handle_new_file_drop(f))"
-        />
+            <span v-if="!is_drag_above_file_zone" class="page__dropzonetitle">
+              &lt; {{ max_file_size }} МБ</span
+            >
+          </file-drop-zone>
+          <input
+            type="file"
+            id="file-input"
+            multiple
+            @change="
+              Array.prototype.forEach.call($event.target.files, (f) =>
+                handle_new_file_drop(f)
+              )
+            "
+          />
+        </div>
       </div>
 
       <div class="page__middlecontainer">
@@ -309,7 +315,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: 20px;
+  flex-grow: 1;
+  margin: 5px;
+
 }
 
 .page__filedropzone_dragging {
@@ -330,6 +338,13 @@ export default {
   display: flex;
   flex-direction: column;
   margin-top: 20px;
+}
+
+.page__filecontainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 20px;
 }
 
 .filerow,

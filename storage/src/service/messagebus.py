@@ -7,7 +7,7 @@ from asyncpg.exceptions import (InterfaceError, PostgresError,
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from src.core import exceptions
 from src.domain import command_results, commands, events
-from src.service import command_handlers
+from src.service import command_handlers, event_handlers
 from src.service.uow import AbstractUnitOfWork, UnitOfWork
 
 
@@ -17,7 +17,8 @@ Message = commands.Command | events.Event
 
 
 EVENT_HANDLERS = {
-    # events.Allocated: [handlers.publish_allocated_event],
+    events.FileStored: [event_handlers.file_stored],
+    events.FileRemovedFromStorage: [event_handlers.file_removed_from_storage],
 }
 
 COMMAND_HANDLERS = {
@@ -28,7 +29,7 @@ COMMAND_HANDLERS = {
     commands.GetManyFiles: command_handlers.get_many_files,
     commands.GetFileServers: command_handlers.get_file_servers,
     commands.GetUploadLink: command_handlers.get_upload_link,
-    commands.CollectCreatedEventsFromStorage: command_handlers.collect_created_events_from_storage,
+    commands.HandleS3Event: command_handlers.handle_s3_event,
     # commands.CreateUser: user_handlers.create_user,
     # commands.GetUserById: user_handlers.get_user_by_id,
     # commands.LoginByCredentials: user_handlers.login_by_credentials,
@@ -51,6 +52,7 @@ RESULTS = {
     exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
     exceptions.FileDoesNotExist: command_results.FileDoesNotExist,
     exceptions.CdnServerAlreadyExists: command_results.CdnServerAlreadyExists,
+    exceptions.BadS3Event: command_results.BadS3Event,
     # exceptions.WrongCredentials: command_results.WrongCredentials,
 }
 
@@ -84,7 +86,7 @@ class MessageBus:
                 message = queue.pop(0)
 
                 if isinstance(message, events.Event):
-                    await self.handle_event(queue, message)
+                    await self.handle_event(message)
                     queue.extend(self._uow.collect_new_messages())
 
                 elif isinstance(message, commands.Command):

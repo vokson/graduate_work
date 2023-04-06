@@ -15,7 +15,7 @@ from src.service.messagebus import get_message_bus
 
 
 logger = logging.getLogger(__name__)
-bus = get_message_bus()
+bus = get_message_bus(['db'])
 
 
 async def main():

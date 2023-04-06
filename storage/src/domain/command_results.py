@@ -46,11 +46,12 @@ class CommandResults:
 
     @property
     def are_all_results_positive(self):
-        result = True
-        for x in self._results:
-            result = result and isinstance(x, PositiveCommandResult)
+        for _, x in self._results:
+            if not isinstance(x, PositiveCommandResult):
+                return False
 
-        return result
+        return True
+
 
 
 class DatabaseError(NegativeCommandResult):
@@ -98,6 +99,9 @@ class CdnServerAlreadyExists(NegativeCommandResult):
 
 
 class FileDoesNotExist(NegativeCommandResult):
+    pass
+
+class BadS3Event(NegativeCommandResult):
     pass
 
 

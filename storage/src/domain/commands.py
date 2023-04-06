@@ -46,6 +46,9 @@ class GetUploadLink(Command):
     user_id: UUID
     ip: str
 
+class HandleS3Event(Command):
+    routing_key: str
+    body: dict
 
-class CollectCreatedEventsFromStorage(Command):
-    name: str
+# class CollectStorageEvents(Command):
+#     pass

@@ -48,10 +48,11 @@ class GeoSettings(BaseSettings):
     use_real_ip: bool
 
 
-# class RabbitQueueSettings(BaseSettings):
-#     enrich_messages: str
-#     send_emails: str
-#     send_sms: str
+class RabbitQueueSettings(BaseSettings):
+    listen_s3_events: str
+    # enrich_messages: str
+    # send_emails: str
+    # send_sms: str
 
 
 class RabbitSettings(BaseSettings):
@@ -61,10 +62,11 @@ class RabbitSettings(BaseSettings):
     password: str
     vhost: str
     exchange: str
-    # queues: RabbitQueueSettings
+    queues: RabbitQueueSettings
 
 
 class Settings(BaseSettings):
+    app_name: str
     auth: AuthServiceSettings
     storage_db: DatabaseSettings
     cache: CacheSettings

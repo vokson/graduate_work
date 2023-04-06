@@ -93,11 +93,21 @@ services:
     ports:
       - '9001:9000'
       - '9091:9090'
+    depends_on:
+      - rabbit
     volumes:
       - s3_1_data:/data/
     environment:
       - MINIO_ROOT_USER=${S3__USER}
       - MINIO_ROOT_PASSWORD=${S3__PASSWORD}
+      - MINIO_NOTIFY_AMQP_ENABLE_RABBIT=on
+      - MINIO_NOTIFY_AMQP_URL_RABBIT=amqp://${RABBITMQ__USER}:${RABBITMQ__PASSWORD}@${RABBITMQ__HOST}:${RABBITMQ__PORT}/${RABBITMQ__VHOST}
+      - MINIO_NOTIFY_AMQP_EXCHANGE_RABBIT=${RABBITMQ__EXCHANGE}
+      - MINIO_NOTIFY_AMQP_EXCHANGE_TYPE_RABBIT=topic
+      - MINIO_NOTIFY_AMQP_ROUTING_KEY_RABBIT=S3.s3_1.EVENT
+      - MINIO_NOTIFY_AMQP_DURABLE_RABBIT=on
+      - MINIO_NOTIFY_AMQP_MANDATORY_RABBIT=on
+      - MINIO_NOTIFY_AMQP_DELIVERY_MODE_RABBIT=2
     env_file:
       - .env
     command: server /data --console-address ":9090"
@@ -107,11 +117,21 @@ services:
     ports:
       - '9002:9000'
       - '9092:9090'
+    depends_on:
+      - rabbit
     volumes:
       - s3_2_data:/data/
     environment:
       - MINIO_ROOT_USER=${S3__USER}
       - MINIO_ROOT_PASSWORD=${S3__PASSWORD}
+      - MINIO_NOTIFY_AMQP_ENABLE_RABBIT=on
+      - MINIO_NOTIFY_AMQP_URL_RABBIT=amqp://${RABBITMQ__USER}:${RABBITMQ__PASSWORD}@${RABBITMQ__HOST}:${RABBITMQ__PORT}/${RABBITMQ__VHOST}
+      - MINIO_NOTIFY_AMQP_EXCHANGE_RABBIT=${RABBITMQ__EXCHANGE}
+      - MINIO_NOTIFY_AMQP_EXCHANGE_TYPE_RABBIT=topic
+      - MINIO_NOTIFY_AMQP_ROUTING_KEY_RABBIT=S3.s3_2.EVENT
+      - MINIO_NOTIFY_AMQP_DURABLE_RABBIT=on
+      - MINIO_NOTIFY_AMQP_MANDATORY_RABBIT=on
+      - MINIO_NOTIFY_AMQP_DELIVERY_MODE_RABBIT=2
     env_file:
       - .env
     command: server /data --console-address ":9090"
@@ -121,11 +141,21 @@ services:
     ports:
       - '9003:9000'
       - '9093:9090'
+    depends_on:
+      - rabbit
     volumes:
       - s3_3_data:/data/
     environment:
       - MINIO_ROOT_USER=${S3__USER}
       - MINIO_ROOT_PASSWORD=${S3__PASSWORD}
+      - MINIO_NOTIFY_AMQP_ENABLE_RABBIT=on
+      - MINIO_NOTIFY_AMQP_URL_RABBIT=amqp://${RABBITMQ__USER}:${RABBITMQ__PASSWORD}@${RABBITMQ__HOST}:${RABBITMQ__PORT}/${RABBITMQ__VHOST}
+      - MINIO_NOTIFY_AMQP_EXCHANGE_RABBIT=${RABBITMQ__EXCHANGE}
+      - MINIO_NOTIFY_AMQP_EXCHANGE_TYPE_RABBIT=topic
+      - MINIO_NOTIFY_AMQP_ROUTING_KEY_RABBIT=S3.s3_3.EVENT
+      - MINIO_NOTIFY_AMQP_DURABLE_RABBIT=on
+      - MINIO_NOTIFY_AMQP_MANDATORY_RABBIT=on
+      - MINIO_NOTIFY_AMQP_DELIVERY_MODE_RABBIT=2
     env_file:
       - .env
     command: server /data --console-address ":9090"

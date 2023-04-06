@@ -32,9 +32,9 @@ def backoff(
     """
 
     def func_wrapper(func):
-        def get_sleep_time(n: int, attempt: int):
+        def get_sleep_time(exc: Exception, n: int, attempt: int):
             if max_attempt_count > 0 and attempt >= max_attempt_count:
-                raise e
+                raise exc
 
             attempt += 1
             sleep_time = start_sleep_time * pow(factor, n + 1)
@@ -57,6 +57,7 @@ def backoff(
                 except Exception as e:
                     logger.error(f"Error: {e}")
                     n, attempt, sleep_time = get_sleep_time(
+                        e,
                         n,
                         attempt,
                     )
@@ -73,6 +74,7 @@ def backoff(
                 except Exception as e:
                     logger.error(f"Error: {e}")
                     n, attempt, sleep_time = get_sleep_time(
+                        e,
                         n,
                         attempt,
                     )

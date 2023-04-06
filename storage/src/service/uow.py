@@ -85,7 +85,7 @@ class UnitOfWork(AbstractUnitOfWork):
             self.geoip = await self._get_geo_ip()
 
         if "publisher" in self._bootstrap:
-            self._publisher = await self._get_publisher()
+            self.publisher = await self._get_publisher()
 
         if "db" in self._bootstrap:
             self._is_done = False

@@ -1,0 +1,94 @@
+import asyncio
+import os
+import sys
+import logging
+import time
+
+
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+sys.path.append(BASE_DIR)
+
+from src.domain import commands
+from src.service.messagebus import get_message_bus
+from src.tools.delay import DelayCalculator
+from src.core.operator import AbstractAsyncOperator
+# from src.adapters.broker import init_publisher
+# from src.adapters.db import get_db_conn, release_db_conn
+# from src.adapters.repositories.cdn_server import CdnServerRepository
+# from src.adapters.s3 import init_s3_pool, AbstractS3Storage
+# from src.core.config import db_dsl, get_s3_dsl, rabbit_args, settings
+# from aiostream import stream
+
+
+logger = logging.getLogger(__name__)
+
+
+# def get_db_connection():
+#     return get_db_conn(**db_dsl)
+
+
+# def get_s3_pool():
+#     return init_s3_pool(settings.s3.bucket, get_s3_dsl)
+
+# async def listen_storage(storage: AbstractS3Storage):
+#     async for x in storage.get_created_events():
+#         logger.info(f'Created file "{x}" on server {storage}')
+ 
+
+# async def do(listeners):
+#     asyncio.gather(*listeners)
+
+class EventCollector(AbstractAsyncOperator):
+    def __init__(self):
+        super().__init__()
+        self._bus = get_message_bus(["db", "s3", "publisher"])
+        self._cmd = commands.CollectStorageEvents()
+
+    async def _do(self):
+        results = await self._bus.handle(self._cmd)
+        print(results)
+        if results.is_first_result_positive:
+            print('**************')
+            result = results.first_result
+            print(result)
+            if result.data['done'] > 0:
+                self._delay_calculator.done()
+ 
+async def main():
+    collector = EventCollector()
+    await collector.run()
+    # bus = get_message_bus(["db", "s3", "publisher"])
+    # cmd = commands.CollectStorageEvents()
+    # # await asyncio.wait([bus.handle(cmd)])
+    # try:
+    #     result = await asyncio.wait_for(bus.handle(cmd), timeout=10)
+    #     print(result)
+    # except TimeoutError:
+    #     print('timeout!')
+
+    print('++++++++++++++')
+
+
+
+    # db_conn = await get_db_connection()
+    # s3_pool = await get_s3_pool()
+    # servers_repository = CdnServerRepository(db_conn)
+
+    # servers = await servers_repository.get_all()
+    # storages = [await s3_pool.get(x.name, x.host, x.port) for x in servers]
+    # listeners = [listen_storage(x) for x in storages]
+
+    # await do(listeners)
+     
+
+if __name__ == "__main__":
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        loop.run_until_complete(main())
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass

@@ -41,6 +41,9 @@ class CdnServerAlreadyExists(ApplicationException):
 class FileDoesNotExist(ApplicationException):
     pass
 
+class BadS3Event(ApplicationException):
+    pass
+
 
 # class WrongCredentials(ApplicationException):
 #     pass

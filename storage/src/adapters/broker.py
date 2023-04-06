@@ -308,7 +308,7 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
         await asyncio.sleep(self._interval_in_sec)
 
         is_new_message = True
-        if self._cache:
+        if self._cache and properties.message_id:
             # Проверяем установлен message_id в кэше,
             # чтобы исключить повторную обработку сообщения
             is_new_message = (
@@ -350,7 +350,7 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
             logger.info("Acknowledging message %s", envelope.delivery_tag)
             await self._channel.basic_client_ack(envelope.delivery_tag)
 
-            if self._cache:
+            if self._cache and properties.message_id:
                 # Устанавливаем message_id в кэш,
                 # чтобы исключить повторную обработку сообщения
                 await self._cache.set(properties.message_id, 1)
