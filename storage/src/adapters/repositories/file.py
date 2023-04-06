@@ -1,6 +1,5 @@
 import logging
-from abc import ABC, abstractmethod
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from src.domain.models import File
 
@@ -20,11 +19,13 @@ class FileRepository:
                             name,
                             size,
                             user_id,
+                            has_deleted,
+                            has_executed,
                             created,
                             updated
                         )
                     VALUES
-                        ($1, $2, $3, $4, $5, $6);
+                        ($1, $2, $3, $4, $5, $6, $7, $8);
                     """
 
     UPDATE_QUERY = f"""
@@ -33,10 +34,12 @@ class FileRepository:
                             name,
                             size,
                             user_id,
+                            has_deleted,
+                            has_executed,
                             created,
                             updated
                         ) = (
-                            $2, $3, $4, $5, $6
+                            $2, $3, $4, $5, $6, $7, $8
                         )
                     WHERE id = $1;
                     """
@@ -104,6 +107,8 @@ class FileRepository:
             obj.name,
             obj.size,
             obj.user_id,
+            obj.has_deleted,
+            obj.has_executed,
             obj.created,
             obj.updated,
         )
@@ -182,6 +187,8 @@ class FileRepository:
             obj.name,
             obj.size,
             obj.user_id,
+            obj.has_deleted,
+            obj.has_executed,
             obj.created,
             obj.updated,
         )
@@ -193,4 +200,4 @@ class FileRepository:
     async def get_ids_of_servers(self, file_id: UUID):
         logger.debug(f"Get IDs servers of file with ID {id}")
         rows = await self._conn.fetch(self.GET_IDS_OF_SERVERS, file_id)
-        return [row['server_id'] for row in rows]
+        return [row["server_id"] for row in rows]

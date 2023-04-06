@@ -47,6 +47,12 @@
             &lt; {{ max_file_size }} МБ</span
           >
         </file-drop-zone>
+        <input
+          type="file"
+          id="file-input"
+          multiple
+          @change="Array.prototype.forEach.call($event.target.files, (f) => handle_new_file_drop(f))"
+        />
       </div>
 
       <div class="page__middlecontainer">
@@ -100,9 +106,6 @@
                 filerow__img_no: !file.names_of_servers.includes(server.name),
               }"
             />
-            <!-- <p>{{ server.location }}</p>
-          <p>Ш: {{ server.latitude }}</p>
-          <p>Д: {{ server.longitude }}</p> -->
           </div>
         </div>
       </div>
@@ -166,6 +169,14 @@ export default {
       });
     });
 
+    // document
+    //   .getElementById("file-input")
+    //   .addEventListener("change", function (e) {
+    //     if (e.target.files[0]) {
+    //       document.body.append("You selected " + e.target.files[0].name);
+    //     }
+    //   });
+
     const handle_delete = async (id) => {
       await MessageBus.handle(new DeleteFile(id), uow);
     };
@@ -175,6 +186,7 @@ export default {
 
     // DROP
     const handle_new_file_drop = async (file) => {
+      console.log(file);
       let message = null;
       if (file.size > max_file_size * 1024 * 1024) {
         message = new UploadFileTooBigError(file.name);
@@ -264,6 +276,7 @@ export default {
 .page__topcontainer {
   display: flex;
   width: 100%;
+  align-items: stretch;
 }
 
 .page__userinfo {
@@ -289,8 +302,8 @@ export default {
 
 .page__filedropzone {
   width: 100%;
+  /* height: 100%; */
   max-width: 300px;
-  height: 100%;
   border: 2px dashed grey;
   border-radius: 5px;
   display: flex;

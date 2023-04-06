@@ -7,8 +7,6 @@ from src.domain import commands
 from src.service.messagebus import get_message_bus
 
 
-
-
 fake = Faker()
 
 
@@ -33,8 +31,9 @@ def get_ip():
 
     return inner
 
+
 def get_bus():
     async def inner():
-        return get_message_bus()
+        return get_message_bus(["db", "geoip", "s3"])
 
     return inner

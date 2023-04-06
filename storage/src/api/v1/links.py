@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Request, Response, status
 from src.api.decorators import auth
-from src.api.dependables import extract_user_id, get_ip, get_bus
+from src.api.dependables import extract_user_id, get_bus, get_ip
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
@@ -25,7 +25,7 @@ async def get_upload_link(
     body: schemes.UploadLinkRequest,
     user_id: UUID = Depends(extract_user_id()),
     ip: str = Depends(get_ip()),
-    bus: MessageBus = Depends(get_bus()) 
+    bus: MessageBus = Depends(get_bus()),
 ) -> schemes.LinkResponse:
     return transform_command_result(
         await bus.handle(

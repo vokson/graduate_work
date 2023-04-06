@@ -28,6 +28,7 @@ COMMAND_HANDLERS = {
     commands.GetManyFiles: command_handlers.get_many_files,
     commands.GetFileServers: command_handlers.get_file_servers,
     commands.GetUploadLink: command_handlers.get_upload_link,
+    commands.CollectCreatedEventsFromStorage: command_handlers.collect_created_events_from_storage,
     # commands.CreateUser: user_handlers.create_user,
     # commands.GetUserById: user_handlers.get_user_by_id,
     # commands.LoginByCredentials: user_handlers.login_by_credentials,
@@ -140,6 +141,7 @@ class MessageBus:
 
 
 def get_message_bus(
+    bootstrap: list[str],
     uow: AbstractUnitOfWork = None,
     event_handlers: dict[Type[events.Event], list[Callable]] = EVENT_HANDLERS,
     command_handlers: dict[
@@ -147,7 +149,7 @@ def get_message_bus(
     ] = COMMAND_HANDLERS,
 ):
     if not uow:
-        uow = UnitOfWork()
+        uow = UnitOfWork(bootstrap)
 
     bus = MessageBus(uow, event_handlers, command_handlers)
     return bus

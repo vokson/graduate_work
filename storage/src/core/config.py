@@ -47,6 +47,7 @@ class S3Settings(BaseSettings):
 class GeoSettings(BaseSettings):
     use_real_ip: bool
 
+
 # class RabbitQueueSettings(BaseSettings):
 #     enrich_messages: str
 #     send_emails: str
@@ -61,7 +62,6 @@ class RabbitSettings(BaseSettings):
     vhost: str
     exchange: str
     # queues: RabbitQueueSettings
-
 
 
 class Settings(BaseSettings):
@@ -104,6 +104,7 @@ def get_s3_dsl(host: str, port: int) -> dict:
         "secret_key": settings.s3.password,
         "secure": False,
     }
+
 
 rabbitmq_url = (
     f"amqp://{settings.rabbitmq.user}:"

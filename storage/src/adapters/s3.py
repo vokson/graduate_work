@@ -1,11 +1,12 @@
 """Модуль для работы с S3 Storage."""
+import logging
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 from typing import Callable
 
 from minio import Minio
 from src.tools.decorators import backoff
-import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,11 @@ class AbstractS3Storage(ABC):
         pass
 
     @abstractmethod
-    async def get_upload_url(self, bucket_name: str, object_name: str) -> str:
+    async def get_upload_url(self, object_name: str) -> str:
+        pass
+
+    @abstractmethod
+    async def get_created_events(self):
         pass
 
 
@@ -50,8 +55,18 @@ class MinioS3Storage(AbstractS3Storage):
             response_headers={"response-content-type": "application/json"},
         )
 
+    async def get_created_events(self):
+        with self._conn.listen_bucket_notification(
+            self._bucket, events=["s3:ObjectCreated:*"]
+        ) as events:
+            for event in events:
+                for f in event['Records']:
+                    yield f['s3']['object']['key']
+
+
 def get_s3_conn(bucket: str) -> AbstractS3Storage:
     return MinioS3Storage(bucket)
+
 
 class StoragePool:
     def __init__(self, bucket: str, get_dsl: Callable[[str, int], dict]):
@@ -72,23 +87,26 @@ class StoragePool:
 
         return self._storages[name]
 
+
 pool: StoragePool | None = None
+
 
 async def init_s3_pool(
     bucket: str, get_dsl_func: Callable[[str, int], dict]
-)-> StoragePool:
+) -> StoragePool:
     global pool
 
     if not pool:
-        logger.info(f'Initialization of S3 connection pool ..')
+        logger.info(f"Initialization of S3 connection pool ..")
         pool = StoragePool(bucket, get_dsl_func)
-        logger.info(f'S3 connection pool has been initialized.')
+        logger.info(f"S3 connection pool has been initialized.")
 
     return pool
+
 
 async def close_s3_pool():
     global pool
     if pool:
-        logger.info(f'Closing S3 connection pool ..')
+        logger.info(f"Closing S3 connection pool ..")
         await pool.shutdown()
-        logger.info(f'S3 connection pool has been closed.')
+        logger.info(f"S3 connection pool has been closed.")

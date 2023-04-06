@@ -45,3 +45,7 @@ class GetUploadLink(Command):
     size: int
     user_id: UUID
     ip: str
+
+
+class CollectCreatedEventsFromStorage(Command):
+    name: str

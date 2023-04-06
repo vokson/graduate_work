@@ -6,8 +6,8 @@ from abc import ABC, abstractmethod
 
 import aioamqp
 from aioamqp.protocol import CONNECTING, OPEN
-
 from src.tools.delay import DelayCalculator
+
 
 logger = logging.getLogger(__name__)
 
@@ -232,21 +232,29 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
     async def _actions(self):
         await self._setup_exchange(self._exchange, self._exchange_type)
         await self._setup_exchange(
-            self._dead_letter_exchange, self._exchange_type,
+            self._dead_letter_exchange,
+            self._exchange_type,
         )
         await self._setup_queue(
-            self._queue, self._queue_durability, self._dead_letter_exchange,
+            self._queue,
+            self._queue_durability,
+            self._dead_letter_exchange,
         )
         await self._start_consuming()
 
     async def _setup_queue(
-        self, queue_name, queue_durability, dead_letter_exchange,
+        self,
+        queue_name,
+        queue_durability,
+        dead_letter_exchange,
     ):
         logger.info("Declaring queue %s", queue_name)
 
         args = {"x-dead-letter-exchange": dead_letter_exchange}
         await self._channel.queue_declare(
-            queue_name=queue_name, durable=queue_durability, arguments=args,
+            queue_name=queue_name,
+            durable=queue_durability,
+            arguments=args,
         )
         logger.info(
             "Binding %s to %s with %s",
@@ -256,7 +264,9 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
         )
 
         await self._channel.queue_bind(
-            queue_name, self._exchange, self._routing_key,
+            queue_name,
+            self._exchange,
+            self._routing_key,
         )
         logger.info("Queue bound: %s", queue_name)
 
@@ -270,7 +280,8 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
         self._channel.add_cancellation_callback(self._on_consumer_cancelled)
 
         response = await self._channel.basic_consume(
-            self._on_message, self._queue,
+            self._on_message,
+            self._queue,
         )
 
         self._consumer_tag = response["consumer_tag"]
@@ -278,7 +289,8 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
 
     async def _on_consumer_cancelled(self, _unused_channel, consumer_tag):
         logger.info(
-            "Consumer was cancelled remotely, shutting down: %r", consumer_tag,
+            "Consumer was cancelled remotely, shutting down: %r",
+            consumer_tag,
         )
         if self._channel:
             await self._channel.close()
@@ -348,7 +360,8 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
                 envelope.delivery_tag,
             )
             await self._channel.basic_client_nack(
-                envelope.delivery_tag, requeue=False,
+                envelope.delivery_tag,
+                requeue=False,
             )
 
     async def _stop(self):
@@ -358,20 +371,23 @@ class RabbitConsumer(AbstractRabbitExchangeConnector):
 
         await super()._stop()
 
+
 publisher: RabbitPublisher | None = None
+
 
 async def init_publisher(*args, **kwargs):
     global publisher
 
     if not publisher:
-        logger.info(f'Initialization of publisher ..')
+        logger.info(f"Initialization of publisher ..")
         publisher = RabbitPublisher(*args, **kwargs)
         loop = asyncio.get_event_loop()
         loop.create_task(publisher.run())
         # await asyncio.gather(publisher.run())
-        logger.info(f'Publisher has been initialized.')
+        logger.info(f"Publisher has been initialized.")
 
     return publisher
+
 
 # async def close_cache():
 #     global cache

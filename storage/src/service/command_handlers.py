@@ -96,6 +96,7 @@ async def delete_file(
 
     return command_results.PositiveCommandResult({})
 
+
 async def get_file_servers(
     cmd: commands.GetFileServers,
     uow: AbstractUnitOfWork,
@@ -125,7 +126,6 @@ async def get_upload_link(
         storage = await uow.s3_pool.get(
             nearest_server.name, nearest_server.host, nearest_server.port
         )
-        print(storage)
         link = await storage.get_upload_url(cmd.name)
         # link = uow.s3.get_upload_url(cmd.name)
         obj = await uow.files.get_by_name_and_user_id(cmd.name, cmd.user_id)
@@ -154,3 +154,16 @@ async def get_upload_link(
         await uow.commit()
 
     return command_results.PositiveCommandResult({"file": obj, "link": link})
+
+
+async def collect_created_events_from_storage(
+    cmd: commands.GetFileServers,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        server = await uow.cdn_servers.get_by_name(cmd.name)
+        storage = await uow.s3_pool.get(server.name, server.host, server.port)
+        async for x in storage.get_created_events():
+            logger.info(f'Created file {x}')
+
+    return command_results.PositiveCommandResult({})
