@@ -21,6 +21,8 @@ import {
   DeleteFileResponse,
   GetUploadLinkResponse,
   UploadFileResponse,
+  GetDownloadLinkResponse,
+  DownloadFileResponse,
 } from "./api";
 
 class HttpApiError extends Error { }
@@ -47,6 +49,8 @@ class HttpApi extends AbstractApi {
       DeleteFileRequest: this.delete_file,
       GetUploadLinkRequest: this.get_upload_link,
       UploadFileRequest: this.upload_file,
+      GetDownloadLinkRequest: this.get_download_link,
+      DownloadFileRequest: this.download_file,
     };
   }
 
@@ -168,28 +172,38 @@ class HttpApi extends AbstractApi {
     });
 
     // Если получен файл для скачивания
-    if (response.content_type === "application/octet-stream") {
-      // Достаем имя файла из Content-Disposition
 
-      // Проверяем вариант для английского имени файла
-      const regex_en = /filename\s*=\s*"(?<filename>.+)"/g;
-      const match_en = regex_en.exec(response.content_disposition);
-
-      // Проверяем вариант для русского имени файла
-      const regex_ru = /filename\*=utf-8''(?<filename>.+)/g;
-      const match_ru = regex_ru.exec(response.content_disposition);
-
-      const match = match_en === null ? match_ru : match_en;
-      // Заменяем управляющие последовательности с % на символы
+    if (operation_by_link && response.content_length > 0) {
+      console.log('FILE DOWNLOAD')
       return {
         file: response.data,
-        name: decodeURI(match.groups.filename)
-          .replace(/%2C/g, ",")
-          .replace(/%40/g, "@")
-          .replace(/%3F/g, "?"),
-        size: response.content_length,
       };
     }
+
+
+    // // Если получен файл для скачивания
+    // if (response.content_type === "application/octet-stream") {
+    //   // Достаем имя файла из Content-Disposition
+
+    //   // Проверяем вариант для английского имени файла
+    //   const regex_en = /filename\s*=\s*"(?<filename>.+)"/g;
+    //   const match_en = regex_en.exec(response.content_disposition);
+
+    //   // Проверяем вариант для русского имени файла
+    //   const regex_ru = /filename\*=utf-8''(?<filename>.+)/g;
+    //   const match_ru = regex_ru.exec(response.content_disposition);
+
+    //   const match = match_en === null ? match_ru : match_en;
+    //   // Заменяем управляющие последовательности с % на символы
+    //   return {
+    //     file: response.data,
+    //     name: decodeURI(match.groups.filename)
+    //       .replace(/%2C/g, ",")
+    //       .replace(/%40/g, "@")
+    //       .replace(/%3F/g, "?"),
+    //     size: response.content_length,
+    //   };
+    // }
 
     // Если это не файл, то должен быть формат JSON
     let json_data = {};
@@ -292,7 +306,7 @@ class HttpApi extends AbstractApi {
   get_upload_link = async (request) => {
     return await this.perform_request(
       GetUploadLinkResponse,
-      `/storage/api/v1/links/upload/`,
+      `/storage/api/v1/files/upload/`,
       {
         method: "post",
         data: JSON.stringify({
@@ -300,6 +314,13 @@ class HttpApi extends AbstractApi {
           size: request.data.size,
         }),
       }
+    );
+  };
+
+  get_download_link = async (request) => {
+    return await this.perform_request(
+      GetDownloadLinkResponse,
+      `/storage/api/v1/files/${request.data.id}/`
     );
   };
 
@@ -717,16 +738,16 @@ class HttpApi extends AbstractApi {
     );
   };
 
-  //   download_file_from_folder = async (request) => {
-  //     return await this.perform_request(
-  //       DownloadFileFromFolderResponse,
-  //       `/folders/${request.data.folder_id}/usergroups/${request.data.usergroup_id}/files/${request.data.id}/`,
-  //       {
-  //         response_type: "blob",
-  //         set_download_size_method: request.data.set_size_method,
-  //       }
-  //     );
-  //   };
+  download_file = async (request) => {
+    return await this.perform_request(
+      DownloadFileResponse,
+      request.data.link,
+      {
+        response_type: "blob",
+        set_download_size_method: request.data.set_size_method,
+      }
+    );
+  };
 
   //   download_many_documents_files_as_archive = async (request) => {
   //     return await this.perform_request(

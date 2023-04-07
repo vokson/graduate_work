@@ -43,6 +43,13 @@ class DeleteFile extends Command {
   }
 }
 
+class DownloadFile extends Command {
+  constructor(id) {
+    super();
+    this.id = id;
+  }
+}
+
 // class LoginWithToken extends Command {}
 
 
@@ -720,6 +727,15 @@ class UploadFileByLink extends Command {
   }
 }
 
+class DownloadFileByLink extends Command {
+  constructor(link,name, size) {
+    super();
+    this.link = link;
+    this.name = name;
+    this.size = size;
+  }
+}
+
 // class DeleteShareFile extends Command {
 //   constructor(id) {
 //     super();
@@ -1333,7 +1349,9 @@ export {
   GetFileServers,
   DeleteFile,
   UploadFile,
-  UploadFileByLink
+  UploadFileByLink,
+  DownloadFile,
+  DownloadFileByLink,
   // GetUsers,
   // SetUser,
   // DeleteUser,

@@ -11,54 +11,15 @@ BASE_DIR = os.path.dirname(
 )
 sys.path.append(BASE_DIR)
 
-# from src.core.operator import AbstractAsyncOperator
 from src.adapters.broker import RabbitConsumer
 from src.adapters.cache import close_cache, init_cache
-# from src.adapters.db import get_db_conn, release_db_conn
-# from src.adapters.repositories.cdn_server import CdnServerRepository
-# from src.adapters.s3 import init_s3_pool, AbstractS3Storage
 from src.core.config import cache_dsl, rabbitmq_url, settings
 from src.domain import commands
 from src.service.messagebus import MessageBus, get_message_bus
 from src.tools.delay import DelayCalculator
 
 
-# from aiostream import stream
-
-
 logger = logging.getLogger(__name__)
-
-
-# def get_db_connection():
-#     return get_db_conn(**db_dsl)
-
-
-# def get_s3_pool():
-#     return init_s3_pool(settings.s3.bucket, get_s3_dsl)
-
-# async def listen_storage(storage: AbstractS3Storage):
-#     async for x in storage.get_created_events():
-#         logger.info(f'Created file "{x}" on server {storage}')
-
-
-# async def do(listeners):
-#     asyncio.gather(*listeners)
-
-# class EventCollector(AbstractAsyncOperator):
-#     def __init__(self):
-#         super().__init__()
-#         self._bus = get_message_bus(["db", "s3", "publisher"])
-#         self._cmd = commands.CollectStorageEvents()
-
-#     async def _do(self):
-#         results = await self._bus.handle(self._cmd)
-#         print(results)
-#         if results.is_first_result_positive:
-#             print('**************')
-#             result = results.first_result
-#             print(result)
-#             if result.data['done'] > 0:
-#                 self._delay_calculator.done()
 
 
 @asynccontextmanager
@@ -79,14 +40,14 @@ def get_handler(bus: MessageBus):
 
 async def main():
     async with get_cache() as cache_conn:
-        bus = get_message_bus(["db"])
+        bus = await get_message_bus(["db", "publisher"])
 
         rabbit_consumer = RabbitConsumer(
             rabbitmq_url,
             settings.rabbitmq.exchange,
             settings.rabbitmq.queues.listen_s3_events,
             get_handler(bus),
-            routing_key="S3.#.EVENT",
+            routing_key="S3.*.EVENT",
             cache=cache_conn,
         )
 

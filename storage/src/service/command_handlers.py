@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import time
 from collections import deque
 from datetime import datetime
@@ -10,9 +11,7 @@ from asyncpg.exceptions import PostgresError
 from src.adapters.s3 import AbstractS3Storage
 from src.core import exceptions
 from src.core.config import settings
-from src.domain import command_results, commands, events
-from src.domain.models import (BrokerMessage, CdnServer, File,
-                               FileStoredBrokerMessage)
+from src.domain import command_results, commands, events, models
 from src.service.uow import AbstractUnitOfWork
 
 
@@ -29,7 +28,7 @@ async def create_cdn_server(
         if obj:
             raise exceptions.CdnServerAlreadyExists
 
-        obj = CdnServer(
+        obj = models.CdnServer(
             id=uuid4(),
             name=cmd.name,
             host=cmd.host,
@@ -133,7 +132,7 @@ async def get_upload_link(
         dt = datetime.now()
 
         if is_new:
-            obj = File(
+            obj = models.File(
                 id=uuid4(),
                 name=cmd.name,
                 size=cmd.size,
@@ -152,36 +151,56 @@ async def get_upload_link(
             nearest_server.name, nearest_server.host, nearest_server.port
         )
         link = await storage.get_upload_url(str(obj.id))
+        await uow.files.remove_all_servers_from_file(obj.id)
 
         await uow.commit()
 
     return command_results.PositiveCommandResult({"file": obj, "link": link})
 
 
-async def publish_message(
-    uow: AbstractUnitOfWork, broker_message: BrokerMessage
+async def get_download_link(
+    cmd: commands.GetDownloadLink,
+    uow: AbstractUnitOfWork,
 ):
-    is_ok = False
-    try:
-        is_ok = await uow.publisher.push_message(
-            broker_message.app, broker_message.key, broker_message.message
+    async with uow:
+        obj = await uow.files.get_by_id(cmd.file_id)
+        ids_of_servers = await uow.files.get_ids_of_servers(cmd.file_id)
+
+        if not (obj and ids_of_servers):
+            raise exceptions.FileDoesNotExist
+
+        coordinates = await uow.geoip.get_info(cmd.ip)
+        nearest_server = await uow.cdn_servers.get_nearest(
+            coordinates, only_servers=ids_of_servers
+        )
+        storage = await uow.s3_pool.get(
+            nearest_server.name, nearest_server.host, nearest_server.port
         )
 
-    except Exception:
-        pass
+        logger.info(
+            f"Get download link for file {cmd.file_id} on server {nearest_server.name}"
+        )
+        link = await storage.get_download_url(str(obj.id))
 
-    finally:
-        if is_ok:
-            logger.info(
-                f"Message {broker_message.message} with key {broker_message.key} has been published"
-            )
+    return command_results.PositiveCommandResult({"file": obj, "link": link})
 
-        else:
-            logger.error(
-                f"Error when publish message {broker_message.message} with key {broker_message.key}"
-            )
 
-    return is_ok
+async def publish_message(
+    cmd: commands.PublishMessage,
+    uow: AbstractUnitOfWork,
+):
+    app = cmd.message.app
+    key = f"{settings.app_name}.{cmd.message.key}"
+    message = cmd.message.message
+
+    is_ok = await uow.publisher.push_message(app, key, message)
+
+    if not is_ok:
+        logger.error(f"Error when publish message {message} with key {key}")
+        raise exceptions.PublishMessageError
+
+    logger.info(f"Message {message} with key {key} has been published")
+    return command_results.PositiveCommandResult({})
 
 
 # async def collect_storage_events(
@@ -285,19 +304,96 @@ async def handle_s3_event(
 
     return command_results.PositiveCommandResult({})
 
+
+async def handle_service_event(
+    cmd: commands.HandleServiceEvent,
+    uow: AbstractUnitOfWork,
+):
+    key = cmd.routing_key.split(".", 1)[1]
+
+    events_mapping = {
+        "FILE.ORDERED_TO_DOWNLOAD": commands.DownloadFileToTempStorage,
+        "FILE.ORDERED_TO_COPY": commands.CopyFile,
+    }
+
+    if key not in events_mapping:
+        raise exceptions.BadServiceEvent
+
+    uow.push_message(events_mapping[key](**cmd.body))
+
+    return command_results.PositiveCommandResult({})
+
+
 async def mark_file_as_stored(
     cmd: commands.MarkFileAsStored,
     uow: AbstractUnitOfWork,
 ):
     async with uow:
         await uow.files.add_server_to_file(cmd.file_id, cmd.server_id)
+        if await uow.files.is_copied(cmd.file_id):
+            uow.push_message(events.FileDistributed(id=cmd.file_id))
+
         await uow.commit()
 
     return command_results.PositiveCommandResult({})
+
+
+async def order_file_to_download(
+    cmd: commands.OrderFileToDownload,
+    uow: AbstractUnitOfWork,
+):
+    message = models.FileOrderedToDownloadBrokerMessage(message=cmd.dict())
+    uow.push_message(commands.PublishMessage(message=message))
+    return command_results.PositiveCommandResult({})
+
+
+async def download_file_to_temp_storage(
+    cmd: commands.DownloadFileToTempStorage,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        server = await uow.cdn_servers.get_by_id(cmd.server_id)
+        storage = await uow.s3_pool.get(server.name, server.host, server.port)
+        filename = str(cmd.file_id)
+        path = os.path.join(settings.storage_path, filename)
+        await storage.download_file(filename, path)
+        uow.push_message(events.FileDownloadedToTempStorage(id=cmd.file_id))
+
+    return command_results.PositiveCommandResult({})
+
 
 async def order_file_to_copy(
     cmd: commands.OrderFileToCopy,
     uow: AbstractUnitOfWork,
 ):
-    print('ORDER TO COPY', cmd.file_id, cmd.from_server_id, cmd.to_server_id)
+    message = models.FileOrderedToCopyBrokerMessage(message=cmd.dict())
+    uow.push_message(commands.PublishMessage(message=message))
+    return command_results.PositiveCommandResult({})
+
+
+async def copy_file(
+    cmd: commands.CopyFile,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        server = await uow.cdn_servers.get_by_id(cmd.server_id)
+        storage = await uow.s3_pool.get(server.name, server.host, server.port)
+        filename = str(cmd.file_id)
+        path = os.path.join(settings.storage_path, filename)
+        await storage.upload_file(filename, path)
+
+    return command_results.PositiveCommandResult({})
+
+
+async def remove_file_from_temp_storage(
+    cmd: commands.RemoveFileFromTempStorage,
+    uow: AbstractUnitOfWork,
+):
+    filename = str(cmd.file_id)
+    path = os.path.join(settings.storage_path, filename)
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        raise exceptions.FileNotFoundInTempStorage
+
     return command_results.PositiveCommandResult({})

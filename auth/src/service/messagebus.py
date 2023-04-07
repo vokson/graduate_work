@@ -1,12 +1,8 @@
-# from __future__ import annotations
 import logging
 from typing import Callable, Type
 
-from asyncpg.exceptions import PostgresError, InterfaceError, UniqueViolationError
-from pydantic.error_wrappers import ValidationError as PydanticValidationError
-from src.core import exceptions
 from src.domain import command_results, commands, events
-from src.service.handlers import permission_handlers, user_handlers
+from src.service.handlers import COMMAND_HANDLERS, EVENT_HANDLERS, RESULTS
 from src.service.uow import AbstractUnitOfWork, UnitOfWork
 
 
@@ -14,44 +10,6 @@ logger = logging.getLogger(__name__)
 
 Message = commands.Command | events.Event
 
-
-EVENT_HANDLERS = {
-    # events.Allocated: [handlers.publish_allocated_event],
-}
-
-COMMAND_HANDLERS = {
-    commands.CheckRequiredPermissions: permission_handlers.check_required_permissions,
-    commands.CreateUser: user_handlers.create_user,
-    commands.GetUserById: user_handlers.get_user_by_id,
-    commands.LoginByCredentials: user_handlers.login_by_credentials,
-    commands.Logout: user_handlers.logout,
-    commands.RefreshTokens: user_handlers.refresh_tokens,
-    commands.VerifyToken: user_handlers.verify_token,
-}
-
-RESULTS = {
-    PostgresError: command_results.DatabaseError,
-    InterfaceError: command_results.DatabaseError,
-    UniqueViolationError: command_results.UniqueViolationDatabaseError,
-    PydanticValidationError: command_results.ValidationError,
-    exceptions.AuthTokenMissedException: command_results.AuthTokenMissedException,
-    exceptions.AuthTokenWithWrongSignatureException: command_results.AuthTokenWithWrongSignatureException,
-    exceptions.AuthTokenOutdatedException: command_results.AuthTokenOutdatedException,
-    exceptions.AuthTokenWrongPayloadException: command_results.AuthTokenWrongPayloadException,
-    exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
-    exceptions.UserDoesNotExists: command_results.UserDoesNotExists,
-    exceptions.UserAlreadyExists: command_results.UserAlreadyExists,
-    exceptions.WrongCredentials: command_results.WrongCredentials,
-}
-
-# def print_exception():
-#     exc_type, exc_obj, tb = sys.exc_info()
-#     f = tb.tb_frame
-#     lineno = tb.tb_lineno
-#     filename = f.f_code.co_filename
-#     linecache.checkcache(filename)
-#     line = linecache.getline(filename, lineno, f.f_globals)
-#     logger.info(f'EXCEPTION IN ({filename}, LINE {lineno} "{line.strip()}"): {exc_obj}')
 
 from sys import exc_info
 from traceback import format_exception
@@ -83,7 +41,7 @@ class MessageBus:
                 message = queue.pop(0)
 
                 if isinstance(message, events.Event):
-                    await self.handle_event(queue, message)
+                    await self.handle_event(message)
                     queue.extend(self._uow.collect_new_messages())
 
                 elif isinstance(message, commands.Command):
@@ -139,18 +97,17 @@ class MessageBus:
             return cls(str(error))
 
 
-bus: MessageBus = None
-
-
-def get_message_bus(
-    uow: AbstractUnitOfWork = UnitOfWork(),
+async def get_message_bus(
+    bootstrap: list[str],
+    uow: AbstractUnitOfWork = None,
     event_handlers: dict[Type[events.Event], list[Callable]] = EVENT_HANDLERS,
     command_handlers: dict[
         Type[commands.Command], Callable
     ] = COMMAND_HANDLERS,
 ):
-    global bus
+    if not uow:
+        uow = UnitOfWork(bootstrap)
+        await uow.startup()
 
-    if not bus:
-        bus = MessageBus(uow, event_handlers, command_handlers)
+    bus = MessageBus(uow, event_handlers, command_handlers)
     return bus

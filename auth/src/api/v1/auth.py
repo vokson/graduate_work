@@ -1,18 +1,16 @@
 from uuid import UUID
 
-from src.api.dependables import required_permissions_dependable
+from fastapi import APIRouter, Depends, Header, Request, Response, status
+from src.api.dependables import get_bus, required_permissions_dependable
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
 from src.domain.models import User
-from src.service.messagebus import get_message_bus
-
-from fastapi import APIRouter, Depends, Header, Request, Response, status
+from src.service.messagebus import MessageBus
 
 
 router = APIRouter()
-bus = get_message_bus()
 
 
 @router.post(
@@ -25,6 +23,7 @@ bus = get_message_bus()
 # @rate_limit()
 async def register(
     credentials: schemes.RegisterUserRequest,
+    bus: MessageBus = Depends(get_bus()),
 ) -> schemes.UserResponse:
     return transform_command_result(
         await bus.handle(
@@ -49,6 +48,7 @@ async def register(
 # @rate_limit()
 async def login(
     credentials: schemes.LoginByCredentialsRequest,
+    bus: MessageBus = Depends(get_bus()),
 ) -> schemes.LoginByCredentialsResponse:
     return transform_command_result(
         await bus.handle(
@@ -59,6 +59,7 @@ async def login(
         )
     )
 
+
 @router.post(
     "/logout/",
     response_model=schemes.EmptyResponse,
@@ -67,7 +68,8 @@ async def login(
     summary="Выход пользователя",
 )
 async def logout(
-    commons: dict = Depends(required_permissions_dependable([]))
+    commons: dict = Depends(required_permissions_dependable([])),
+    bus: MessageBus = Depends(get_bus()),
 ) -> schemes.EmptyResponse:
     return transform_command_result(
         await bus.handle(commands.Logout(user_id=commons["user_id"]))
@@ -83,7 +85,8 @@ async def logout(
 )
 # @rate_limit()
 async def refresh_tokens(
-    commons: dict = Depends(required_permissions_dependable([], False))
+    commons: dict = Depends(required_permissions_dependable([], False)),
+    bus: MessageBus = Depends(get_bus()),
 ) -> schemes.RefreshTokensResponse:
     return transform_command_result(
         await bus.handle(commands.RefreshTokens(user_id=commons["user_id"]))
@@ -101,6 +104,7 @@ async def refresh_tokens(
 async def verify_token(
     body: schemes.VerifyTokenRequest,
     commons: dict = Depends(required_permissions_dependable([])),
+    bus: MessageBus = Depends(get_bus()),
 ) -> schemes.EmptyResponse:
     return transform_command_result(
         await bus.handle(

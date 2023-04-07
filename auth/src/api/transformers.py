@@ -1,7 +1,6 @@
+from fastapi import HTTPException, status
 from src.api.v1.codes import COMMAND_RESULTS_RESPONSE_CODES
 from src.domain.command_results import NegativeCommandResult
-
-from fastapi import HTTPException, status
 
 
 def transform_command_result(results):

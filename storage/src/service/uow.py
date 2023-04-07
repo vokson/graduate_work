@@ -74,7 +74,7 @@ class UnitOfWork(AbstractUnitOfWork):
         self._get_geo_ip = get_geo_ip
         self._get_publisher = get_publisher
 
-    async def __aenter__(self):
+    async def startup(self):
         if "cache" in self._bootstrap:
             self.cache = await self._get_cache_conn()
 
@@ -87,6 +87,7 @@ class UnitOfWork(AbstractUnitOfWork):
         if "publisher" in self._bootstrap:
             self.publisher = await self._get_publisher()
 
+    async def __aenter__(self):
         if "db" in self._bootstrap:
             self._is_done = False
             self._conn = await self._get_db_conn()

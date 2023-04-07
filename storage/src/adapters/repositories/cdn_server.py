@@ -3,7 +3,7 @@ import math
 import operator
 import random
 from abc import ABC, abstractmethod
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from src.domain.models import CdnServer
 
@@ -29,59 +29,9 @@ class CdnServerRepository:
                         ($1, $2, $3, $4, $5, $6, $7);
                     """
 
-    # UPDATE_QUERY = f"""
-    #                 UPDATE {__users_tablename__} SET
-    #                     (
-    #                         id,
-    #                         username,
-    #                         password,
-    #                         email,
-    #                         first_name,
-    #                         last_name,
-    #                         is_superuser,
-    #                         access_token,
-    #                         refresh_token,
-    #                         access_token_expire_at,
-    #                         refresh_token_expire_at,
-    #                         created,
-    #                         updated
-    #                     ) = (
-    #                         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-    #                     )
-    #                 WHERE id = $1;
-    #                 """
-
-    # GET_BY_ID_QUERY = f"SELECT * FROM {__users_tablename__} WHERE id = $1;"
     GET_ALL_QUERY = f"SELECT * FROM {__tablename__};"
-
+    GET_BY_ID_QUERY = f"SELECT * FROM {__tablename__} WHERE id = $1;"
     GET_BY_NAME_QUERY = f"SELECT * FROM {__tablename__} WHERE name = $1;"
-
-    # ADD_PERMISSIONS_QUERY = f"""
-    #                 INSERT INTO {__permissions_tablename__} (id, name)
-    #                 VALUES ($1, $2)
-    #                 ON CONFLICT DO NOTHING;
-    #                 """
-
-    # GET_PERMISSIONS_OF_USER_QUERY = f"""
-    #                 SELECT p.name FROM {__user_permission_tablename__} up
-    #                 JOIN {__permissions_tablename__} p ON up.permission_id  = p.id
-    #                 WHERE up.user_id = $1;
-    #                 """
-
-    # DELETE_ALL_PERMISSIONS_FROM_USER = f"""
-    #                 DELETE FROM {__user_permission_tablename__} WHERE user_id = $1;
-    #                 """
-
-    # SET_PERMISSIONS_TO_USER = f"""
-    #                 INSERT INTO {__user_permission_tablename__} (
-    #                     id, user_id, permission_id
-    #                 ) (
-    #                     SELECT
-    #                         uuid_generate_v4(), $1, id
-    #                     FROM {__permissions_tablename__}
-    #                     WHERE name = ANY($2)
-    #                 );
-    #                 """
 
     def __init__(self, conn):
         self._conn = conn
@@ -102,22 +52,16 @@ class CdnServerRepository:
             obj.longitude,
         )
 
-    # async def get_by_id(self, id) -> CdnServer:
-    #     logger.debug(f"Get user with id {id}")
-    #     row = await self._conn.fetchrow(self.GET_BY_ID_QUERY, id)
-    #     if not row:
-    #         return
+    async def get_by_id(self, id: UUID) -> CdnServer:
+        logger.debug(f"Get cdn server with id {id}")
+        row = await self._conn.fetchrow(self.GET_BY_ID_QUERY, id)
 
-    #     perms = await self._conn.fetch(self.GET_PERMISSIONS_OF_USER_QUERY, id)
+        if not row:
+            return
 
-    #     return User(
-    #         **{
-    #             **{k: v for k, v in row.items()},
-    #             **{"permissions": [x["name"] for x in perms]},
-    #         }
-    #     )
+        return self._convert_row_to_obj(row)
 
-    async def get_by_name(self, name) -> CdnServer:
+    async def get_by_name(self, name: str) -> CdnServer:
         logger.debug(f"Get cdn server with name {name}")
         row = await self._conn.fetchrow(self.GET_BY_NAME_QUERY, name)
 
@@ -146,24 +90,31 @@ class CdnServerRepository:
         return R * c  # Distance in km
 
     async def get_nearest(
-        self, coordinates: tuple[float, float] | None
+        self,
+        coordinates: tuple[float, float] | None,
+        only_servers: list[UUID] | None = None,
     ) -> CdnServer:
         servers = await self.get_all()
+        filtered_servers = (
+            [x for x in servers if x.id in only_servers]
+            if only_servers
+            else servers
+        )
 
         if not coordinates:
             logger.debug(f"Get random cdn server")
-            return random.choice(servers)
+            return random.choice(filtered_servers)
 
         logger.debug(f"Get nearest cdn server")
         lat, lon = coordinates
         distances = [
             self._calculate_distance(lat, lon, x.latitude, x.longitude)
-            for x in servers
+            for x in filtered_servers
         ]
         min_index, min_value = min(
             enumerate(distances), key=operator.itemgetter(1)
         )
-        return servers[min_index]
+        return filtered_servers[min_index]
 
     # async def update(self, obj: User):
     #     logger.debug(f"Update user: {obj.dict()}")

@@ -1,12 +1,14 @@
 """Модуль для работы с S3 Storage."""
 import asyncio
 import logging
+import os
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 from typing import Callable
 
 from miniopy_async import Minio
 from miniopy_async.notificationconfig import NotificationConfig, QueueConfig
+from src.core import exceptions
 from src.tools.decorators import backoff
 
 
@@ -26,9 +28,13 @@ class AbstractS3Storage(ABC):
     async def get_upload_url(self, object_name: str) -> str:
         pass
 
-    # @abstractmethod
-    # async def get_created_events(self):
-    #     pass
+    @abstractmethod
+    async def download_file(self, object_name: str):
+        pass
+
+    @abstractmethod
+    async def upload_file(self, object_name: str):
+        pass
 
 
 class MinioS3Storage(AbstractS3Storage):
@@ -61,6 +67,9 @@ class MinioS3Storage(AbstractS3Storage):
     async def get_upload_url(self, object_name: str) -> str:
         return await self._get_presigned_url("PUT", object_name)
 
+    async def get_download_url(self, object_name: str) -> str:
+        return await self._get_presigned_url("GET", object_name)
+
     async def _get_presigned_url(self, method: str, object_name: str) -> str:
         return await self._conn.get_presigned_url(
             method,
@@ -69,28 +78,38 @@ class MinioS3Storage(AbstractS3Storage):
             response_headers={"response-content-type": "application/json"},
         )
 
-    # async def get_created_events(self):
-    #     logger.info('Start to listen events..')
-    #     async def agen():
-    #         for x in range(5):
-    #             yield x
-    #             await asyncio.sleep(1)
+    async def download_file(self, object_name: str, path: str):
+        file_info = await self._conn.stat_object(self._bucket, object_name)
+        total_size = int(file_info.size)
 
-    #     async for x in agen():
-    #         yield x
+        is_exist = os.path.isfile(path)
 
-    #     logger.info('Finish to listen events.')
+        if is_exist:
+            size = os.path.getsize(path)
 
-    # async def get_created_events(self):
-    #     logger.info('Start to listen events..')
-    #     events = await self._conn.listen_bucket_notification(
-    #         self._bucket, events=["s3:ObjectCreated:*"]
-    #     )
+            if size >= total_size:
+                #  Файл скачан полностью
+                return
 
-    #     async for event in events:
-    #         for f in event['Records']:
-    #             yield f['s3']['object']['key']
-    #     logger.info('Finish to listen events.')
+        #  Требуется скачивание
+        try:
+            await self._conn.fget_object(self._bucket, object_name, path)
+        except Exception as e:
+            logger.error(
+                f"Error during downloading file {object_name} from {self.name}/{self._bucket}"
+            )
+            logger.info(e)
+            raise exceptions.DownloadFileError
+
+    async def upload_file(self, object_name: str, path: str):
+        try:
+            await self._conn.fput_object(self._bucket, object_name, path)
+        except Exception as e:
+            logger.error(
+                f"Error during uploading file {object_name} from {self.name}/{self._bucket}"
+            )
+            logger.info(e)
+            raise exceptions.UploadFileError
 
 
 def get_s3_conn(bucket: str, name: str) -> AbstractS3Storage:

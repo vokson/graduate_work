@@ -34,6 +34,6 @@ def get_ip():
 
 def get_bus():
     async def inner():
-        return get_message_bus(["db", "geoip", "s3"])
+        return await get_message_bus(["db", "geoip", "s3"])
 
     return inner

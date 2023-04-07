@@ -107,19 +107,17 @@ class EmptyPositiveResponse extends Response {
   }
 }
 
-// class PositiveFileResponse extends Response {
-//   get schema() {
-//     return {
-//       type: "object",
-//       properties: {
-//         file: { type: "object" },
-//         name: { type: "string" },
-//         size: { type: "number" },
-//       },
-//       additionalProperties: false,
-//     };
-//   }
-// }
+class PositiveFileResponse extends Response {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        file: { type: "object" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
 
 class LoginCredentialsRequest extends Request {
   get schema() {
@@ -215,6 +213,23 @@ class GetUploadLinkRequest extends Request {
   }
 }
 class GetUploadLinkResponse extends Response {
+  get schema() {
+    return LinkSingle;
+  }
+}
+
+class GetDownloadLinkRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class GetDownloadLinkResponse extends Response {
   get schema() {
     return LinkSingle;
   }
@@ -579,20 +594,18 @@ class UploadFileRequest extends Request {
 }
 class UploadFileResponse extends EmptyPositiveResponse { }
 
-// class DownloadFileFromFolderRequest extends Request {
-//   get schema() {
-//     return {
-//       type: "object",
-//       properties: {
-//         id: { type: "string" },
-//         folder_id: { type: "integer" },
-//         usergroup_id: { type: "integer" },
-//       },
-//       additionalProperties: true, // set_size_method
-//     };
-//   }
-// }
-// class DownloadFileFromFolderResponse extends PositiveFileResponse {}
+class DownloadFileRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        link: { type: "string" },
+      },
+      additionalProperties: true, // set_size_method
+    };
+  }
+}
+class DownloadFileResponse extends PositiveFileResponse {}
 
 // class DownloadManyDocumentsFilesAsArchiveRequest extends Request {
 //   get schema() {
@@ -2055,7 +2068,19 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  get_upload_link = () => {
+    throw new NotImplementedError();
+  };
+
   upload_file = () => {
+    throw new NotImplementedError();
+  };
+
+  get_download_link = () => {
+    throw new NotImplementedError();
+  };
+
+  download_file = () => {
     throw new NotImplementedError();
   };
 
@@ -2088,6 +2113,10 @@ export {
   DeleteFileResponse,
   GetUploadLinkRequest,
   GetUploadLinkResponse,
+  GetDownloadLinkRequest,
+  GetDownloadLinkResponse,
   UploadFileRequest,
   UploadFileResponse,
+  DownloadFileRequest,
+  DownloadFileResponse,
 };

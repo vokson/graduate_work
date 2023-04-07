@@ -1,5 +1,7 @@
 import asyncio
+import inspect
 import logging
+import time
 from functools import wraps
 
 
@@ -30,28 +32,54 @@ def backoff(
     """
 
     def func_wrapper(func):
+        def get_sleep_time(exc: Exception, n: int, attempt: int):
+            if max_attempt_count > 0 and attempt >= max_attempt_count:
+                raise exc
+
+            attempt += 1
+            sleep_time = start_sleep_time * pow(factor, n + 1)
+
+            if sleep_time < border_sleep_time:
+                n += 1
+            else:
+                sleep_time = border_sleep_time
+
+            return n, attempt, sleep_time
+
         @wraps(func)
-        async def inner(*args, **kwargs):
+        def sync_inner(*args, **kwargs):
+            n = 0
+            attempt = 0
+            while True:
+                try:
+                    return func(*args, **kwargs)
+
+                except Exception as e:
+                    logger.error(f"Error: {e}")
+                    n, attempt, sleep_time = get_sleep_time(
+                        e,
+                        n,
+                        attempt,
+                    )
+                    time.sleep(sleep_time)
+
+        @wraps(func)
+        async def async_inner(*args, **kwargs):
             n = 0
             attempt = 0
             while True:
                 try:
                     return await func(*args, **kwargs)
+
                 except Exception as e:
                     logger.error(f"Error: {e}")
-
-                    if max_attempt_count > 0 and attempt >= max_attempt_count:
-                        raise e
-
-                    attempt += 1
-                    sleep_time = start_sleep_time * pow(factor, n + 1)
-                    if sleep_time < border_sleep_time:
-                        n += 1
-                    else:
-                        sleep_time = border_sleep_time
-
+                    n, attempt, sleep_time = get_sleep_time(
+                        e,
+                        n,
+                        attempt,
+                    )
                     await asyncio.sleep(sleep_time)
 
-        return inner
+        return async_inner if inspect.iscoroutinefunction(func) else sync_inner
 
     return func_wrapper

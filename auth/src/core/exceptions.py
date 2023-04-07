@@ -26,7 +26,7 @@ class AuthNoPermissionException(ApplicationException):
     pass
 
 
-class UserDoesNotExists(ApplicationException):
+class UserDoesNotExist(ApplicationException):
     pass
 
 

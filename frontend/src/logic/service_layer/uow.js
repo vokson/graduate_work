@@ -61,7 +61,7 @@ class VueUnitOfWork extends AbstractUnitOfWork {
     // );
     this.file_repository = new VueFileFlatRepository("files");
     // this.permission_repository = new VuePermissionRepository("permissions");
-    // this.download_progress = new VueFileFlatRepository("download_progress");
+    this.download_progress = new VueFileFlatRepository("download_progress");
 
     this.api.set_auth_token(this.token_repository.get_access_token());
   }

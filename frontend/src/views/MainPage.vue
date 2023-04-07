@@ -59,6 +59,10 @@
             "
           />
         </div>
+        <div class="page__filedownloadingcontainer">
+          <form-text-field value="Файлы в процессе скачивания:"/>
+          <file-list :files="downloading_files" :can_be_deleted="false" :can_be_dragged="false"/>
+        </div>
       </div>
 
       <div class="page__middlecontainer">
@@ -89,7 +93,10 @@
           </div>
 
           <div class="filerow__name">
-            <file-block :file="file" />
+            <file-block
+              :file="file"
+              @download:file="handle_download(file.id)"
+            />
           </div>
 
           <div class="filerow__date">
@@ -129,15 +136,17 @@ import {
   RefreshTokens,
   UploadFile,
   DeleteFile,
+  DownloadFile,
 } from "../logic/domain/command";
 import { UploadFileTooBigError } from "../logic/domain/event";
 import HeadingComponent from "../components/HeadingComponent.vue";
 // import FileList from "../components/file/FileList.vue";
 import FileDropZone from "../components/file/FileDropZone.vue";
 import FileBlock from "../components/file/FileBlock.vue";
+import FileList from "../components/file/FileList.vue";
 import { MessageBus } from "../logic/service_layer/message_bus";
 
-// import FormTextField from "../components/fields/FormTextField.vue";
+import FormTextField from "../components/fields/FormTextField.vue";
 // import FolderTreeNode from "../components/folder/FolderTreeNode.vue";
 // import ToggleTextButton from "../components/buttons/ToggleTextButton.vue";
 import { useBeforeEnterPage } from "../logic/service_layer/use_modules";
@@ -147,7 +156,8 @@ export default {
     HeadingComponent,
     FileBlock,
     FileDropZone,
-    // FormTextField,
+    FileList,
+    FormTextField,
     // FolderTreeNode,
     // FormTextInput,
     // ToggleTextButton,
@@ -168,6 +178,10 @@ export default {
       uow.file_repository.values().map((obj) => obj.value)
     );
 
+    const downloading_files = computed(() =>
+      uow.download_progress.values().map((obj) => obj.value).filter(f => !f.uploaded)
+    );
+
     watch(files, async (arr) => {
       arr.forEach(async (f) => {
         if (f.servers.length < servers.value.length)
@@ -185,6 +199,10 @@ export default {
 
     const handle_delete = async (id) => {
       await MessageBus.handle(new DeleteFile(id), uow);
+    };
+
+    const handle_download = async (id) => {
+      await MessageBus.handle(new DownloadFile(id), uow);
     };
 
     // DRAGGING
@@ -257,10 +275,12 @@ export default {
 
       // FILE
       files,
+      downloading_files,
       max_file_size,
       is_drag_above_file_zone,
       handle_new_file_drop,
       handle_delete,
+      handle_download,
     };
   },
 };
@@ -321,7 +341,6 @@ export default {
   align-items: center;
   flex-grow: 1;
   margin: 5px;
-
 }
 
 .page__filedropzone_dragging {
@@ -348,6 +367,13 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-left: 20px;
+}
+
+.page__filedownloadingcontainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   margin-left: 20px;
 }
 

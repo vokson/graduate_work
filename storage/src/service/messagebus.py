@@ -2,61 +2,17 @@
 import logging
 from typing import Callable, Type
 
-from asyncpg.exceptions import (InterfaceError, PostgresError,
-                                UniqueViolationError)
-from pydantic.error_wrappers import ValidationError as PydanticValidationError
-from src.core import exceptions
+# from src.domain import commands, events
 from src.domain import command_results, commands, events
-from src.service import command_handlers, event_handlers
+# from src.service import command_handlers, event_handlers
 from src.service.uow import AbstractUnitOfWork, UnitOfWork
+from src.service.handlers import RESULTS, COMMAND_HANDLERS, EVENT_HANDLERS
 
 
 logger = logging.getLogger(__name__)
 
 Message = commands.Command | events.Event
 
-
-EVENT_HANDLERS = {
-    events.FileStored: [event_handlers.file_stored],
-    events.FileRemovedFromStorage: [event_handlers.file_removed_from_storage],
-}
-
-COMMAND_HANDLERS = {
-    commands.CreateCdnServer: command_handlers.create_cdn_server,
-    commands.GetManyCdnServers: command_handlers.get_many_cdn_servers,
-    # commands.CreateFile: command_handlers.create_file,
-    commands.DeleteFile: command_handlers.delete_file,
-    commands.GetManyFiles: command_handlers.get_many_files,
-    commands.GetFileServers: command_handlers.get_file_servers,
-    commands.GetUploadLink: command_handlers.get_upload_link,
-    commands.HandleS3Event: command_handlers.handle_s3_event,
-    commands.MarkFileAsStored: command_handlers.mark_file_as_stored,
-    commands.OrderFileToCopy: command_handlers.order_file_to_copy,
-    # commands.CreateUser: user_handlers.create_user,
-    # commands.GetUserById: user_handlers.get_user_by_id,
-    # commands.LoginByCredentials: user_handlers.login_by_credentials,
-    # commands.Logout: user_handlers.logout,
-    # commands.RefreshTokens: user_handlers.refresh_tokens,
-    # commands.VerifyToken: user_handlers.verify_token,
-}
-
-RESULTS = {
-    PostgresError: command_results.DatabaseError,
-    InterfaceError: command_results.DatabaseError,
-    UniqueViolationError: command_results.UniqueViolationDatabaseError,
-    # PydanticValidationError: command_results.ValidationError,
-    # exceptions.AuthTokenMissedException: command_results.AuthTokenMissedException,
-    # exceptions.AuthTokenWithWrongSignatureException: command_results.AuthTokenWithWrongSignatureException,
-    # exceptions.AuthTokenOutdatedException: command_results.AuthTokenOutdatedException,
-    # exceptions.AuthTokenWrongPayloadException: command_results.AuthTokenWrongPayloadException,
-    # exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
-    # exceptions.UserDoesNotExists: command_results.UserDoesNotExists,
-    exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
-    exceptions.FileDoesNotExist: command_results.FileDoesNotExist,
-    exceptions.CdnServerAlreadyExists: command_results.CdnServerAlreadyExists,
-    exceptions.BadS3Event: command_results.BadS3Event,
-    # exceptions.WrongCredentials: command_results.WrongCredentials,
-}
 
 from sys import exc_info
 from traceback import format_exception
@@ -144,7 +100,7 @@ class MessageBus:
             return cls(str(error))
 
 
-def get_message_bus(
+async def get_message_bus(
     bootstrap: list[str],
     uow: AbstractUnitOfWork = None,
     event_handlers: dict[Type[events.Event], list[Callable]] = EVENT_HANDLERS,
@@ -154,6 +110,7 @@ def get_message_bus(
 ):
     if not uow:
         uow = UnitOfWork(bootstrap)
+        await uow.startup()
 
     bus = MessageBus(uow, event_handlers, command_handlers)
     return bus

@@ -25,6 +25,7 @@ class LoginByCredentials(Command):
     username: str
     password: str
 
+
 class Logout(Command):
     user_id: UUID
 

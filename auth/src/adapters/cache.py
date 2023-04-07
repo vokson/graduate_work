@@ -1,9 +1,13 @@
 """Модуль для работы с Redis."""
+import logging
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 
 import redis.asyncio as redis  # type: ignore
 from src.tools.decorators import backoff
+
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncCacheStorage(ABC):
@@ -39,8 +43,24 @@ class AsyncRedisStorage(AsyncCacheStorage):
         await self._redis.set(key, value, ex=expire_at)
 
 
-async def get_cache_conn(**dsl):
-    cache = AsyncRedisStorage()
-    await cache.startup(**dsl)
-    yield cache
-    await cache.shutdown()
+cache: AsyncCacheStorage | None = None
+
+
+async def init_cache(**dsl):
+    global cache
+
+    if not cache:
+        logger.info(f"Initialization of cache ..")
+        cache = AsyncRedisStorage()
+        await cache.startup(**dsl)
+        logger.info(f"Cache has been initialized.")
+
+    return cache
+
+
+async def close_cache():
+    global cache
+    if cache:
+        logger.info(f"Closing cache ..")
+        await cache.shutdown()
+        logger.info(f"Cache has been closed.")

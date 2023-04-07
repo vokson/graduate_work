@@ -89,7 +89,7 @@ class AuthNoPermissionException(NegativeCommandResult):
 #     pass
 
 
-# class UserDoesNotExists(NegativeCommandResult):
+# class UserDoesNotExist(NegativeCommandResult):
 #     pass
 
 
@@ -105,5 +105,21 @@ class BadS3Event(NegativeCommandResult):
     pass
 
 
-# class WrongCredentials(NegativeCommandResult):
-#     pass
+class BadServiceEvent(NegativeCommandResult):
+    pass
+
+
+class PublishMessageError(NegativeCommandResult):
+    pass
+
+
+class DownloadFileError(NegativeCommandResult):
+    pass
+
+
+class UploadFileError(NegativeCommandResult):
+    pass
+
+
+class FileNotFoundInTempStorage(NegativeCommandResult):
+    pass

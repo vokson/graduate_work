@@ -3,7 +3,7 @@
 import os
 from logging import config as logging_config
 
-from pydantic import BaseModel, BaseSettings
+from pydantic import BaseModel, BaseSettings, Field
 from src.core.logger import LOGGING
 
 
@@ -50,7 +50,7 @@ class GeoSettings(BaseSettings):
 
 class RabbitQueueSettings(BaseSettings):
     listen_s3_events: str
-    # enrich_messages: str
+    file_operations: str
     # send_emails: str
     # send_sms: str
 
@@ -73,6 +73,7 @@ class Settings(BaseSettings):
     s3: S3Settings
     geo: GeoSettings
     rabbitmq: RabbitSettings
+    storage_path: str = Field("/temp_storage")
 
     class Config:
         #  Для локальной разработки вне docker

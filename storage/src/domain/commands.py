@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+from src.domain.models import BrokerMessage
 
 
 class Command(BaseModel):
@@ -47,19 +48,52 @@ class GetUploadLink(Command):
     ip: str
 
 
-class HandleS3Event(Command):
+class GetDownloadLink(Command):
+    file_id: UUID
+    ip: str
+
+
+class HandleBrokerMessage(Command):
     routing_key: str
     body: dict
 
-class MarkFileAsStored(Command):
+
+class HandleS3Event(HandleBrokerMessage):
+    pass
+
+
+class HandleServiceEvent(HandleBrokerMessage):
+    pass
+
+
+class PublishMessage(Command):
+    message: BrokerMessage
+
+
+class FileOperation(Command):
     file_id: UUID
     server_id: UUID
 
-class OrderFileToCopy(Command):
+
+class MarkFileAsStored(FileOperation):
+    pass
+
+
+class OrderFileToDownload(FileOperation):
+    pass
+
+
+class DownloadFileToTempStorage(FileOperation):
+    pass
+
+
+class OrderFileToCopy(FileOperation):
+    pass
+
+
+class CopyFile(FileOperation):
+    pass
+
+
+class RemoveFileFromTempStorage(Command):
     file_id: UUID
-    from_server_id: UUID
-    to_server_id: UUID
-
-
-# class CollectStorageEvents(Command):
-#     pass

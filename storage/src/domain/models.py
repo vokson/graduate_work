@@ -50,6 +50,9 @@ class File(AbstractIdCreatedUpdatedModel):
     has_executed: bool = Field(False)
 
 
+# BROKER MESSAGES
+
+
 class BrokerMessage(BaseModel):
     message: dict
     app: str = Field(settings.app_name)
@@ -57,3 +60,11 @@ class BrokerMessage(BaseModel):
 
 class FileStoredBrokerMessage(BrokerMessage):
     key: str = Field("FILE.STORED")
+
+
+class FileOrderedToDownloadBrokerMessage(BrokerMessage):
+    key: str = Field("FILE.ORDERED_TO_DOWNLOAD")
+
+
+class FileOrderedToCopyBrokerMessage(BrokerMessage):
+    key: str = Field("FILE.ORDERED_TO_COPY")

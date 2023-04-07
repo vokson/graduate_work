@@ -2,18 +2,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Request, Response, status
 from src.api.decorators import auth
-from src.api.dependables import extract_user_id, get_bus
+from src.api.dependables import extract_user_id, get_bus, get_ip
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
 from src.domain.models import CdnServer
-# from src.service.messagebus import get_message_bus
 from src.service.messagebus import MessageBus
 
 
 router = APIRouter()
-# bus = get_message_bus()
 
 
 @router.get(
@@ -32,6 +30,28 @@ async def get_many(
     )
 
 
+@router.post(
+    "/upload/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Получение ссылки для загрузки файлв",
+)
+@auth(permissions=["can_upload_file"])
+async def get_upload_link(
+    body: schemes.UploadLinkRequest,
+    user_id: UUID = Depends(extract_user_id()),
+    ip: str = Depends(get_ip()),
+    bus: MessageBus = Depends(get_bus()),
+) -> schemes.LinkResponse:
+    return transform_command_result(
+        await bus.handle(
+            commands.GetUploadLink(
+                name=body.name, size=body.size, user_id=user_id, ip=ip
+            )
+        )
+    )
+
+
 @router.delete(
     "/{file_id}/",
     responses=collect_reponses(),
@@ -46,6 +66,23 @@ async def delete(
 ):
     return transform_command_result(
         await bus.handle(commands.DeleteFile(id=file_id, user_id=user_id))
+    )
+
+
+@router.get(
+    "/{file_id}/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Получение ссылки для скачивания",
+)
+@auth(permissions=["can_view_file"])
+async def get_download_link(
+    file_id: UUID,
+    ip: str = Depends(get_ip()),
+    bus: MessageBus = Depends(get_bus()),
+) -> schemes.LinkResponse:
+    return transform_command_result(
+        await bus.handle(commands.GetDownloadLink(file_id=file_id, ip=ip))
     )
 
 

@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class Event(BaseModel):
@@ -14,3 +15,11 @@ class FileStored(Event):
 class FileRemovedFromStorage(Event):
     id: UUID
     storage_name: str
+
+
+class FileDownloadedToTempStorage(Event):
+    id: UUID
+
+
+class FileDistributed(Event):
+    id: UUID

@@ -1,18 +1,16 @@
 from uuid import UUID
 
-from src.api.dependables import required_permissions_dependable
+from fastapi import APIRouter, Depends, Header, Request, Response, status
+from src.api.dependables import get_bus, required_permissions_dependable
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
 from src.domain.models import User
-from src.service.messagebus import get_message_bus
-
-from fastapi import APIRouter, Depends, Header, Request, Response, status
+from src.service.messagebus import MessageBus
 
 
 router = APIRouter()
-bus = get_message_bus()
 
 
 @router.get(
@@ -24,6 +22,7 @@ bus = get_message_bus()
 )
 async def get_user_by_id(
     commons: dict = Depends(required_permissions_dependable([])),
+    bus: MessageBus = Depends(get_bus()),
 ) -> schemes.UserResponse:
     return transform_command_result(
         await bus.handle(

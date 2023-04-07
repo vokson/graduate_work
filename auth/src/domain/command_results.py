@@ -85,7 +85,7 @@ class AuthNoPermissionException(NegativeCommandResult):
     pass
 
 
-class UserDoesNotExists(NegativeCommandResult):
+class UserDoesNotExist(NegativeCommandResult):
     pass
 
 

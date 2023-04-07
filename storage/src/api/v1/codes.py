@@ -12,7 +12,7 @@ COMMAND_RESULTS_RESPONSE_CODES = {
         "Auth.Error.NoPermission",
     ),
     # command_results.ValidationError: (400, "Request.Error.Validation"),
-    # command_results.UserDoesNotExists: (400, "User.DoesNotExists"),
+    # command_results.UserDoesNotExist: (400, "User.DoesNotExist"),
     command_results.FileDoesNotExist: (400, "File.DoesNotExist"),
     command_results.CdnServerAlreadyExists: (400, "CdnServer.AlreadyExists"),
     # command_results.WrongCredentials: (401, "Login.Error.Credentials"),

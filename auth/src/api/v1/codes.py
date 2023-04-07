@@ -10,7 +10,7 @@ COMMAND_RESULTS_RESPONSE_CODES = {
         "Database.Error.UniqueViolation",
     ),
     command_results.ValidationError: (400, "Request.Error.Validation"),
-    command_results.UserDoesNotExists: (400, "User.DoesNotExists"),
+    command_results.UserDoesNotExist: (400, "User.DoesNotExist"),
     command_results.UserAlreadyExists: (400, "User.AlreadyExists"),
     command_results.WrongCredentials: (401, "Login.Error.Credentials"),
     command_results.AuthTokenMissedException: (401, "Auth.Error.TokenMissed"),

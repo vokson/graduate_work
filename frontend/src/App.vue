@@ -10,7 +10,7 @@ export default {
   components: { BasePage },
   name: "App",
   setup() {
-    // provide("info", {});
+    provide("download_progress", {});
     provide("users", {});
     provide("tokens", {});
 

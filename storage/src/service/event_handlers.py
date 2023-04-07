@@ -14,30 +14,44 @@ async def file_stored(
     cmd: events.FileStored,
     uow: AbstractUnitOfWork,
 ):
-    
     async with uow:
         file_on_servers = await uow.files.get_ids_of_servers(cmd.id)
-        if file_on_servers:
-            return
-
-        all_servers = await uow.cdn_servers.get_all()
         current_server = await uow.cdn_servers.get_by_name(cmd.storage_name)
 
+        data = {"file_id": cmd.id, "server_id": current_server.id}
+        uow.push_message(commands.MarkFileAsStored(**data))
+
+        if not file_on_servers:
+            uow.push_message(commands.OrderFileToDownload(**data))
+
+
+async def file_downloaded_to_temp_storage(
+    cmd: events.FileDownloadedToTempStorage,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        file_on_servers_ids = await uow.files.get_ids_of_servers(cmd.id)
+        all_servers = await uow.cdn_servers.get_all()
+
         for server in all_servers:
-            if server.name == cmd.storage_name:
-                uow.push_message(
-                    commands.MarkFileAsStored(
-                        file_id=cmd.id, server_id=server.id
-                    )
-                )
-            else:
+            if server.id not in file_on_servers_ids:
                 uow.push_message(
                     commands.OrderFileToCopy(
                         file_id=cmd.id,
-                        from_server_id=current_server.id,
-                        to_server_id=server.id,
+                        server_id=server.id,
                     )
                 )
+
+
+async def file_distributed(
+    cmd: events.FileDistributed,
+    uow: AbstractUnitOfWork,
+):
+    uow.push_message(
+        commands.RemoveFileFromTempStorage(
+            file_id=cmd.id,
+        )
+    )
 
 
 async def file_removed_from_storage(

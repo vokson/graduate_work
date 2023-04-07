@@ -22,7 +22,6 @@ class DatabaseSettings(BaseModel):
     dbname: str
 
 
-
 class CacheSettings(BaseSettings):
     host: str
     port: int

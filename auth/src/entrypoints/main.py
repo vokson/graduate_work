@@ -1,12 +1,13 @@
 import os
 import sys
 
-from starlette.exceptions import HTTPException as StarletteHTTPException
-
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import ORJSONResponse
+from src.adapters.cache import close_cache
+from src.adapters.db import close_db
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 BASE_DIR = os.path.dirname(
@@ -31,11 +32,17 @@ app = FastAPI(
 # For DEV
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await close_db()
+    await close_cache()
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -53,5 +60,7 @@ async def validation_exception_handler(request, exc):
     )
 
 
-app.include_router(auth.router, prefix="/users/api/v1/auth", tags=["Authentication"])
+app.include_router(
+    auth.router, prefix="/users/api/v1/auth", tags=["Authentication"]
+)
 app.include_router(users.router, prefix="/users/api/v1/users", tags=["Users"])

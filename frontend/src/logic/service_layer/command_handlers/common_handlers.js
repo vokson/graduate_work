@@ -19,8 +19,8 @@ const notify = (event, uow) => {
 
 const notify_api_error = (event, uow) => {
   const errors = {
-    "User.DoesNotExists": ["error", "Неверные учетные данные"],
-    "File.DoesNotExists": ["error", "Файл не существует"],
+    "User.DoesNotExist": ["error", "Неверные учетные данные"],
+    "File.DoesNotExist": ["error", "Файл не существует"],
     "CdnServer.AlreadyExists": ["error", "Сервер уже существует"],
     "Auth.Error.TokenMissed": ["error", null],
     "Auth.Error.TokenOutdated": ["error", null],

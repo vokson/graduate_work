@@ -51,51 +51,29 @@ class FileRepository:
                         WHERE name = $1 AND user_id = $2;
                         """
 
-    # GET_ALL_QUERY = f"""
-    #                 SELECT
-    #                     f.id,
-    #                     f.name,
-    #                     f.size,
-    #                     f.user_id,
-    #                     f.created,
-    #                     f.updated,
-    #                     s.name as server_name
-    #                 FROM {__file_server_tablename__} fs
-    #                     LEFT JOIN {__files_tablename__} f ON fs.file_id = f.id
-    #                     LEFT JOIN {__servers_tablename__} s ON fs.server_id = s.id
-    #                 WHERE f.user_id = $1;
-    #                 """
-
     GET_ALL_QUERY = f"SELECT * FROM {__files_tablename__} WHERE user_id = $1;"
 
     DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
 
     GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
 
-    ADD_SERVER_TO_FILE = f"""INSERT INTO {__file_server_tablename__} (id, file_id, server_id)
+    ADD_SERVER_TO_FILE = f"""
+                            INSERT INTO {__file_server_tablename__} (id, file_id, server_id)
                             (SELECT uuid_generate_v4(), $1, $2) ON CONFLICT DO NOTHING;
                         """
 
-    # GET_SERVER_NAMES_OF_FILE_QUERY = f"""
-    #                 SELECT s.name FROM {__file_server_tablename__} fs
-    #                 JOIN {__servers_tablename__} s ON fs.server_id  = s.id
-    #                 WHERE fs.file_id = $1;
-    #                 """
+    REMOVE_ALL_SERVERS_FROM_FILE = (
+        f"DELETE FROM {__file_server_tablename__} WHERE file_id = $1;"
+    )
 
-    # DELETE_ALL_SERVERS_FROM_FILE = f"""
-    #                 DELETE FROM {__file_server_tablename__} WHERE file_id = $1;
-    #                 """
-
-    # SET_SERVERS_TO_FILE = f"""
-    #                 INSERT INTO {__file_server_tablename__} (
-    #                     id, file_id, server_id
-    #                 ) (
-    #                     SELECT
-    #                         uuid_generate_v4(), $1, id
-    #                     FROM {__servers_tablename__}
-    #                     WHERE name = ANY($2)
-    #                 );
-    #                 """
+    IS_FILE_ON_ALL_SERVERS = f""" SELECT (
+                                    SELECT COUNT(server_id)
+                                    FROM {__file_server_tablename__}
+                                    WHERE file_id = $1 
+                                ) = (
+                                    SELECT COUNT(id) from {__servers_tablename__} 
+                                ) as result;
+                            """
 
     def __init__(self, conn):
         self._conn = conn
@@ -116,24 +94,12 @@ class FileRepository:
             obj.created,
             obj.updated,
         )
-        # if obj.servers:
-        #     await self._conn.execute(
-        #         self.SET_SERVERS_TO_FILE, obj.id, obj.servers
-        #     )
 
     async def get_by_id(self, id: UUID) -> File:
         logger.debug(f"Get file with id {id}")
         row = await self._conn.fetchrow(self.GET_BY_ID_QUERY, id)
         if not row:
             return
-
-        # servers = await self._conn.fetch(self.GET_SERVER_NAMES_OF_FILE_QUERY, id)
-        # return File(
-        #     **{
-        #         **{k: v for k, v in row.items()},
-        #         **{"servers": [x["name"] for x in servers]},
-        #     }
-        # )
 
         return self._convert_row_to_obj(row)
 
@@ -147,36 +113,6 @@ class FileRepository:
             return
 
         return self._convert_row_to_obj(row)
-
-        # servers = await self._conn.fetch(self.GET_SERVER_NAMES_OF_FILE_QUERY, row['id'])
-
-        # return File(
-        #     **{
-        #         **{k: v for k, v in row.items()},
-        #         **{"servers": [x["name"] for x in servers]},
-        #     }
-        # )
-
-    # async def get_all(self, user_id: UUID) -> list[File]:
-    #     logger.debug(f"Get all files")
-    #     rows = await self._conn.fetch(self.GET_ALL_QUERY, user_id)
-    #     print(user_id, rows)
-    #     objs = {}
-    #     for row in rows:
-    #         id = row["id"]
-    #         if id not in objs:
-    #             objs[id] = {
-    #                 "id": id,
-    #                 "name": row["name"],
-    #                 "size": row["size"],
-    #                 "user_id": row["user_id"],
-    #                 "created": row["created"],
-    #                 "updated": row["updated"],
-    #                 "servers": []
-    #             }
-    #         objs[id]["servers"].append(row['server_name'])
-
-    #     return [File(**obj) for obj in objs.values()]
 
     async def get_all(self, user_id: UUID) -> list[File]:
         logger.debug(f"Get all files")
@@ -204,9 +140,17 @@ class FileRepository:
     async def get_ids_of_servers(self, file_id: UUID):
         logger.debug(f"Get IDs servers of file with ID {id}")
         rows = await self._conn.fetch(self.GET_IDS_OF_SERVERS, file_id)
-        print(file_id, rows)
         return [row["server_id"] for row in rows]
 
     async def add_server_to_file(self, file_id: UUID, server_id: UUID):
         logger.debug(f"Add server {server_id} to file {file_id}")
         await self._conn.execute(self.ADD_SERVER_TO_FILE, file_id, server_id)
+
+    async def remove_all_servers_from_file(self, file_id: UUID):
+        logger.debug(f"Remove all servers from file {file_id}")
+        await self._conn.execute(self.REMOVE_ALL_SERVERS_FROM_FILE, file_id)
+
+    async def is_copied(self, file_id: UUID):
+        logger.debug(f"Check if file {file_id} located on all servers")
+        row = await self._conn.fetchrow(self.IS_FILE_ON_ALL_SERVERS, file_id)
+        return bool(row["result"])

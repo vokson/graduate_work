@@ -4,6 +4,7 @@ volumes:
   auth_db_data: null
   storage_db_data: null
   redis_data: null
+  temp_file_storage: null
   s3_1_data: null
   s3_2_data: null
   s3_3_data: null
@@ -79,6 +80,8 @@ services:
   
   storage:
     build: storage
+    volumes:
+      - temp_file_storage:/temp_storage/
     depends_on:
       - storage_db
       - redis

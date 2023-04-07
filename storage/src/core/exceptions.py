@@ -30,7 +30,7 @@ class AuthNoPermissionException(ApplicationException):
 #     pass
 
 
-# class UserDoesNotExists(ApplicationException):
+# class UserDoesNotExist(ApplicationException):
 #     pass
 
 
@@ -43,6 +43,26 @@ class FileDoesNotExist(ApplicationException):
 
 
 class BadS3Event(ApplicationException):
+    pass
+
+
+class BadServiceEvent(ApplicationException):
+    pass
+
+
+class PublishMessageError(ApplicationException):
+    pass
+
+
+class DownloadFileError(ApplicationException):
+    pass
+
+
+class UploadFileError(ApplicationException):
+    pass
+
+
+class FileNotFoundInTempStorage(ApplicationException):
     pass
 
 

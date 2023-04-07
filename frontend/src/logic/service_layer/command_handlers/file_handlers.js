@@ -1,3 +1,5 @@
+// import { v4 as uuidv4 } from "uuid";
+
 import {
   NegativeResponse,
   GetFilesRequest,
@@ -8,8 +10,10 @@ import {
   UploadFileResponse,
   GetUploadLinkRequest,
   GetUploadLinkResponse,
-  // DownloadFileFromFolderRequest,
-  // DownloadFileFromFolderResponse,
+  GetDownloadLinkRequest,
+  GetDownloadLinkResponse,
+  DownloadFileRequest,
+  DownloadFileResponse,
   // DownloadManyDocumentsFilesAsArchiveRequest,
   // DownloadManyDocumentsFilesAsArchiveResponse,
   // DownloadDocumentFilesAsArchiveRequest,
@@ -28,6 +32,7 @@ import {
 
 import {
   UploadFileByLink,
+  DownloadFileByLink
 } from "../../domain/command";
 
 import {
@@ -42,8 +47,8 @@ import {
 } from "../../domain/event";
 
 import { File } from "../../domain/model";
-// import { js_download_file } from "../utils/file_download";
-// import { v4 as uuidv4 } from "uuid";
+import { js_download_file } from "../utils/file_download";
+import { v4 as uuidv4 } from "uuid";
 
 class WrongResponseError extends Error { }
 
@@ -165,6 +170,28 @@ const upload_file_by_link = async (event, uow) => {
   throw new WrongResponseError();
 };
 
+const download_file = async (event, uow) => {
+  // Получаем ссылку на скачаивание файла
+  const request = new GetDownloadLinkRequest({
+    id: event.id,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+  if (response instanceof GetDownloadLinkResponse) {
+    console.log(response)
+    uow.push_message(new DownloadFileByLink(
+      response.data.link, response.data.file.name, response.data.file.size));
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
 // const upload_file_to_folder = async (event, uow) => {
 //   const file = new BaseFile(event.file_id, event.file.name, event.file.size);
 //   uow.file_in_folder_repository.set(event.folder_id, event.file_id, file);
@@ -211,38 +238,34 @@ const upload_file_by_link = async (event, uow) => {
 //   throw new WrongResponseError();
 // };
 
-// // OK
-// const download_file_from_folder = async (event, uow) => {
-//   const id = uuidv4();
+const download_file_by_link = async (event, uow) => {
+  const id = uuidv4();
 
-//   const file = new BaseFile(id, event.name, event.size);
-//   uow.download_progress.set(id, file);
+  const file = new File(id, event.name, event.size, new Date(), new Date());
+  uow.download_progress.set(id, file);
 
-//   const request = new DownloadFileFromFolderRequest({
-//     set_size_method: (size) => uow.download_progress.set_size(id, size),
-//     folder_id: event.folder_id,
-//     usergroup_id: event.usergroup_id,
-//     id: event.file_id,
-//   });
+  const request = new DownloadFileRequest({
+    set_size_method: (size) => uow.download_progress.set_size(id, size),
+    link: event.link,
+  });
 
-//   const response = await uow.api.call(request);
+  const response = await uow.api.call(request);
 
-//   if (response instanceof NegativeResponse) {
-//     uow.push_message(new ApiError(response.data.code));
-//     return;
-//   }
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
 
-//   if (response instanceof DownloadFileFromFolderResponse) {
-//     js_download_file({
-//       data: response.data.file,
-//       filename: response.data.name,
-//       inline: event.inline,
-//     });
-//     return;
-//   }
+  if (response instanceof DownloadFileResponse) {
+    js_download_file({
+      data: response.data.file,
+      filename: event.name,
+    });
+    return;
+  }
 
-//   throw new WrongResponseError();
-// };
+  throw new WrongResponseError();
+};
 
 // const download_many_documents_files_as_archive = async (event, uow) => {
 //   const id = uuidv4();
@@ -600,6 +623,8 @@ export {
   upload_file_by_link,
   get_files,
   delete_file,
+  download_file,
+  download_file_by_link,
   //   upload_file_to_folder,
   //   download_file_from_folder,
   //   download_many_documents_files_as_archive,
