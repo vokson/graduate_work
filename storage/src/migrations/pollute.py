@@ -15,10 +15,11 @@ from src.service.messagebus import get_message_bus
 
 
 logger = logging.getLogger(__name__)
-bus = get_message_bus(["db"])
 
 
 async def main():
+    bus = await get_message_bus(["db"])
+
     cdn_servers = [
         ("s3_1", "10.95.27.163", 9001, "New York", 40.730610, -73.935242),
         ("s3_2", "10.95.27.163", 9002, "Vladivostok", 43.1056200, 131.8735300),
@@ -36,23 +37,6 @@ async def main():
                 longitude=longitude,
             )
         )
-
-    # files = [
-    #     ('file_1', 111111, ['s3_1']),
-    #     ('file_2', 222222, ['s3_2']),
-    #     ('file_3', 333333, ['s3_3']),
-    #     ('file_4', 444444, ['s3_1', 's3_2', 's3_3']),
-    # ]
-
-    # for name, size, servers in files:
-    #     await bus.handle(
-    #         commands.CreateFile(
-    #             name=name,
-    #             size=size,
-    #             servers=servers,
-    #         )
-    #     )
-
 
 if __name__ == "__main__":
     loop = asyncio.new_event_loop()

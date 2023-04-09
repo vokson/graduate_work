@@ -47,7 +47,6 @@ class File(AbstractIdCreatedUpdatedModel):
     size: int
     user_id: UUID
     has_deleted: bool = Field(False)
-    has_executed: bool = Field(False)
 
 
 # BROKER MESSAGES
@@ -68,3 +67,6 @@ class FileOrderedToDownloadBrokerMessage(BrokerMessage):
 
 class FileOrderedToCopyBrokerMessage(BrokerMessage):
     key: str = Field("FILE.ORDERED_TO_COPY")
+
+class FileOrderedToRemoveBrokerMessage(BrokerMessage):
+    key: str = Field("FILE.ORDERED_TO_REMOVE")

@@ -12,6 +12,7 @@ EVENT_HANDLERS = {
         event_handlers.file_downloaded_to_temp_storage
     ],
     events.FileDistributed: [event_handlers.file_distributed],
+    events.FileDeleted: [event_handlers.file_deleted],
 }
 
 COMMAND_HANDLERS = {
@@ -31,6 +32,9 @@ COMMAND_HANDLERS = {
     commands.PublishMessage: command_handlers.publish_message,
     commands.CopyFile: command_handlers.copy_file,
     commands.RemoveFileFromTempStorage: command_handlers.remove_file_from_temp_storage,
+    commands.OrderFileToRemove: command_handlers.order_file_to_remove,
+    commands.RemoveFile: command_handlers.remove_file,
+    commands.MarkFileAsRemoved: command_handlers.mark_file_as_removed,
 }
 
 RESULTS = {
@@ -46,4 +50,5 @@ RESULTS = {
     exceptions.DownloadFileError: command_results.DownloadFileError,
     exceptions.UploadFileError: command_results.UploadFileError,
     exceptions.FileNotFoundInTempStorage: command_results.FileNotFoundInTempStorage,
+    exceptions.RemoveFileError: command_results.RemoveFileError,
 }

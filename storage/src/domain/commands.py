@@ -97,3 +97,12 @@ class CopyFile(FileOperation):
 
 class RemoveFileFromTempStorage(Command):
     file_id: UUID
+
+class OrderFileToRemove(FileOperation):
+    pass
+
+class RemoveFile(FileOperation):
+    pass
+
+class MarkFileAsRemoved(FileOperation):
+    pass

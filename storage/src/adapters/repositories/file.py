@@ -20,12 +20,11 @@ class FileRepository:
                             size,
                             user_id,
                             has_deleted,
-                            has_executed,
                             created,
                             updated
                         )
                     VALUES
-                        ($1, $2, $3, $4, $5, $6, $7, $8);
+                        ($1, $2, $3, $4, $5, $6, $7);
                     """
 
     UPDATE_QUERY = f"""
@@ -35,11 +34,10 @@ class FileRepository:
                             size,
                             user_id,
                             has_deleted,
-                            has_executed,
                             created,
                             updated
                         ) = (
-                            $2, $3, $4, $5, $6, $7, $8
+                            $2, $3, $4, $5, $6, $7
                         )
                     WHERE id = $1;
                     """
@@ -51,9 +49,12 @@ class FileRepository:
                         WHERE name = $1 AND user_id = $2;
                         """
 
-    GET_ALL_QUERY = f"SELECT * FROM {__files_tablename__} WHERE user_id = $1;"
+    GET_ALL_NON_DELETED_QUERY = f"""
+                        SELECT * FROM {__files_tablename__} WHERE
+                        has_deleted = false AND user_id = $1;
+                        """
 
-    DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
+    DELETE_QUERY = f"UPDATE {__files_tablename__} SET has_deleted = true WHERE id = $1;"
 
     GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
 
@@ -61,6 +62,9 @@ class FileRepository:
                             INSERT INTO {__file_server_tablename__} (id, file_id, server_id)
                             (SELECT uuid_generate_v4(), $1, $2) ON CONFLICT DO NOTHING;
                         """
+    REMOVE_SERVER_FROM_FILE = (
+        f"DELETE FROM {__file_server_tablename__} WHERE file_id = $1 AND server_id = $2;"
+    )
 
     REMOVE_ALL_SERVERS_FROM_FILE = (
         f"DELETE FROM {__file_server_tablename__} WHERE file_id = $1;"
@@ -90,7 +94,6 @@ class FileRepository:
             obj.size,
             obj.user_id,
             obj.has_deleted,
-            obj.has_executed,
             obj.created,
             obj.updated,
         )
@@ -114,9 +117,9 @@ class FileRepository:
 
         return self._convert_row_to_obj(row)
 
-    async def get_all(self, user_id: UUID) -> list[File]:
+    async def get_non_deleted(self, user_id: UUID) -> list[File]:
         logger.debug(f"Get all files")
-        rows = await self._conn.fetch(self.GET_ALL_QUERY, user_id)
+        rows = await self._conn.fetch(self.GET_ALL_NON_DELETED_QUERY, user_id)
         return [self._convert_row_to_obj(row) for row in rows]
 
     async def update(self, obj: File):
@@ -128,7 +131,6 @@ class FileRepository:
             obj.size,
             obj.user_id,
             obj.has_deleted,
-            obj.has_executed,
             obj.created,
             obj.updated,
         )
@@ -145,6 +147,10 @@ class FileRepository:
     async def add_server_to_file(self, file_id: UUID, server_id: UUID):
         logger.debug(f"Add server {server_id} to file {file_id}")
         await self._conn.execute(self.ADD_SERVER_TO_FILE, file_id, server_id)
+
+    async def remove_server_from_file(self, file_id: UUID, server_id: UUID):
+        logger.debug(f"Remove server {server_id} from file {file_id}")
+        await self._conn.execute(self.REMOVE_SERVER_FROM_FILE, file_id, server_id)
 
     async def remove_all_servers_from_file(self, file_id: UUID):
         logger.debug(f"Remove all servers from file {file_id}")

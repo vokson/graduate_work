@@ -111,6 +111,16 @@ class MinioS3Storage(AbstractS3Storage):
             logger.info(e)
             raise exceptions.UploadFileError
 
+    async def remove_file(self, object_name: str):
+        try:
+            await self._conn.remove_object(self._bucket, object_name)
+        except Exception as e:
+            logger.error(
+                f"Error during removing file {object_name} from {self.name}/{self._bucket}"
+            )
+            logger.info(e)
+            raise exceptions.RemoveFileError
+
 
 def get_s3_conn(bucket: str, name: str) -> AbstractS3Storage:
     return MinioS3Storage(bucket, name)

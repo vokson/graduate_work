@@ -23,3 +23,6 @@ class FileDownloadedToTempStorage(Event):
 
 class FileDistributed(Event):
     id: UUID
+
+class FileDeleted(Event):
+    id: UUID

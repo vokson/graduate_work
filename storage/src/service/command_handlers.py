@@ -54,30 +54,12 @@ async def get_many_cdn_servers(
     return command_results.PositiveCommandResult([x.dict() for x in objs])
 
 
-# async def create_file(
-#     cmd: commands.CreateFile,
-#     uow: AbstractUnitOfWork,
-# ):
-#     async with uow:
-#         obj = File(
-#             id=uuid4(),
-#             name=cmd.name,
-#             size=cmd.size,
-#             servers=cmd.servers
-#         )
-
-#         await uow.files.add(obj)
-#         await uow.commit()
-
-#     return command_results.PositiveCommandResult(obj.dict())
-
-
 async def get_many_files(
     cmd: commands.GetManyFiles,
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        objs = await uow.files.get_all(cmd.user_id)
+        objs = await uow.files.get_non_deleted(cmd.user_id)
 
     return command_results.PositiveCommandResult(objs)
 
@@ -97,6 +79,7 @@ async def delete_file(
         await uow.files.delete(cmd.id)
         await uow.commit()
 
+    uow.push_message(events.FileDeleted(id=cmd.id))
     return command_results.PositiveCommandResult({})
 
 
@@ -203,81 +186,10 @@ async def publish_message(
     return command_results.PositiveCommandResult({})
 
 
-# async def collect_storage_events(
-#     cmd: commands.CollectStorageEvents,
-#     uow: AbstractUnitOfWork,
-# ):
-#     async with uow:
-#         servers = await uow.cdn_servers.get_all()
-#         storages = []
-#         for x in servers:
-#             try:
-#                 storages.append(await uow.s3_pool.get(x.name, x.host, x.port))
-#             except Exception:
-#                 logger.error(f'Storage {x.name} is not available at {x.host}:{x.port}')
-
-
-#         async def listen_storage(storage: AbstractS3Storage):
-#             queue = deque([])
-#             count = 0
-#             # try:
-#             #     filename = await asyncio.wait_for(anext(storage.get_created_events()), timeout=5)
-#             async for filename in storage.get_created_events():
-#                 logger.info(f'Created file "{x}" on server {storage.name}')
-#                 message = FileStoredBrokerMessage(message={
-#                     "id": filename,
-#                     "storage": storage.name
-#                 })
-#                 queue.append(message)
-
-#                 while len(queue) > 0:
-#                     message = queue.popleft()
-#                     is_ok = await publish_message(uow, message)
-#                     if not is_ok:
-#                         queue.append(message)
-#                         asyncio.sleep(1)
-#                     else:
-#                         count += 1
-
-#             # except Exception as e:
-#             #     print('&&&&&&&&&&&&&&&&')
-#             #     print(e)
-
-#             return count
-
-#         listeners = [asyncio.create_task(listen_storage(x)) for x in storages]
-
-#         # await asyncio.wait(listeners)
-#             # done, pending = await asyncio.wait(listeners, timeout=3)
-#         results = await asyncio.gather(*listeners)
-
-#         total_count = 0
-#         for x in results:
-#             if type(x) is int:
-#                 total_count += x
-#             # print('***************')
-#             # print(done, pending)
-#             # for task in pending:
-#             #     print('@@@@@@@')
-#             #     task.cancel()
-#             #     print(f'Task cancelled - {task.cancelled()}')
-
-#         # except asyncio.TimeoutError:
-#         #     logger.info('Timeout Exception')
-
-#         # except asyncio.CancelledError:
-#         #     print(f'Cancel task')
-
-
-#     return command_results.PositiveCommandResult({"done": total_count})
-
-
 async def handle_s3_event(
     cmd: commands.HandleS3Event,
     uow: AbstractUnitOfWork,
 ):
-    # print(cmd.routing_key, cmd.body)
-
     async with uow:
         try:
             storage_name = cmd.routing_key.split(".", 2)[1]
@@ -314,6 +226,7 @@ async def handle_service_event(
     events_mapping = {
         "FILE.ORDERED_TO_DOWNLOAD": commands.DownloadFileToTempStorage,
         "FILE.ORDERED_TO_COPY": commands.CopyFile,
+        "FILE.ORDERED_TO_REMOVE": commands.RemoveFile,
     }
 
     if key not in events_mapping:
@@ -395,5 +308,34 @@ async def remove_file_from_temp_storage(
         os.remove(path)
     except FileNotFoundError:
         raise exceptions.FileNotFoundInTempStorage
+
+    return command_results.PositiveCommandResult({})
+
+async def order_file_to_remove(
+    cmd: commands.OrderFileToRemove,
+    uow: AbstractUnitOfWork,
+):
+    message = models.FileOrderedToRemoveBrokerMessage(message=cmd.dict())
+    uow.push_message(commands.PublishMessage(message=message))
+    return command_results.PositiveCommandResult({})
+
+async def remove_file(
+    cmd: commands.RemoveFile,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        server = await uow.cdn_servers.get_by_id(cmd.server_id)
+        storage = await uow.s3_pool.get(server.name, server.host, server.port)
+        await storage.remove_file(str(cmd.file_id))
+
+    return command_results.PositiveCommandResult({})
+
+async def mark_file_as_removed(
+    cmd: commands.MarkFileAsRemoved,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        await uow.files.remove_server_from_file(cmd.file_id, cmd.server_id)
+        await uow.commit()
 
     return command_results.PositiveCommandResult({})

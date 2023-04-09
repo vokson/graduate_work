@@ -53,10 +53,27 @@ async def file_distributed(
         )
     )
 
+async def file_deleted(
+    cmd: events.FileDeleted,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        file_on_servers_ids = await uow.files.get_ids_of_servers(cmd.id)
+
+        for server_id in file_on_servers_ids:
+            uow.push_message(
+                commands.OrderFileToRemove(
+                    file_id=cmd.id,
+                    server_id=server_id,
+                )
+            )
+
 
 async def file_removed_from_storage(
     cmd: events.FileRemovedFromStorage,
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        print(cmd.id, cmd.storage_name)
+        current_server = await uow.cdn_servers.get_by_name(cmd.storage_name)
+        data = {"file_id": cmd.id, "server_id": current_server.id}
+        uow.push_message(commands.MarkFileAsRemoved(**data))
