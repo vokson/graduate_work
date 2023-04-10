@@ -245,7 +245,7 @@ export default {
       await MessageBus.handle(new RefreshTokens(), uow);
 
     uow.token_timer.set_callback(refresh_tokens);
-    // uow.token_timer.start();
+    uow.token_timer.start();
 
     const get_files = async () => {
       // await MessageBus.handle(new GetFiles(), uow);

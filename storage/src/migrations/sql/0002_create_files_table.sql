@@ -4,13 +4,10 @@ CREATE TABLE files
     name VARCHAR(255),
     size INTEGER,
     user_id UUID,
-    has_deleted BOOLEAN NOT NULL DEFAULT false,
     created TIMESTAMP,
     updated TIMESTAMP,
     UNIQUE (name, user_id)
 );
-
-CREATE INDEX idx_deleted ON files (has_deleted);
 
 CREATE TABLE m2m_file_server
 (

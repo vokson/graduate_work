@@ -46,7 +46,6 @@ class File(AbstractIdCreatedUpdatedModel):
     name: str
     size: int
     user_id: UUID
-    has_deleted: bool = Field(False)
 
 
 # BROKER MESSAGES

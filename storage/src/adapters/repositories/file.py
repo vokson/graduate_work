@@ -19,12 +19,11 @@ class FileRepository:
                             name,
                             size,
                             user_id,
-                            has_deleted,
                             created,
                             updated
                         )
                     VALUES
-                        ($1, $2, $3, $4, $5, $6, $7);
+                        ($1, $2, $3, $4, $5, $6);
                     """
 
     UPDATE_QUERY = f"""
@@ -33,11 +32,10 @@ class FileRepository:
                             name,
                             size,
                             user_id,
-                            has_deleted,
                             created,
                             updated
                         ) = (
-                            $2, $3, $4, $5, $6, $7
+                            $2, $3, $4, $5, $6
                         )
                     WHERE id = $1;
                     """
@@ -49,12 +47,15 @@ class FileRepository:
                         WHERE name = $1 AND user_id = $2;
                         """
 
-    GET_ALL_NON_DELETED_QUERY = f"""
-                        SELECT * FROM {__files_tablename__} WHERE
-                        has_deleted = false AND user_id = $1;
-                        """
+    GET_ALL_QUERY = f"SELECT * FROM {__files_tablename__} WHERE user_id = $1;"
 
-    DELETE_QUERY = f"UPDATE {__files_tablename__} SET has_deleted = true WHERE id = $1;"
+    # GET_ALL_NON_DELETED_QUERY = f"""
+    #                     SELECT * FROM {__files_tablename__} WHERE
+    #                     has_deleted = false AND user_id = $1;
+    #                     """
+
+    DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
+    # DELETE_QUERY = f"UPDATE {__files_tablename__} SET has_deleted = true WHERE id = $1;"
 
     GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
 
@@ -93,7 +94,6 @@ class FileRepository:
             obj.name,
             obj.size,
             obj.user_id,
-            obj.has_deleted,
             obj.created,
             obj.updated,
         )
@@ -119,7 +119,7 @@ class FileRepository:
 
     async def get_non_deleted(self, user_id: UUID) -> list[File]:
         logger.debug(f"Get all files")
-        rows = await self._conn.fetch(self.GET_ALL_NON_DELETED_QUERY, user_id)
+        rows = await self._conn.fetch(self.GET_ALL_QUERY, user_id)
         return [self._convert_row_to_obj(row) for row in rows]
 
     async def update(self, obj: File):
@@ -130,7 +130,6 @@ class FileRepository:
             obj.name,
             obj.size,
             obj.user_id,
-            obj.has_deleted,
             obj.created,
             obj.updated,
         )
