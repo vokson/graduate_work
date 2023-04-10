@@ -53,6 +53,10 @@ class GetDownloadLink(Command):
     ip: str
 
 
+class GetUserActions(Command):
+    user_id: UUID
+
+
 class HandleBrokerMessage(Command):
     routing_key: str
     body: dict

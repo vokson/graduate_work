@@ -23,6 +23,7 @@ COMMAND_HANDLERS = {
     commands.GetFileServers: command_handlers.get_file_servers,
     commands.GetUploadLink: command_handlers.get_upload_link,
     commands.GetDownloadLink: command_handlers.get_download_link,
+    commands.GetUserActions: command_handlers.get_user_actions,
     commands.HandleS3Event: command_handlers.handle_s3_event,
     commands.HandleServiceEvent: command_handlers.handle_service_event,
     commands.MarkFileAsStored: command_handlers.mark_file_as_stored,

@@ -122,6 +122,37 @@ class CdnServer {
 
 }
 
+class UserAction {
+  constructor(
+    id,
+    event,
+    data,
+    created,
+  ) {
+    this._id = id;
+    this._event = event;
+    this._data = data;
+    this._created = created;
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  get event() {
+    return this._event;
+  }
+
+  get data() {
+    return this._data;
+  }
+
+  get created() {
+    return this._created;
+  }
+
+}
+
 class File {
   constructor(id, name, total_size, created, updated) {
     this._id = id;
@@ -214,4 +245,5 @@ export {
   User,
   CdnServer,
   File,
+  UserAction
 };

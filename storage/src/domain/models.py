@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import orjson
 from pydantic import BaseModel, Field
@@ -20,8 +20,10 @@ class IdMixin(BaseModel):
     id: UUID
 
 
-class CreatedUpdatedMixin(BaseModel):
+class CreatedMixin(BaseModel):
     created: datetime
+
+class UpdatedMixin(BaseModel):
     updated: datetime
 
 
@@ -29,7 +31,7 @@ class AbstractIdModel(AbstractModel, IdMixin):
     pass
 
 
-class AbstractIdCreatedUpdatedModel(AbstractIdModel, CreatedUpdatedMixin):
+class AbstractIdCreatedUpdatedModel(AbstractIdModel, CreatedMixin, UpdatedMixin):
     pass
 
 
@@ -47,12 +49,39 @@ class File(AbstractIdCreatedUpdatedModel):
     size: int
     user_id: UUID
 
+class UserAction(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    user_id: UUID
+    obj_id: UUID
+    data: dict
+    event: str
+    created: datetime = Field(default_factory=datetime.now)
+
+class FileActionData(BaseModel):
+    name: str
+
+class FileUserAction(UserAction):
+    data: FileActionData
+
+class FileUploadedUserAction(FileUserAction):
+    event: str = Field('FILE.UPLOADED')
+
+class FileDownloadedUserAction(FileUserAction):
+    event: str = Field('FILE.DOWNLOADED')
+
+class FileDeletedUserAction(FileUserAction):
+    event: str = Field('FILE.DELETED')
+
+class FileRenamedUserAction(FileUserAction):
+    event: str = Field('FILE.RENAMED')
+
 
 # BROKER MESSAGES
 
 
 class BrokerMessage(BaseModel):
     message: dict
+    key: str
     app: str = Field(settings.app_name)
 
 

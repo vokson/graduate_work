@@ -1,4 +1,5 @@
 import logging
+import json
 
 import asyncpg
 from asyncpg import Pool
@@ -26,6 +27,14 @@ async def init_db(**dsl):
 async def get_db_conn(**dsl):
     pool = await init_db(**dsl)
     conn = await pool.acquire()
+
+    await conn.set_type_codec(
+        'jsonb',
+        encoder=lambda x: x.json(),
+        decoder=json.loads,
+        schema='pg_catalog'
+    )
+
     logger.debug(
         f"DB connection {id(conn)} for pool {id(pool)} has been acquired"
     )

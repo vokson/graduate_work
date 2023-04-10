@@ -18,7 +18,7 @@ BASE_DIR = os.path.dirname(
 sys.path.append(BASE_DIR)
 
 
-from src.api.v1 import files, servers
+from src.api.v1 import files, servers, user_actions
 # from src.api.v1 import files, links, servers
 from src.core.config import settings
 from src.service.messagebus import MessageBus
@@ -81,6 +81,6 @@ app.include_router(
 app.include_router(
     files.router, prefix="/storage/api/v1/files", tags=["Files"]
 )
-# app.include_router(
-#     links.router, prefix="/storage/api/v1/links", tags=["Links"]
-# )
+app.include_router(
+    user_actions.router, prefix="/storage/api/v1/actions", tags=["User Actions"]
+)

@@ -21,6 +21,12 @@ class CdnServerResponse(BaseModel):
     latitude: float
     longitude: float
 
+class UserActionResponse(BaseModel):
+    id: UUID
+    data: dict
+    event: str
+    created: datetime
+
 
 class FileResponse(BaseModel):
     id: UUID

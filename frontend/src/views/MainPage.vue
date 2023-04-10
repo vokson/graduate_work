@@ -131,6 +131,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { VueUnitOfWork } from "../logic/service_layer/uow";
 import {
   GetCdnServers,
+  GetUserActions,
   GetFiles,
   GetFileServers,
   RefreshTokens,
@@ -264,6 +265,7 @@ export default {
       await useBeforeEnterPage(uow, []);
       await MessageBus.handle(new GetCdnServers(), uow);
       await MessageBus.handle(new GetFiles(), uow);
+      await MessageBus.handle(new GetUserActions(), uow);
     });
 
     return {

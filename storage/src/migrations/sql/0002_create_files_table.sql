@@ -1,11 +1,11 @@
 CREATE TABLE files
 (
     id UUID PRIMARY KEY,
-    name VARCHAR(255),
-    size INTEGER,
-    user_id UUID,
-    created TIMESTAMP,
-    updated TIMESTAMP,
+    name VARCHAR(255) NOT NULL,
+    size INTEGER NOT NULL,
+    user_id UUID NOT NULL,
+    created TIMESTAMP NOT NULL,
+    updated TIMESTAMP NOT NULL,
     UNIQUE (name, user_id)
 );
 

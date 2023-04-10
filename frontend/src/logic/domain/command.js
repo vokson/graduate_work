@@ -28,6 +28,7 @@ class Logout extends Command { }
 class MyCredentials extends Command { }
 class RefreshTokens extends Command { }
 class GetCdnServers extends Command { }
+class GetUserActions extends Command { }
 class GetFiles extends Command { }
 class GetFileServers extends Command {
   constructor(id) {
@@ -1342,6 +1343,7 @@ export {
   MyCredentials,
   RefreshTokens,
   Logout,
+  GetUserActions,
   // CDN SERVERS
   GetCdnServers,
   // FILE

@@ -6,6 +6,7 @@ from src.adapters.db import get_db_conn, release_db_conn
 from src.adapters.geoip import init_geo_ip
 from src.adapters.repositories.cdn_server import CdnServerRepository
 from src.adapters.repositories.file import FileRepository
+from src.adapters.repositories.history import HistoryRepository
 from src.adapters.s3 import init_s3_pool
 from src.core.config import (cache_dsl, db_dsl, get_s3_dsl, rabbit_args,
                              settings)
@@ -96,6 +97,7 @@ class UnitOfWork(AbstractUnitOfWork):
 
             self.cdn_servers = CdnServerRepository(self._conn)
             self.files = FileRepository(self._conn)
+            self.history = HistoryRepository(self._conn)
 
         return self
 

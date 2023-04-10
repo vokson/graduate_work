@@ -77,6 +77,11 @@ async def delete_file(
             raise exceptions.FileDoesNotExist
 
         await uow.files.delete(cmd.id)
+        await uow.history.add(models.FileDeletedUserAction(**{
+            "obj_id": obj.id,
+            "user_id": obj.user_id,
+            "data": {"name": obj.name}
+        }))
         await uow.commit()
 
     uow.push_message(events.FileDeleted(id=cmd.id))
@@ -139,6 +144,17 @@ async def get_upload_link(
         await uow.commit()
 
     return command_results.PositiveCommandResult({"file": obj, "link": link})
+
+
+async def get_user_actions(
+    cmd: commands.GetUserActions,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        objs = await uow.history.get(cmd.user_id)
+
+    return command_results.PositiveCommandResult([x.dict() for x in objs])
+
 
 
 async def get_download_link(

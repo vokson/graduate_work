@@ -53,6 +53,7 @@ class VueUnitOfWork extends AbstractUnitOfWork {
 
     // this.info_repository = new VueInfoRepository("info");
     this.user_repository = new VueUserRepository("users");
+    this.action_repository = new VueFlatRepository("user_actions");
     this.cdn_server_repository = new VueFlatRepository("cdn_servers");
     this.token_repository = new VueTokenRepository("tokens")
 

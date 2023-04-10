@@ -14,6 +14,7 @@ import {
   refresh_tokens,
   // login_with_token,
   logout,
+  get_user_actions,
 } from "./command_handlers/user_handlers";
 
 // import {
@@ -64,6 +65,7 @@ const COMMAND_HANDLERS = {
   RefreshTokens: [refresh_tokens],
   // LoginWithToken: [login_with_token],
   Logout: [logout],
+  GetUserActions: [get_user_actions],
 
   // CDN SERVERS
   GetCdnServers: [get_cdn_servers],
