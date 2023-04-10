@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, Header, Request, Response, status
 from src.api.decorators import auth
@@ -34,7 +35,7 @@ async def get_many(
     "/upload/",
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,
-    summary="Получение ссылки для загрузки файлв",
+    summary="Получение ссылки для загрузки файла",
 )
 @auth(permissions=["can_upload_file"])
 async def get_upload_link(
@@ -98,4 +99,27 @@ async def get_servers(
 ) -> list[schemes.CdnServerResponse]:
     return transform_command_result(
         await bus.handle(commands.GetFileServers(id=file_id))
+    )
+
+
+@router.post(
+    "/{file_id}/links/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_201_CREATED,
+    summary="Добавление общедоступной ссылки на файл",
+)
+@auth(permissions=["can_add_filesharelink"])
+async def create_file_share_link(
+    file_id: UUID,
+    body: schemes.AddFileShareLinkRequest,
+    bus: MessageBus = Depends(get_bus()),
+) -> schemes.FileShareLinkResponse:
+    return transform_command_result(
+        await bus.handle(
+            commands.CreateFileShareLink(
+                id=file_id,
+                expire_at=timedelta(seconds=body.lifetime) + datetime.now(),
+                password=body.password,
+            )
+        )
     )

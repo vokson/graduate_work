@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Request, Response, status
+from fastapi import (APIRouter, Depends, Header, Query, Request, Response,
+                     status)
 from src.api.decorators import auth
-from src.api.dependables import get_bus, extract_user_id
+from src.api.dependables import extract_user_id, get_bus
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
@@ -22,9 +23,17 @@ router = APIRouter()
 )
 @auth(permissions=[])
 async def get_many(
+    page_num: int = Query(1, gt=0),
+    page_size: int = Query(20, gt=0, le=1000),
     user_id: UUID = Depends(extract_user_id()),
     bus: MessageBus = Depends(get_bus()),
-) -> list[schemes.UserActionResponse]:
+) -> schemes.UserActionResponse:
     return transform_command_result(
-        await bus.handle(commands.GetUserActions(user_id=user_id))
+        await bus.handle(
+            commands.GetUserActions(
+                user_id=user_id,
+                limit=page_size,
+                offset=(page_num - 1) * page_size,
+            )
+        )
     )

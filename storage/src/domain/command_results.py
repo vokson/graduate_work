@@ -124,5 +124,6 @@ class UploadFileError(NegativeCommandResult):
 class FileNotFoundInTempStorage(NegativeCommandResult):
     pass
 
+
 class RemoveFileError(NegativeCommandResult):
     pass

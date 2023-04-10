@@ -77,11 +77,15 @@ async def delete_file(
             raise exceptions.FileDoesNotExist
 
         await uow.files.delete(cmd.id)
-        await uow.history.add(models.FileDeletedUserAction(**{
-            "obj_id": obj.id,
-            "user_id": obj.user_id,
-            "data": {"name": obj.name}
-        }))
+        await uow.history.add(
+            models.FileDeletedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": obj.user_id,
+                    "data": {"name": obj.name},
+                }
+            )
+        )
         await uow.commit()
 
     uow.push_message(events.FileDeleted(id=cmd.id))
@@ -141,6 +145,16 @@ async def get_upload_link(
         link = await storage.get_upload_url(str(obj.id))
         await uow.files.remove_all_servers_from_file(obj.id)
 
+        await uow.history.add(
+            models.FileUploadedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": obj.user_id,
+                    "data": {"name": obj.name},
+                }
+            )
+        )
+
         await uow.commit()
 
     return command_results.PositiveCommandResult({"file": obj, "link": link})
@@ -151,10 +165,12 @@ async def get_user_actions(
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        objs = await uow.history.get(cmd.user_id)
+        objs = await uow.history.get(cmd.user_id, cmd.limit, cmd.offset)
+        count = await uow.history.count(cmd.user_id)
 
-    return command_results.PositiveCommandResult([x.dict() for x in objs])
-
+    return command_results.PositiveCommandResult(
+        {"count": count, "data": [x.dict() for x in objs]}
+    )
 
 
 async def get_download_link(
@@ -180,6 +196,18 @@ async def get_download_link(
             f"Get download link for file {cmd.file_id} on server {nearest_server.name}"
         )
         link = await storage.get_download_url(str(obj.id))
+
+        await uow.history.add(
+            models.FileDownloadedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": obj.user_id,
+                    "data": {"name": obj.name},
+                }
+            )
+        )
+
+        await uow.commit()
 
     return command_results.PositiveCommandResult({"file": obj, "link": link})
 
@@ -327,6 +355,7 @@ async def remove_file_from_temp_storage(
 
     return command_results.PositiveCommandResult({})
 
+
 async def order_file_to_remove(
     cmd: commands.OrderFileToRemove,
     uow: AbstractUnitOfWork,
@@ -334,6 +363,7 @@ async def order_file_to_remove(
     message = models.FileOrderedToRemoveBrokerMessage(message=cmd.dict())
     uow.push_message(commands.PublishMessage(message=message))
     return command_results.PositiveCommandResult({})
+
 
 async def remove_file(
     cmd: commands.RemoveFile,
@@ -346,6 +376,7 @@ async def remove_file(
 
     return command_results.PositiveCommandResult({})
 
+
 async def mark_file_as_removed(
     cmd: commands.MarkFileAsRemoved,
     uow: AbstractUnitOfWork,
@@ -355,3 +386,29 @@ async def mark_file_as_removed(
         await uow.commit()
 
     return command_results.PositiveCommandResult({})
+
+
+async def create_file_share_link(
+    cmd: commands.CreateFileShareLink,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        file = await uow.files.get_by_id(cmd.id)
+        if not file:
+            raise exceptions.FileDoesNotExist
+
+        obj = models.FileShareLink(
+            file_id=cmd.id,
+            password=cmd.password,
+            expire_at=cmd.expire_at,
+        )
+
+        await uow.file_share_links.add(obj)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult(
+        {
+            **obj.dict(),
+            **{"file": file.dict(), "is_secured": obj.password is not None},
+        }
+    )

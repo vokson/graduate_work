@@ -19,6 +19,11 @@
           @click="page_index = Math.min(page_index + 1, page_count - 1)"
         />
         <div
+          class="baseform-header__button baseform-header__button_apply"
+          title="Сохранить"
+          @click="$emit('apply')"
+        />
+        <div
           class="baseform-header__button baseform-header__button_close"
           title="Закрыть"
           @click="$emit('close')"
@@ -57,7 +62,7 @@ import FormDateInput from "../fields/FormDateInput.vue";
 import FormEmailToAddressField from "../fields/FormEmailToAddressField.vue";
 import FormEmailToAddressInput from "../fields/FormEmailToAddressInput.vue";
 import FormHtmlInput from "../fields/FormHtmlInput.vue";
-import FormHiddenInput from "../fields/FormHiddenInput.vue";
+// import FormHiddenInput from "../fields/FormHiddenInput.vue";
 import FormSelectInput from "../fields/FormSelectInput.vue";
 import FormFilteredSelectInput from "../fields/FormFilteredSelectInput.vue";
 
@@ -73,7 +78,7 @@ export default {
     FormEmailToAddressInput,
     FormDateInput,
     FormHtmlInput,
-    FormHiddenInput,
+    // FormHiddenInput,
     FormSelectInput,
     FormFilteredSelectInput,
   },
@@ -97,7 +102,7 @@ export default {
       default: true
     }
   },
-  emits: ["close", "update"],
+  emits: ["apply", "close", "update"],
 
   setup(props) {
     // PAGE
@@ -196,6 +201,11 @@ export default {
 
 .baseform-header__button_right {
   background: url("../../../public/right.png") center center/24px 24px no-repeat;
+}
+
+.baseform-header__button_apply {
+  background: url("../../../public/check.png") center center/24px 24px
+    no-repeat;
 }
 
 .baseform-header__button_close {

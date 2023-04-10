@@ -15,6 +15,9 @@ import {
 import {
   List as UserActionList
 } from "./api_responses/models/user_action";
+import {
+  Single as ShareLinkSingle
+} from "./api_responses/models/file_share_link";
 
 class NotImplementedError extends Error { }
 
@@ -179,10 +182,28 @@ class GetDownloadLinkResponse extends Response {
   }
 }
 
-class GetUserActionsRequest extends Request {}
+class GetUserActionsRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        page_num: { type: "integer" },
+        page_size: { type: "integer" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
 class GetUserActionsResponse extends Response {
   get schema() {
-    return UserActionList;
+    return {
+      type: "object",
+      properties: {
+        count: { type: "integer" },
+        data: UserActionList
+      },
+      additionalProperties: false,
+    };
   }
 }
 
@@ -213,6 +234,26 @@ class DownloadFileRequest extends Request {
   }
 }
 class DownloadFileResponse extends PositiveFileResponse {}
+
+class AddFileShareLinkRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        lifetime: { type: "integer" },
+        password: { type: ["null", "string"] },
+      },
+      additionalProperties: true, // set_size_method
+    };
+  }
+}
+class AddFileShareLinkResponse extends Response {
+  get schema() {
+    return ShareLinkSingle;
+  }
+}
+
 
 class AbstractApi {
   constructor() {
@@ -295,6 +336,10 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  add_file_share_link = () => {
+    throw new NotImplementedError();
+  };
+
 }
 
 export {
@@ -332,4 +377,8 @@ export {
   UploadFileResponse,
   DownloadFileRequest,
   DownloadFileResponse,
+
+  // SHARE LINK
+  AddFileShareLinkRequest,
+  AddFileShareLinkResponse
 };

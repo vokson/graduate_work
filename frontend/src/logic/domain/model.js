@@ -139,19 +139,76 @@ class UserAction {
     return this._id;
   }
 
-  get event() {
-    return this._event;
+  get created() {
+    return this._created;
   }
 
-  get data() {
-    return this._data;
+  get text() {
+    if (this._event === 'FILE.UPLOADED') return this._file_uploaded_text;
+    if (this._event === 'FILE.DOWNLOADED') return this._file_downloaded_text;
+    if (this._event === 'FILE.RENAMED') return this._file_renamed_text;
+    if (this._event === 'FILE.DELETED') return this._file_deleted_text;
+    return `Wrong event ${this._event}`;
+  }
+
+  get _file_uploaded_text() {
+    return `Файл "${this._data['name']}" был добавлен`;
+  }
+
+  get _file_downloaded_text() {
+    return `Файл "${this._data['name']}" был скачан`;
+  }
+
+  get _file_renamed_text() {
+    return `Файл "${this._data['old_name']}" был переименован в "${this._data['new_name']}"`
+  }
+
+  get _file_deleted_text() {
+    return `Файл "${this._data['name']}" был удален`;
+  }
+
+}
+
+class ShareLink {
+  constructor(
+    id,
+    file,
+    is_secured,
+    expire_at,
+    created,
+  ) {
+    this._id = id;
+    this._file = file;
+    this._is_secured = is_secured;
+    this._expire_at = expire_at;
+    this._created = created;
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  get file() {
+    return this._file;
+  }
+  
+  get is_secured() {
+    return this._is_secured;
+  }
+
+  get expire_at() {
+    return this._expire_at;
   }
 
   get created() {
     return this._created;
   }
 
+  get text() {
+    return `${this._is_secured ? ', защищенная паролем' : ' без пароля'}. Действует до ${this._expire_at.toLocaleString()}.`;
+  }
 }
+
 
 class File {
   constructor(id, name, total_size, created, updated) {
@@ -245,5 +302,6 @@ export {
   User,
   CdnServer,
   File,
+  ShareLink,
   UserAction
 };

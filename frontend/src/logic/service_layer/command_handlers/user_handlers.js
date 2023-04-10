@@ -86,7 +86,7 @@ const refresh_tokens = async (event, uow) => {
   const access_token = uow.token_repository.get_access_token()
   const refresh_token = uow.token_repository.get_refresh_token()
 
-  console.log('CURRENT REFRESH TOKEN', refresh_token);
+  // console.log('CURRENT REFRESH TOKEN', refresh_token);
 
   if (!refresh_token) {
     uow.push_message(new RefreshTokenOutdated());
@@ -98,7 +98,7 @@ const refresh_tokens = async (event, uow) => {
   }
 
   uow.api.set_auth_token(refresh_token);
-  console.log('SET AUTH TOKEN - REFRESH')
+  // console.log('SET AUTH TOKEN - REFRESH')
 
   const request = new RefreshTokensRequest();
   const response = await uow.api.call(request);
@@ -113,11 +113,11 @@ const refresh_tokens = async (event, uow) => {
   }
 
   if (response instanceof RefreshTokensResponse) {
-    console.log('NEW REFRESH TOKEN', response.data.refresh_token);
+    // console.log('NEW REFRESH TOKEN', response.data.refresh_token);
     uow.token_repository.set_access_token(response.data.access_token);
     uow.token_repository.set_refresh_token(response.data.refresh_token);
     uow.api.set_auth_token(response.data.access_token);
-    console.log('SET AUTH TOKEN - NEW ACCESS')
+    // console.log('SET AUTH TOKEN - NEW ACCESS')
     uow.token_timer.start()
     return;
   }
@@ -159,7 +159,10 @@ const convert_user_action_response_obj_to_model = (obj) => {
 const get_user_actions = async (event, uow) => {
   uow.action_repository.reset_keeping_refs();
 
-  const request = new GetUserActionsRequest();
+  const request = new GetUserActionsRequest({
+    page_num: event.page_num,
+    page_size: event.page_size,
+  });
   const response = await uow.api.call(request);
 
   if (response instanceof NegativeResponse) {
@@ -168,7 +171,8 @@ const get_user_actions = async (event, uow) => {
   }
 
   if (response instanceof GetUserActionsResponse) {
-    response.data.forEach((obj) =>
+    uow.action_repository.set_count(response.data.count)
+    response.data.data.forEach((obj) =>
       uow.action_repository.set(obj.id,
         convert_user_action_response_obj_to_model(obj)
       ))

@@ -3,15 +3,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '../views/LoginPage.vue'
 import MainPage from '../views/MainPage.vue'
 import MessagePage from '../views/service/MessagePage.vue'
-// import DownloadFileFromFolderPage from '../views/download/DownloadFileFromFolderPage'
+import DownloadFilePage from '../views/download/DownloadFilePage'
 
 
 const routes = [
-  // {
-  //   path: '/folder/:folder_id/usergroup/:usergroup_id/file/:file_id',
-  //   name: 'DownloadFileFromFolderPage',
-  //   component: DownloadFileFromFolderPage
-  // },
+  {
+    path: '/links/:link_id',
+    name: 'DownloadFilePage',
+    component: DownloadFilePage
+  },
   {
     path: '/login',
     name: 'LoginPage',

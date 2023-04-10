@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 
 import asyncpg
 from asyncpg import Pool
@@ -29,10 +29,10 @@ async def get_db_conn(**dsl):
     conn = await pool.acquire()
 
     await conn.set_type_codec(
-        'jsonb',
+        "jsonb",
         encoder=lambda x: x.json(),
         decoder=json.loads,
-        schema='pg_catalog'
+        schema="pg_catalog",
     )
 
     logger.debug(

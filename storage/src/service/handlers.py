@@ -5,6 +5,7 @@ from src.core import exceptions
 from src.domain import command_results, commands, events
 from src.service import command_handlers, event_handlers
 
+
 EVENT_HANDLERS = {
     events.FileStored: [event_handlers.file_stored],
     events.FileRemovedFromStorage: [event_handlers.file_removed_from_storage],
@@ -36,6 +37,7 @@ COMMAND_HANDLERS = {
     commands.OrderFileToRemove: command_handlers.order_file_to_remove,
     commands.RemoveFile: command_handlers.remove_file,
     commands.MarkFileAsRemoved: command_handlers.mark_file_as_removed,
+    commands.CreateFileShareLink: command_handlers.create_file_share_link,
 }
 
 RESULTS = {

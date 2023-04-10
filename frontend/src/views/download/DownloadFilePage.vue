@@ -12,8 +12,8 @@
 import { useRoute } from "vue-router";
 import { onMounted, computed } from "vue";
 import { VueUnitOfWork } from "../../logic/service_layer/uow";
-import { GetFileInfo } from "../../logic/domain/command";
-import { MessageBus } from "../../logic/service_layer/message_bus";
+// import { GetFileInfo } from "../../logic/domain/command";
+// import { MessageBus } from "../../logic/service_layer/message_bus";
 import DocumentPageDownloadProgressRow from "../../components/document/DocumentPageDownloadProgressRow.vue";
 
 export default {
@@ -22,35 +22,31 @@ export default {
   },
   name: "DownloadFilePage",
 
-  props: {
-    generate_message: {
-      type: Function,
-      required: true,
-    },
-  },
 
-  setup(props) {
+  setup() {
     const uow = new VueUnitOfWork();
 
     const route = useRoute();
-    const file_id = route.params.file_id;
+    const link_id = route.params.link_id;
 
     const downloading_files = computed(() =>
       uow.download_progress.values().map((obj) => obj.value)
     );
 
     const handle_get_file_info = async () => {
-      const message = new GetFileInfo(file_id);
-      const result = await MessageBus.handle(message, uow);
-      return result[0]; // Первый результат
+      return link_id
+      // const message = new GetFileInfo(file_id);
+      // const result = await MessageBus.handle(message, uow);
+      // return result[0]; // Первый результат
     };
 
-    const handle_download_file = async (name, size) =>
-      await MessageBus.handle(props.generate_message(name, size), uow);
+    // const handle_download_file = async (name, size) =>
+    //   await MessageBus.handle(props.generate_message(name, size), uow);
 
     onMounted(async () => {
       const file_info = await handle_get_file_info();
-      if (file_info) await handle_download_file(file_info.name, file_info.size);
+      console.log(file_info)
+      // if (file_info) await handle_download_file(file_info.name, file_info.size);
     });
 
     return { downloading_files };

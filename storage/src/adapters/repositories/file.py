@@ -63,9 +63,7 @@ class FileRepository:
                             INSERT INTO {__file_server_tablename__} (id, file_id, server_id)
                             (SELECT uuid_generate_v4(), $1, $2) ON CONFLICT DO NOTHING;
                         """
-    REMOVE_SERVER_FROM_FILE = (
-        f"DELETE FROM {__file_server_tablename__} WHERE file_id = $1 AND server_id = $2;"
-    )
+    REMOVE_SERVER_FROM_FILE = f"DELETE FROM {__file_server_tablename__} WHERE file_id = $1 AND server_id = $2;"
 
     REMOVE_ALL_SERVERS_FROM_FILE = (
         f"DELETE FROM {__file_server_tablename__} WHERE file_id = $1;"
@@ -149,7 +147,9 @@ class FileRepository:
 
     async def remove_server_from_file(self, file_id: UUID, server_id: UUID):
         logger.debug(f"Remove server {server_id} from file {file_id}")
-        await self._conn.execute(self.REMOVE_SERVER_FROM_FILE, file_id, server_id)
+        await self._conn.execute(
+            self.REMOVE_SERVER_FROM_FILE, file_id, server_id
+        )
 
     async def remove_all_servers_from_file(self, file_id: UUID):
         logger.debug(f"Remove all servers from file {file_id}")

@@ -17,6 +17,7 @@ export default {
     provide("cdn_servers", {});
     provide("user_actions", {});
     provide("files", {});
+    provide("file_share_links", {});
   },
 };
 </script>

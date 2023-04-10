@@ -82,5 +82,7 @@ app.include_router(
     files.router, prefix="/storage/api/v1/files", tags=["Files"]
 )
 app.include_router(
-    user_actions.router, prefix="/storage/api/v1/actions", tags=["User Actions"]
+    user_actions.router,
+    prefix="/storage/api/v1/actions",
+    tags=["User Actions"],
 )

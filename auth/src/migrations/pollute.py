@@ -15,10 +15,11 @@ from src.service.messagebus import get_message_bus
 
 
 logger = logging.getLogger(__name__)
-bus = get_message_bus()
 
 
 async def main():
+    bus = await get_message_bus(["db"])
+
     await bus.handle(
         commands.CreateUser(
             username="admin",
@@ -28,10 +29,33 @@ async def main():
             last_name="Doe",
             is_superuser=True,
             permissions=[
-                "can_delete_file",
+                "can_view_file",
+                "can_rename_file",
                 "can_upload_file",
                 "can_download_file",
+                "can_delete_file",
                 "can_view_cdnserver",
+                "can_add_filesharelink",
+            ],
+        )
+    )
+
+    await bus.handle(
+        commands.CreateUser(
+            username="user",
+            password="user",
+            email="user@mail.ru",
+            first_name="Vasya",
+            last_name="Pupkin",
+            is_superuser=False,
+            permissions=[
+                "can_view_file",
+                "can_rename_file",
+                "can_upload_file",
+                "can_download_file",
+                "can_delete_file",
+                "can_view_cdnserver",
+                "can_add_filesharelink",
             ],
         )
     )

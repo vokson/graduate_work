@@ -17,11 +17,12 @@ class AbstractModel(BaseModel):
 
 
 class IdMixin(BaseModel):
-    id: UUID
+    id: UUID = Field(default_factory=uuid4)
 
 
 class CreatedMixin(BaseModel):
-    created: datetime
+    created: datetime = Field(default_factory=datetime.now)
+
 
 class UpdatedMixin(BaseModel):
     updated: datetime
@@ -31,7 +32,9 @@ class AbstractIdModel(AbstractModel, IdMixin):
     pass
 
 
-class AbstractIdCreatedUpdatedModel(AbstractIdModel, CreatedMixin, UpdatedMixin):
+class AbstractIdCreatedUpdatedModel(
+    AbstractIdModel, CreatedMixin, UpdatedMixin
+):
     pass
 
 
@@ -49,31 +52,42 @@ class File(AbstractIdCreatedUpdatedModel):
     size: int
     user_id: UUID
 
-class UserAction(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
+
+class FileShareLink(AbstractIdModel, CreatedMixin):
+    file_id: UUID
+    password: str | None
+    expire_at: datetime | None
+
+
+class UserAction(AbstractIdModel, CreatedMixin):
     user_id: UUID
     obj_id: UUID
     data: dict
     event: str
-    created: datetime = Field(default_factory=datetime.now)
+
 
 class FileActionData(BaseModel):
     name: str
 
+
 class FileUserAction(UserAction):
     data: FileActionData
 
+
 class FileUploadedUserAction(FileUserAction):
-    event: str = Field('FILE.UPLOADED')
+    event: str = Field("FILE.UPLOADED")
+
 
 class FileDownloadedUserAction(FileUserAction):
-    event: str = Field('FILE.DOWNLOADED')
+    event: str = Field("FILE.DOWNLOADED")
+
 
 class FileDeletedUserAction(FileUserAction):
-    event: str = Field('FILE.DELETED')
+    event: str = Field("FILE.DELETED")
+
 
 class FileRenamedUserAction(FileUserAction):
-    event: str = Field('FILE.RENAMED')
+    event: str = Field("FILE.RENAMED")
 
 
 # BROKER MESSAGES
@@ -95,6 +109,7 @@ class FileOrderedToDownloadBrokerMessage(BrokerMessage):
 
 class FileOrderedToCopyBrokerMessage(BrokerMessage):
     key: str = Field("FILE.ORDERED_TO_COPY")
+
 
 class FileOrderedToRemoveBrokerMessage(BrokerMessage):
     key: str = Field("FILE.ORDERED_TO_REMOVE")

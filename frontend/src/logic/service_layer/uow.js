@@ -18,7 +18,7 @@ import { AbstractTimer } from "../adapters/timer";
 // import { VueFolderSettings } from "../adapters/folder_settings";
 // import { VueInfoRepository } from "../adapters/info_repository";
 // import { VueCartRepository } from "../adapters/cart_repository";
-// import { VueCountableFlatRepository } from "../adapters/countable_flat_repository";
+import { VueCountableFlatRepository } from "../adapters/countable_flat_repository";
 
 const token_timer = new AbstractTimer(5000);
 const get_files_timer = new AbstractTimer(2000);
@@ -53,9 +53,11 @@ class VueUnitOfWork extends AbstractUnitOfWork {
 
     // this.info_repository = new VueInfoRepository("info");
     this.user_repository = new VueUserRepository("users");
-    this.action_repository = new VueFlatRepository("user_actions");
+    this.action_repository = new VueCountableFlatRepository("user_actions");
+    this.action_repository.set_count(0)
     this.cdn_server_repository = new VueFlatRepository("cdn_servers");
     this.token_repository = new VueTokenRepository("tokens")
+    this.link_repository = new VueFlatRepository("file_share_links")
 
     // this.file_in_folder_repository = new VueFileBoxRepository(
     //   "files_in_folders"

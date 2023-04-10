@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class EmptyResponse(BaseModel):
@@ -21,11 +21,17 @@ class CdnServerResponse(BaseModel):
     latitude: float
     longitude: float
 
-class UserActionResponse(BaseModel):
+
+class UserActionItemResponse(BaseModel):
     id: UUID
     data: dict
     event: str
     created: datetime
+
+
+class UserActionResponse(BaseModel):
+    count: int
+    data: list[UserActionItemResponse]
 
 
 class FileResponse(BaseModel):
@@ -46,36 +52,14 @@ class LinkResponse(BaseModel):
     link: str
 
 
-# class RegisterUserRequest(BaseModel):
-#     username: str
-#     password: str
-#     email: str
-#     first_name: str
-#     last_name: str
+class AddFileShareLinkRequest(BaseModel):
+    lifetime: int | None = Field(None, gt=0)
+    password: str | None = Field(None)
 
 
-# class UserResponse(BaseModel):
-#     username: str
-#     email: str
-#     first_name: str
-#     last_name: str
-#     is_superuser: bool
-#     permissions: list[str]
-
-
-# class LoginByCredentialsRequest(BaseModel):
-#     username: str
-#     password: str
-
-
-# class LoginByCredentialsResponse(BaseModel):
-#     access_token: str
-#     refresh_token: str
-
-
-# class RefreshTokensResponse(LoginByCredentialsResponse):
-#     pass
-
-
-# class VerifyTokenRequest(BaseModel):
-#     permissions: list[str]
+class FileShareLinkResponse(BaseModel):
+    id: UUID
+    file: FileResponse
+    is_secured: bool
+    expire_at: datetime | None
+    created: datetime

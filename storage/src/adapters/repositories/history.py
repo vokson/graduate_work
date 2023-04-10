@@ -28,7 +28,16 @@ class HistoryRepository:
                         ($1, $2, $3, $4, $5, $6);
                     """
 
-    GET_QUERY = f"SELECT * FROM {__tablename__} WHERE user_id = $1 ORDER BY created DESC;"
+    GET_QUERY = f"""
+                    SELECT * FROM {__tablename__} WHERE
+                    user_id = $1
+                    ORDER BY created DESC
+                    LIMIT $2 OFFSET $3;
+                """
+
+    COUNT_QUERY = (
+        f"SELECT COUNT(id) as cnt FROM {__tablename__} WHERE user_id = $1;"
+    )
 
     def __init__(self, conn):
         self._conn = conn
@@ -48,7 +57,13 @@ class HistoryRepository:
             obj.created,
         )
 
-    async def get(self, user_id: UUID) -> UserAction:
+    async def get(self, user_id: UUID, limit: int, offset: int) -> UserAction:
         logger.debug(f"Get actions of user {user_id}")
-        rows = await self._conn.fetch(self.GET_QUERY, user_id)
+
+        rows = await self._conn.fetch(self.GET_QUERY, user_id, limit, offset)
         return [self._convert_row_to_obj(row) for row in rows]
+
+    async def count(self, user_id: UUID) -> UserAction:
+        logger.debug(f"Get count of actions for user {user_id}")
+        row = await self._conn.fetchrow(self.COUNT_QUERY, user_id)
+        return row["cnt"]

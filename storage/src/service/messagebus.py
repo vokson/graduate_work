@@ -4,9 +4,9 @@ from typing import Callable, Type
 
 # from src.domain import commands, events
 from src.domain import command_results, commands, events
+from src.service.handlers import COMMAND_HANDLERS, EVENT_HANDLERS, RESULTS
 # from src.service import command_handlers, event_handlers
 from src.service.uow import AbstractUnitOfWork, UnitOfWork
-from src.service.handlers import RESULTS, COMMAND_HANDLERS, EVENT_HANDLERS
 
 
 logger = logging.getLogger(__name__)

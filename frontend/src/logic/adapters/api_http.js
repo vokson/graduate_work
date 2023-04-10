@@ -24,6 +24,9 @@ import {
   UploadFileResponse,
   GetDownloadLinkResponse,
   DownloadFileResponse,
+
+  // SHARE LINK
+  AddFileShareLinkResponse,
 } from "./api";
 
 class HttpApiError extends Error { }
@@ -53,6 +56,10 @@ class HttpApi extends AbstractApi {
       UploadFileRequest: this.upload_file,
       GetDownloadLinkRequest: this.get_download_link,
       DownloadFileRequest: this.download_file,
+
+
+      // SHARE LINK
+      AddFileShareLinkRequest: this.add_file_share_link,
     };
   }
 
@@ -176,7 +183,6 @@ class HttpApi extends AbstractApi {
     // Если получен файл для скачивания
 
     if (operation_by_link && response.content_length > 0) {
-      console.log('FILE DOWNLOAD')
       return {
         file: response.data,
       };
@@ -281,10 +287,17 @@ class HttpApi extends AbstractApi {
     );
   };
 
-  get_user_actions = async () => {
+  get_user_actions = async (request) => {
     return await this.perform_request(
       GetUserActionsResponse,
-      `/storage/api/v1/actions/`
+      `/storage/api/v1/actions/`,
+      {
+        method: "get",
+        parameters: {
+          page_num: request.data.page_num,
+          page_size: request.data.page_size,
+        },
+      }
     );
   };
 
@@ -353,6 +366,20 @@ class HttpApi extends AbstractApi {
       {
         response_type: "blob",
         set_download_size_method: request.data.set_size_method,
+      }
+    );
+  };
+
+  add_file_share_link = async (request) => {
+    return await this.perform_request(
+      AddFileShareLinkResponse,
+      `/storage/api/v1/files/${request.data.id}/links/`,
+      {
+        method: "post",
+        data: JSON.stringify({
+          lifetime: request.data.lifetime,
+          password: request.data.password,
+        }),
       }
     );
   };

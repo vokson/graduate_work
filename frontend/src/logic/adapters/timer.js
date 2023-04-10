@@ -18,12 +18,12 @@ class AbstractTimer {
   start = () => {
     if (!this._timer) {
       this._timer = setInterval(this._callback, this._period);
-      console.log('START TIMER', this._timer, this._period)
+      // console.log('START TIMER', this._timer, this._period)
     }
   };
 
   stop = () => {
-    console.log('STOP TIMER', this._timer, this._period)
+    // console.log('STOP TIMER', this._timer, this._period)
     clearInterval(this._timer);
     this._timer = null;
   };

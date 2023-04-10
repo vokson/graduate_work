@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -55,6 +56,14 @@ class GetDownloadLink(Command):
 
 class GetUserActions(Command):
     user_id: UUID
+    limit: int
+    offset: int
+
+
+class CreateFileShareLink(Command):
+    id: UUID
+    password: str | None
+    expire_at: datetime | None
 
 
 class HandleBrokerMessage(Command):
@@ -102,11 +111,14 @@ class CopyFile(FileOperation):
 class RemoveFileFromTempStorage(Command):
     file_id: UUID
 
+
 class OrderFileToRemove(FileOperation):
     pass
 
+
 class RemoveFile(FileOperation):
     pass
+
 
 class MarkFileAsRemoved(FileOperation):
     pass

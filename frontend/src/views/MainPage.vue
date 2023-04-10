@@ -6,6 +6,17 @@
       size="middle"
     />
     <div class="page__container">
+      <div class="page__form-backdrop" v-if="is_form_opened">
+        <base-form
+          class="page__form"
+          :attributes="form_attributes"
+          :settings="form_pages"
+          @update="handle_update_form_attribute($event.name, $event.value)"
+          @close="handle_form_close()"
+          @apply="handle_form_apply()"
+        >
+        </base-form>
+      </div>
       <div class="page__topcontainer">
         <div v-if="user" class="page__userinfo">
           <div class="page__userrow">
@@ -38,6 +49,11 @@
           </div>
         </div>
         <div class="page__filecontainer">
+          <file-list
+            :files="downloading_files"
+            :can_be_deleted="false"
+            :can_be_dragged="false"
+          />
           <file-drop-zone
             class="page__filedropzone"
             :class="{ page__filedropzone_dragging: is_drag_above_file_zone }"
@@ -59,9 +75,47 @@
             "
           />
         </div>
-        <div class="page__filedownloadingcontainer">
-          <form-text-field value="Файлы в процессе скачивания:"/>
-          <file-list :files="downloading_files" :can_be_deleted="false" :can_be_dragged="false"/>
+        <div class="page__historycontainer hystorycontainer">
+          <form-text-field
+            value="История действий пользователя:"
+            :parameters="{ font_weight: 600 }"
+          />
+          <document-pagination-row
+            :total_count="ua_total_count"
+            :count_per_page="ua_count_per_page"
+            :current_page="ua_current_page"
+            :variants="ua_variants"
+            @set:count_per_page="ua_select_count_per_page($event)"
+            @select:page="ua_select_page($event)"
+          />
+          <div
+            v-for="action in user_actions"
+            :key="action.id"
+            class="historycontainer__row history__row"
+          >
+            <div class="history__date">
+              {{ action.created.toLocaleString() }}
+            </div>
+            <div class="history__text">{{ action.text }}</div>
+          </div>
+        </div>
+        <div class="page__linkcontainer linkcontainer">
+          <form-text-field
+            value="Общедоступные ссылки на файл:"
+            :parameters="{ font_weight: 600 }"
+          />
+          <div
+            v-for="link in share_links"
+            :key="link.id"
+            class="linkcontainer__row link__row"
+          >
+            <div class="link__date" >
+              {{ link.created.toLocaleString() }}
+            </div>
+            <div class="link__text">
+              <a :href="make_share_link(link.id)">Ссылка</a>{{ link.text }}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -96,6 +150,7 @@
             <file-block
               :file="file"
               @download:file="handle_download(file.id)"
+              @copy_link_to:file="handle_copy_link(file.id)"
             />
           </div>
 
@@ -127,9 +182,11 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, reactive, computed, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
 import { VueUnitOfWork } from "../logic/service_layer/uow";
 import {
+  Notify,
   GetCdnServers,
   GetUserActions,
   GetFiles,
@@ -138,15 +195,21 @@ import {
   UploadFile,
   DeleteFile,
   DownloadFile,
+  AddFileShareLink,
 } from "../logic/domain/command";
-import { UploadFileTooBigError } from "../logic/domain/event";
+import {
+  UploadFileTooBigError,
+  FileShareLinkCopied,
+} from "../logic/domain/event";
 import HeadingComponent from "../components/HeadingComponent.vue";
+import DocumentPaginationRow from "../components/document/DocumentPaginationRow.vue";
 // import FileList from "../components/file/FileList.vue";
 import FileDropZone from "../components/file/FileDropZone.vue";
 import FileBlock from "../components/file/FileBlock.vue";
 import FileList from "../components/file/FileList.vue";
 import { MessageBus } from "../logic/service_layer/message_bus";
 
+import BaseForm from "../components/forms/BaseForm.vue";
 import FormTextField from "../components/fields/FormTextField.vue";
 // import FolderTreeNode from "../components/folder/FolderTreeNode.vue";
 // import ToggleTextButton from "../components/buttons/ToggleTextButton.vue";
@@ -159,6 +222,8 @@ export default {
     FileDropZone,
     FileList,
     FormTextField,
+    DocumentPaginationRow,
+    BaseForm,
     // FolderTreeNode,
     // FormTextInput,
     // ToggleTextButton,
@@ -166,6 +231,7 @@ export default {
   name: "MainPage",
 
   setup() {
+    const router = useRouter();
     const uow = new VueUnitOfWork();
     const max_file_size = 100; // MB
 
@@ -174,13 +240,39 @@ export default {
       uow.cdn_server_repository.values().map((obj) => obj.value)
     );
 
+    // HISTORY
+    const user_actions = computed(() =>
+      uow.action_repository.values().map((obj) => obj.value)
+    );
+    const ua_total_count = uow.action_repository.get_count(); // Ref
+    const ua_current_page = ref(1);
+    const ua_count_per_page = ref(10);
+    const ua_variants = ref([5, 10]);
+
+    const ua_select_page = (page_num) => (ua_current_page.value = page_num);
+    const ua_select_count_per_page = (page_size) =>
+      (ua_count_per_page.value = page_size);
+
+    watch([ua_current_page, ua_count_per_page], async () => {
+      await refresh_actions();
+    });
+
+    const refresh_actions = async () =>
+      await MessageBus.handle(
+        new GetUserActions(ua_current_page.value, ua_count_per_page.value),
+        uow
+      );
+
     // FILES
     const files = computed(() =>
       uow.file_repository.values().map((obj) => obj.value)
     );
 
     const downloading_files = computed(() =>
-      uow.download_progress.values().map((obj) => obj.value).filter(f => !f.uploaded)
+      uow.download_progress
+        .values()
+        .map((obj) => obj.value)
+        .filter((f) => !f.uploaded)
     );
 
     watch(files, async (arr) => {
@@ -190,20 +282,14 @@ export default {
       });
     });
 
-    // document
-    //   .getElementById("file-input")
-    //   .addEventListener("change", function (e) {
-    //     if (e.target.files[0]) {
-    //       document.body.append("You selected " + e.target.files[0].name);
-    //     }
-    //   });
-
     const handle_delete = async (id) => {
       await MessageBus.handle(new DeleteFile(id), uow);
+      await refresh_actions();
     };
 
     const handle_download = async (id) => {
       await MessageBus.handle(new DownloadFile(id), uow);
+      await refresh_actions();
     };
 
     // DRAGGING
@@ -211,7 +297,6 @@ export default {
 
     // DROP
     const handle_new_file_drop = async (file) => {
-      console.log(file);
       let message = null;
       if (file.size > max_file_size * 1024 * 1024) {
         message = new UploadFileTooBigError(file.name);
@@ -219,27 +304,112 @@ export default {
         message = new UploadFile(file);
       }
       await MessageBus.handle(message, uow);
+      await refresh_actions();
     };
 
-    // // DOWNLOAD
-    // const downloading_files = computed(() =>
-    //   uow.download_progress.values().map((obj) => obj.value)
-    // );
+    // SHARE LINKS
+    const share_links = computed(() =>
+      uow.link_repository.values().map((obj) => obj.value)
+    );
 
-    // const handle_download = async (file, inline) => {
-    //   await MessageBus.handle(new DownloadShareFile(file.id, file.name, file.size, inline), uow);
-    // };
+    const make_share_link = (link_id) => {
+      const props = router.resolve({
+        name: "DownloadFilePage",
+        params: {
+          link_id: link_id,
+        },
+      });
 
-    // const handle_copy_link_to_file_into_clipboard = (file) => {
-    //   const props = router.resolve({
-    //     name: "DownloadShareFilePage",
-    //     params: { file_id: file.id },
-    //   });
+      return window.location.origin + props.href;
+    };
 
-    //   navigator.clipboard
-    //     .writeText(window.location.origin + props.href)
-    //     .then(() => MessageBus.handle(new FileLinkCopied(), uow));
-    // };
+    const handle_copy_link_into_clipboard = (link_id) => {
+      const url = make_share_link(link_id);
+
+      console.log("LINK");
+      console.log(url);
+
+      if (navigator.clipboard)
+        navigator.clipboard
+          .writeText(url)
+          .then(() => MessageBus.handle(new FileShareLinkCopied(), uow));
+      else console.log(url);
+    };
+
+    // FORM
+    const is_form_opened = ref(false);
+    const form_attributes = reactive({
+      FILE_ID: null,
+      LIFETIME: "20",
+      PASSWORD: "1234",
+    });
+
+    const handle_copy_link = (file_id) => {
+      handle_update_form_attribute("FILE_ID", file_id);
+      is_form_opened.value = true;
+    };
+
+    const handle_form_close = () => {
+      is_form_opened.value = false;
+    };
+
+    const handle_form_apply = async () => {
+      const file_id = form_attributes["FILE_ID"];
+      const lifetime = Number.parseInt(form_attributes["LIFETIME"]);
+      let password = form_attributes["PASSWORD"];
+
+      if (!password) password = null;
+      if (!lifetime || lifetime <= 0) {
+        await MessageBus.handle(
+          new Notify(
+            "error",
+            "Время жизни должно быть целым положительным числом"
+          ),
+          uow
+        );
+        return;
+      }
+
+      is_form_opened.value = false;
+      await MessageBus.handle(
+        new AddFileShareLink(file_id, lifetime, password),
+        uow
+      );
+    };
+
+    const handle_update_form_attribute = (name, value) =>
+      (form_attributes[name] = value);
+
+    const form_pages = [
+      {
+        size: 400,
+        name: "Создание ссылки",
+        fields: [
+          {
+            type: "FormTextField",
+            parameters: {
+              font_weight: "bold",
+            },
+            value: "Время жизни ссылки:",
+          },
+          {
+            type: "FormTextInput",
+            bind: "LIFETIME",
+          },
+          {
+            type: "FormTextField",
+            parameters: {
+              font_weight: "bold",
+            },
+            value: "Пароль:",
+          },
+          {
+            type: "FormTextInput",
+            bind: "PASSWORD",
+          },
+        ],
+      },
+    ];
 
     // TIMERS
     const refresh_tokens = async () =>
@@ -249,7 +419,6 @@ export default {
     uow.token_timer.start();
 
     const get_files = async () => {
-      // await MessageBus.handle(new GetFiles(), uow);
       files.value.forEach(async (f) => {
         if (f.servers.length < servers.value.length)
           await MessageBus.handle(new GetFileServers(f.id), uow);
@@ -265,12 +434,21 @@ export default {
       await useBeforeEnterPage(uow, []);
       await MessageBus.handle(new GetCdnServers(), uow);
       await MessageBus.handle(new GetFiles(), uow);
-      await MessageBus.handle(new GetUserActions(), uow);
+      await refresh_actions();
     });
 
     return {
       // USER
       user,
+
+      // USER ACTIONS
+      user_actions,
+      ua_total_count,
+      ua_current_page,
+      ua_count_per_page,
+      ua_variants,
+      ua_select_page,
+      ua_select_count_per_page,
 
       // SERVER
       servers,
@@ -283,6 +461,20 @@ export default {
       handle_new_file_drop,
       handle_delete,
       handle_download,
+      handle_copy_link,
+
+      // FORM
+      is_form_opened,
+      form_pages,
+      form_attributes,
+      handle_update_form_attribute,
+      handle_form_apply,
+      handle_form_close,
+
+      // SHARE LINK
+      share_links,
+      make_share_link,
+      handle_copy_link_into_clipboard,
     };
   },
 };
@@ -370,9 +562,11 @@ export default {
   flex-direction: column;
   align-items: center;
   margin-left: 20px;
+  min-height: 300px;
 }
 
-.page__filedownloadingcontainer {
+.page__historycontainer,
+.page__linkcontainer {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -446,5 +640,41 @@ export default {
 .filerow__img_delete {
   background: url("../../public/delete.png") top left/26px 26px no-repeat;
   cursor: pointer;
+}
+
+.history__row,
+.link__row {
+  display: flex;
+}
+
+.history__date,
+.link__date {
+  min-width: 150px;
+}
+
+.history__text,
+.link__text {
+  margin-left: 20px;
+  flex-grow: 1;
+  flex-wrap: wrap;
+}
+
+.page__form-backdrop {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page__form {
+  background: #ffffff;
+  box-shadow: 2px 2px 20px 1px;
+  padding: 20px;
+  border-radius: 10px;
 }
 </style>

@@ -65,6 +65,7 @@ class UploadFileError(ApplicationException):
 class FileNotFoundInTempStorage(ApplicationException):
     pass
 
+
 class RemoveFileError(ApplicationException):
     pass
 

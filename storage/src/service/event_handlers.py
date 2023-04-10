@@ -53,6 +53,7 @@ async def file_distributed(
         )
     )
 
+
 async def file_deleted(
     cmd: events.FileDeleted,
     uow: AbstractUnitOfWork,

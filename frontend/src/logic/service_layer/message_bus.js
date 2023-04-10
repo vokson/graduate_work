@@ -36,9 +36,7 @@ import {
   upload_file_by_link,
   download_file,
   download_file_by_link,
-//   download_file_from_folder,
-//   get_file_info,
-//   delete_file_from_folder,
+  add_file_share_link,
 } from "./command_handlers/file_handlers";
 
 
@@ -47,11 +45,14 @@ import {
   // handle_access_perm_fail_error,
   upload_file_error,
   upload_file_success,
+  download_file_success,
+  rename_file_success,
   delete_file_success,
   user_login_success,
   access_token_outdated,
   refresh_token_outdated,
   user_logout_success,
+  file_share_link_copied,
 } from "./event_handlers";
 
 const COMMAND_HANDLERS = {
@@ -78,11 +79,9 @@ const COMMAND_HANDLERS = {
   UploadFileByLink: [upload_file_by_link],
   DownloadFile: [download_file],
   DownloadFileByLink: [download_file_by_link],
-  // DownloadFileFromFolder: [download_file_from_folder],
-  // DeleteFileFromFolder: [delete_file_from_folder],
-  // GetFileInfo: [get_file_info],
-  // UpdateUploadProgress: [update_upload_progress],
 
+  // SHARE LINK
+  AddFileShareLink: [add_file_share_link],
 };
 
 const EVENT_HANDLERS = {
@@ -94,7 +93,10 @@ const EVENT_HANDLERS = {
   UserLogoutSuccess: [user_logout_success],
   UploadFileError: [upload_file_error],
   UploadFileSuccess: [upload_file_success],
+  DownloadFileSuccess: [download_file_success],
+  RenameFileSuccess: [rename_file_success],
   DeleteFileSuccess: [delete_file_success],
+  FileShareLinkCopied: [file_share_link_copied],
 };
 
 class NotImplementedError extends Error {}
