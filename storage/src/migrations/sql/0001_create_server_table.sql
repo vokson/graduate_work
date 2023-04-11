@@ -3,10 +3,15 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE servers
 (
     id UUID PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    host VARCHAR(15) NOT NULL,
+    name TEXT NOT NULL UNIQUE,
+    host TEXT NOT NULL,
     port INTEGER NOT NULL,
-    location VARCHAR(100),
+    location TEXT,
+    zone TEXT NOT NULL,
     latitude DOUBLE PRECISION NOT NULL,
-    longitude DOUBLE PRECISION NOT NULL
+    longitude DOUBLE PRECISION NOT NULL,
+    is_on BOOLEAN NOT NULL,
+    is_ready BOOLEAN NOT NULL,
+    created TIMESTAMP NOT NULL,
+    updated TIMESTAMP NOT NULL
 );

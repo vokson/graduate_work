@@ -38,13 +38,16 @@ class AbstractIdCreatedUpdatedModel(
     pass
 
 
-class CdnServer(AbstractIdModel):
+class CdnServer(AbstractIdCreatedUpdatedModel):
     name: str
     host: str
     port: int
     location: str
+    zone: str
     latitude: float
     longitude: float
+    is_on: bool
+    is_ready: bool
 
 
 class File(AbstractIdCreatedUpdatedModel):
@@ -68,6 +71,7 @@ class UserAction(AbstractIdModel, CreatedMixin):
 
 class FileActionData(BaseModel):
     name: str
+
 
 class FileRenameActionData(BaseModel):
     old_name: str
@@ -99,11 +103,14 @@ class FileShareLinkActionData(BaseModel):
     name: str
     created: datetime
 
+
 class FileShareLinkUserAction(UserAction):
     data: FileShareLinkActionData
 
+
 class FileShareLinkCreatedUserAction(FileShareLinkUserAction):
     event: str = Field("FILE_SHARE_LINK.CREATED")
+
 
 class FileShareLinkDeletedUserAction(FileShareLinkUserAction):
     event: str = Field("FILE_SHARE_LINK.DELETED")

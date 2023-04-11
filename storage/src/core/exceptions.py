@@ -41,6 +41,7 @@ class CdnServerAlreadyExists(ApplicationException):
 class FileDoesNotExist(ApplicationException):
     pass
 
+
 class FileAlreadyExists(ApplicationException):
     pass
 

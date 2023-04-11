@@ -19,8 +19,13 @@ const convert_cdn_server_response_obj_to_model = (obj) => {
     obj.id,
     obj.name,
     obj.location,
+    obj.zone,
     obj.latitude,
     obj.longitude,
+    obj.is_on,
+    obj.is_ready,
+    obj.created,
+    obj.updated
   );
 
   return user;

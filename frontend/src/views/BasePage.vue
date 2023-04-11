@@ -20,6 +20,7 @@ export default {
     const navigation_links = [
       { route_name: "LoginPage", title: "Вход" },
       { route_name: "MainPage", title: "Главная" },
+      { route_name: "ServersPage", title: "CDN" },
     ];
 
     return {

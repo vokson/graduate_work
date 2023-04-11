@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import LoginPage from '../views/LoginPage.vue'
 import MainPage from '../views/MainPage.vue'
+import ServersPage from '../views/ServersPage.vue'
 import MessagePage from '../views/service/MessagePage.vue'
 import DownloadFilePage from '../views/download/DownloadFilePage'
 
@@ -21,6 +22,11 @@ const routes = [
     path: '/',
     name: 'MainPage',
     component: MainPage
+  },
+  {
+    path: '/servers',
+    name: 'ServersPage',
+    component: ServersPage
   },
   {
     path: '/:pathMatch(.*)*',

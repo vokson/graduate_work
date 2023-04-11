@@ -1,7 +1,7 @@
 CREATE TABLE files
 (
     id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name TEXT NOT NULL,
     size INTEGER NOT NULL,
     user_id UUID NOT NULL,
     created TIMESTAMP NOT NULL,

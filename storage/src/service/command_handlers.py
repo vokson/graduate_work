@@ -30,14 +30,9 @@ async def create_cdn_server(
         if obj:
             raise exceptions.CdnServerAlreadyExists
 
+        dt = datetime.now()
         obj = models.CdnServer(
-            id=uuid4(),
-            name=cmd.name,
-            host=cmd.host,
-            port=cmd.port,
-            location=cmd.location,
-            latitude=cmd.latitude,
-            longitude=cmd.longitude,
+            **{**cmd.dict(), **{"id": uuid4(), "created": dt, "updated": dt}}
         )
 
         await uow.cdn_servers.add(obj)
@@ -90,6 +85,7 @@ async def delete_file(
 
     uow.push_message(events.FileDeleted(id=cmd.id))
     return command_results.PositiveCommandResult({})
+
 
 async def rename_file(
     cmd: commands.RenameFile,
@@ -437,7 +433,11 @@ async def create_file_share_link(
         if not file or file.user_id != cmd.user_id:
             raise exceptions.FileDoesNotExist
 
-        hashed_password = hasher.encode(cmd.password, hasher.salt()) if cmd.password else None
+        hashed_password = (
+            hasher.encode(cmd.password, hasher.salt())
+            if cmd.password
+            else None
+        )
 
         obj = models.FileShareLink(
             file_id=cmd.file_id,
@@ -490,7 +490,9 @@ async def get_file_share_link(
             raise exceptions.FileDoesNotExist
 
         link = await uow.file_share_links.get(cmd.file_id, cmd.link_id)
-        if not link or (link.expire_at is not None and link.expire_at <= datetime.now()):
+        if not link or (
+            link.expire_at is not None and link.expire_at <= datetime.now()
+        ):
             raise exceptions.FileShareLinkDoesNotExist
 
     return command_results.PositiveCommandResult(
@@ -512,7 +514,7 @@ async def delete_file_share_link(
             raise exceptions.FileShareLinkDoesNotExist
 
         await uow.file_share_links.delete(cmd.link_id)
-        
+
         await uow.history.add(
             models.FileShareLinkDeletedUserAction(
                 **{
@@ -526,6 +528,7 @@ async def delete_file_share_link(
 
     return command_results.PositiveCommandResult({})
 
+
 async def validate_file_share_link(
     cmd: commands.ValidateFileShareLink,
     uow: AbstractUnitOfWork,
@@ -537,12 +540,15 @@ async def validate_file_share_link(
 
         link = await uow.file_share_links.get(cmd.file_id, cmd.link_id)
 
-        if not link or (link.expire_at is not None and link.expire_at <= datetime.now()):
+        if not link or (
+            link.expire_at is not None and link.expire_at <= datetime.now()
+        ):
             raise exceptions.FileShareLinkDoesNotExist
 
         if link.password:
-            if not cmd.password or not hasher.verify(cmd.password, link.password):
+            if not cmd.password or not hasher.verify(
+                cmd.password, link.password
+            ):
                 raise exceptions.AuthNoPermissionException
-
 
     return command_results.PositiveCommandResult({})

@@ -101,6 +101,7 @@ class CdnServerAlreadyExists(NegativeCommandResult):
 class FileDoesNotExist(NegativeCommandResult):
     pass
 
+
 class FileAlreadyExists(NegativeCommandResult):
     pass
 

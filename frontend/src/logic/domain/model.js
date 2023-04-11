@@ -90,14 +90,24 @@ class CdnServer {
     id,
     name,
     location,
+    zone,
     latitude,
     longitude,
+    is_on,
+    is_ready,
+    created,
+    updated
   ) {
     this._id = id;
     this._name = name;
     this._location = location;
+    this._zone = zone;
     this._latitude = latitude;
     this._longitude = longitude;
+    this._is_on = is_on;
+    this._is_ready = is_ready;
+    this._created = created;
+    this._updated = updated;
   }
 
   get id() {
@@ -112,12 +122,24 @@ class CdnServer {
     return this._location;
   }
 
+  get zone() {
+    return this._zone;
+  }
+
   get latitude() {
     return this._latitude;
   }
 
   get longitude() {
     return this._longitude;
+  }
+
+  get is_on() {
+    return this._is_on;
+  }
+
+  get is_ready() {
+    return this._is_ready;
   }
 
 }

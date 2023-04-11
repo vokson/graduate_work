@@ -18,8 +18,13 @@ class CdnServerResponse(BaseModel):
     id: UUID
     name: str
     location: str
+    zone: str
     latitude: float
     longitude: float
+    is_on: bool
+    is_ready: bool
+    created: datetime
+    updated: datetime
 
 
 class UserActionItemResponse(BaseModel):
@@ -41,8 +46,10 @@ class FileResponse(BaseModel):
     created: datetime
     updated: datetime
 
+
 class RenameFileRequest(BaseModel):
     name: str
+
 
 class UploadLinkRequest(BaseModel):
     name: str

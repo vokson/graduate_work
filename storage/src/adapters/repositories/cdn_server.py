@@ -22,11 +22,16 @@ class CdnServerRepository:
                             host,
                             port,
                             location,
+                            zone,
                             latitude,
-                            longitude
+                            longitude,
+                            is_on,
+                            is_ready,
+                            created,
+                            updated
                         )
                     VALUES
-                        ($1, $2, $3, $4, $5, $6, $7);
+                        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
                     """
 
     GET_ALL_QUERY = f"SELECT * FROM {__tablename__};"
@@ -48,8 +53,13 @@ class CdnServerRepository:
             obj.host,
             obj.port,
             obj.location,
+            obj.zone,
             obj.latitude,
             obj.longitude,
+            obj.is_on,
+            obj.is_ready,
+            obj.created,
+            obj.updated
         )
 
     async def get_by_id(self, id: UUID) -> CdnServer:

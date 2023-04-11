@@ -14,8 +14,11 @@ class CreateCdnServer(Command):
     host: str
     port: int
     location: str
+    zone: str
     latitude: float
     longitude: float
+    is_on: bool
+    is_ready: bool
 
 
 class GetManyCdnServers(Command):
@@ -26,6 +29,7 @@ class RenameFile(Command):
     id: UUID
     user_id: UUID
     name: str
+
 
 class DeleteFile(Command):
     id: UUID
@@ -79,6 +83,7 @@ class DeleteFileShareLink(Command):
     user_id: UUID
     file_id: UUID
     link_id: UUID
+
 
 class ValidateFileShareLink(Command):
     file_id: UUID
