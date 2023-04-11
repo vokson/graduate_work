@@ -63,3 +63,7 @@ class FileShareLinkResponse(BaseModel):
     is_secured: bool
     expire_at: datetime | None
     created: datetime
+
+
+class DownloadByShareLinkRequest(BaseModel):
+    password: str | None = Field(None)

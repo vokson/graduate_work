@@ -27,6 +27,10 @@ import {
 
   // SHARE LINK
   AddFileShareLinkResponse,
+  GetFileShareLinksResponse,
+  GetFileShareLinkResponse,
+  DeleteFileShareLinkResponse,
+  GetDownloadLinkByFileShareLinkResponse
 } from "./api";
 
 class HttpApiError extends Error { }
@@ -60,6 +64,10 @@ class HttpApi extends AbstractApi {
 
       // SHARE LINK
       AddFileShareLinkRequest: this.add_file_share_link,
+      GetFileShareLinksRequest: this.get_file_share_links,
+      GetFileShareLinkRequest: this.get_file_share_link,
+      DeleteFileShareLinkRequest: this.delete_file_share_link,
+      GetDownloadLinkByFileShareLinkRequest: this.get_download_link_by_file_share_link,
     };
   }
 
@@ -378,6 +386,43 @@ class HttpApi extends AbstractApi {
         method: "post",
         data: JSON.stringify({
           lifetime: request.data.lifetime,
+          password: request.data.password,
+        }),
+      }
+    );
+  };
+
+  get_file_share_links = async (request) => {
+    return await this.perform_request(
+      GetFileShareLinksResponse,
+      `/storage/api/v1/files/${request.data.file_id}/links/`
+    );
+  };
+
+  get_file_share_link = async (request) => {
+    return await this.perform_request(
+      GetFileShareLinkResponse,
+      `/storage/api/v1/files/${request.data.file_id}/links/${request.data.link_id}/`,
+    );
+  };
+
+  delete_file_share_link = async (request) => {
+    return await this.perform_request(
+      DeleteFileShareLinkResponse,
+      `/storage/api/v1/files/${request.data.file_id}/links/${request.data.link_id}/`,
+      {
+        method: "delete",
+      }
+    );
+  };
+
+  get_download_link_by_file_share_link = async (request) => {
+    return await this.perform_request(
+      GetDownloadLinkByFileShareLinkResponse,
+      `/storage/api/v1/files/${request.data.file_id}/links/${request.data.link_id}/`,
+      {
+        method: "post",
+        data: JSON.stringify({
           password: request.data.password,
         }),
       }

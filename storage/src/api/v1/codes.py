@@ -14,6 +14,10 @@ COMMAND_RESULTS_RESPONSE_CODES = {
     # command_results.ValidationError: (400, "Request.Error.Validation"),
     # command_results.UserDoesNotExist: (400, "User.DoesNotExist"),
     command_results.FileDoesNotExist: (400, "File.DoesNotExist"),
+    command_results.FileShareLinkDoesNotExist: (
+        400,
+        "FileShareLink.DoesNotExist",
+    ),
     command_results.CdnServerAlreadyExists: (400, "CdnServer.AlreadyExists"),
     # command_results.WrongCredentials: (401, "Login.Error.Credentials"),
     # command_results.AuthTokenMissedException: (401, "Auth.Error.TokenMissed"),

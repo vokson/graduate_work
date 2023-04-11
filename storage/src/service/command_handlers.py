@@ -13,9 +13,11 @@ from src.core import exceptions
 from src.core.config import settings
 from src.domain import command_results, commands, events, models
 from src.service.uow import AbstractUnitOfWork
+from src.tools.hasher import PBKDF2PasswordHasher
 
 
 logger = logging.getLogger(__name__)
+hasher = PBKDF2PasswordHasher()
 
 
 async def create_cdn_server(
@@ -388,18 +390,27 @@ async def mark_file_as_removed(
     return command_results.PositiveCommandResult({})
 
 
+def make_share_link_result(link: models.FileShareLink, file: models.File):
+    return {
+        **link.dict(),
+        **{"file": file.dict(), "is_secured": link.password is not None},
+    }
+
+
 async def create_file_share_link(
     cmd: commands.CreateFileShareLink,
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        file = await uow.files.get_by_id(cmd.id)
-        if not file:
+        file = await uow.files.get_by_id(cmd.file_id)
+        if not file or file.user_id != cmd.user_id:
             raise exceptions.FileDoesNotExist
 
+        hashed_password = hasher.encode(cmd.password, hasher.salt()) if cmd.password else None
+
         obj = models.FileShareLink(
-            file_id=cmd.id,
-            password=cmd.password,
+            file_id=cmd.file_id,
+            password=hashed_password,
             expire_at=cmd.expire_at,
         )
 
@@ -407,8 +418,75 @@ async def create_file_share_link(
         await uow.commit()
 
     return command_results.PositiveCommandResult(
-        {
-            **obj.dict(),
-            **{"file": file.dict(), "is_secured": obj.password is not None},
-        }
+        make_share_link_result(obj, file)
     )
+
+
+async def get_file_share_links(
+    cmd: commands.GetFileShareLinks,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        file = await uow.files.get_by_id(cmd.file_id)
+        if not file or file.user_id != cmd.user_id:
+            raise exceptions.FileDoesNotExist
+
+        objs = await uow.file_share_links.get_many(cmd.file_id)
+
+    return command_results.PositiveCommandResult(
+        [make_share_link_result(x, file) for x in objs]
+    )
+
+
+async def get_file_share_link(
+    cmd: commands.GetFileShareLink,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        file = await uow.files.get_by_id(cmd.file_id)
+        if not file:
+            raise exceptions.FileDoesNotExist
+
+        link = await uow.file_share_links.get(cmd.file_id, cmd.link_id)
+        if not link or (link.expire_at is not None and link.expire_at <= datetime.now()):
+            raise exceptions.FileShareLinkDoesNotExist
+
+    return command_results.PositiveCommandResult(
+        make_share_link_result(link, file)
+    )
+
+
+async def delete_file_share_link(
+    cmd: commands.DeleteFileShareLink,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        file = await uow.files.get_by_id(cmd.file_id)
+        if not file or file.user_id != cmd.user_id:
+            raise exceptions.FileDoesNotExist
+
+        await uow.file_share_links.delete(cmd.link_id)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult({})
+
+async def validate_file_share_link(
+    cmd: commands.ValidateFileShareLink,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        file = await uow.files.get_by_id(cmd.file_id)
+        if not file:
+            raise exceptions.FileDoesNotExist
+
+        link = await uow.file_share_links.get(cmd.file_id, cmd.link_id)
+
+        if not link or (link.expire_at is not None and link.expire_at <= datetime.now()):
+            raise exceptions.FileShareLinkDoesNotExist
+
+        if link.password:
+            if not cmd.password or not hasher.verify(cmd.password, link.password):
+                raise exceptions.AuthNoPermissionException
+
+
+    return command_results.PositiveCommandResult({})

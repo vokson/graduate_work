@@ -2,31 +2,23 @@
 
 import { Command } from "../domain/command";
 import { Event } from "../domain/event";
+
 import {
   notify,
   notify_api_error,
-  // get_info,
 } from "./command_handlers/common_handlers";
 
 import {
   login_with_credentials,
   my_credentials,
   refresh_tokens,
-  // login_with_token,
   logout,
   get_user_actions,
 } from "./command_handlers/user_handlers";
 
-// import {
-//   get_permissions,
-// } from "./command_handlers/permission_handlers";
-
 import {
   get_cdn_servers,
   get_file_servers,
-//   download_file_from_folder,
-//   get_file_info,
-//   delete_file_from_folder,
 } from "./command_handlers/cdn_server_handlers";
 
 import {
@@ -37,12 +29,15 @@ import {
   download_file,
   download_file_by_link,
   add_file_share_link,
+  get_file_share_links,
+  get_file_share_link,
+  delete_file_share_link,
+  download_file_by_file_share_link,
 } from "./command_handlers/file_handlers";
 
 
 import {
   handle_api_error,
-  // handle_access_perm_fail_error,
   upload_file_error,
   upload_file_success,
   download_file_success,
@@ -53,6 +48,7 @@ import {
   refresh_token_outdated,
   user_logout_success,
   file_share_link_copied,
+  file_share_link_deleted,
 } from "./event_handlers";
 
 const COMMAND_HANDLERS = {
@@ -82,11 +78,14 @@ const COMMAND_HANDLERS = {
 
   // SHARE LINK
   AddFileShareLink: [add_file_share_link],
+  GetFileShareLinks: [get_file_share_links],
+  GetFileShareLink: [get_file_share_link],
+  DeleteFileShareLink: [delete_file_share_link],
+  DownloadFileByFileShareLink: [download_file_by_file_share_link],
 };
 
 const EVENT_HANDLERS = {
   ApiError: [handle_api_error],
-  // AccessPagePermissionCheckFail: [handle_access_perm_fail_error],
   UserLoginSuccess: [user_login_success],
   AccessTokenOutdated: [access_token_outdated],
   RefreshTokenOutdated: [refresh_token_outdated],
@@ -97,6 +96,7 @@ const EVENT_HANDLERS = {
   RenameFileSuccess: [rename_file_success],
   DeleteFileSuccess: [delete_file_success],
   FileShareLinkCopied: [file_share_link_copied],
+  FileShareLinkDeleted: [file_share_link_deleted],
 };
 
 class NotImplementedError extends Error {}

@@ -8,7 +8,7 @@ import DownloadFilePage from '../views/download/DownloadFilePage'
 
 const routes = [
   {
-    path: '/links/:link_id',
+    path: '/files/:file_id/links/:link_id',
     name: 'DownloadFilePage',
     component: DownloadFilePage
   },

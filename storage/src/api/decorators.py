@@ -19,17 +19,19 @@ def auth(permissions: list[str], timeout: int = 1):
         @functools.wraps(func)
         async def wrapper(
             *args,
-            # response: Response,
             **kwargs,
         ):
             request = get_request_var()
 
             auth_header = request.headers.get("Authorization")
-            if not auth_header:
+            if not auth_header and permissions:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Auth.Error.TokenMissed",
                 )
+
+            if not auth_header:
+                return await func(*args, **kwargs)
 
             url = (
                 f"http://{settings.auth.host}:{settings.auth.port}"
@@ -41,7 +43,6 @@ def auth(permissions: list[str], timeout: int = 1):
             try:
                 headers = {
                     "Authorization": auth_header,
-                    # "X-Request-Id": request.headers.get("X-Request-Id"),
                 }
                 async with session.post(
                     url,

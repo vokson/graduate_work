@@ -42,7 +42,8 @@ class CommandResults:
 
     @property
     def is_first_result_negative(self):
-        return isinstance(self.first_result, NegativeCommandResult)
+        print(self._results)
+        return not isinstance(self.first_result, PositiveCommandResult)
 
     @property
     def are_all_results_positive(self):
@@ -98,6 +99,10 @@ class CdnServerAlreadyExists(NegativeCommandResult):
 
 
 class FileDoesNotExist(NegativeCommandResult):
+    pass
+
+
+class FileShareLinkDoesNotExist(NegativeCommandResult):
     pass
 
 

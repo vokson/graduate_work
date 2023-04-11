@@ -38,6 +38,10 @@ COMMAND_HANDLERS = {
     commands.RemoveFile: command_handlers.remove_file,
     commands.MarkFileAsRemoved: command_handlers.mark_file_as_removed,
     commands.CreateFileShareLink: command_handlers.create_file_share_link,
+    commands.GetFileShareLinks: command_handlers.get_file_share_links,
+    commands.GetFileShareLink: command_handlers.get_file_share_link,
+    commands.DeleteFileShareLink: command_handlers.delete_file_share_link,
+    commands.ValidateFileShareLink: command_handlers.validate_file_share_link,
 }
 
 RESULTS = {
@@ -46,6 +50,7 @@ RESULTS = {
     UniqueViolationError: command_results.UniqueViolationDatabaseError,
     exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
     exceptions.FileDoesNotExist: command_results.FileDoesNotExist,
+    exceptions.FileShareLinkDoesNotExist: command_results.FileShareLinkDoesNotExist,
     exceptions.CdnServerAlreadyExists: command_results.CdnServerAlreadyExists,
     exceptions.BadS3Event: command_results.BadS3Event,
     exceptions.BadServiceEvent: command_results.BadServiceEvent,

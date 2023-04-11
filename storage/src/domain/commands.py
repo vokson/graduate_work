@@ -61,9 +61,31 @@ class GetUserActions(Command):
 
 
 class CreateFileShareLink(Command):
-    id: UUID
+    user_id: UUID
+    file_id: UUID
     password: str | None
     expire_at: datetime | None
+
+
+class GetFileShareLinks(Command):
+    user_id: UUID
+    file_id: UUID
+
+
+class GetFileShareLink(Command):
+    link_id: UUID
+    file_id: UUID
+
+
+class DeleteFileShareLink(Command):
+    user_id: UUID
+    file_id: UUID
+    link_id: UUID
+
+class ValidateFileShareLink(Command):
+    file_id: UUID
+    link_id: UUID
+    password: str | None
 
 
 class HandleBrokerMessage(Command):

@@ -101,7 +101,7 @@
         </div>
         <div class="page__linkcontainer linkcontainer">
           <form-text-field
-            value="Общедоступные ссылки на файл:"
+            value="Общедоступные ссылки (выберите файл):"
             :parameters="{ font_weight: 600 }"
           />
           <div
@@ -109,11 +109,16 @@
             :key="link.id"
             class="linkcontainer__row link__row"
           >
-            <div class="link__date" >
+            <div class="link__delete" @click="handle_delete_link(link.id)" />
+            <div class="link__date">
               {{ link.created.toLocaleString() }}
             </div>
-            <div class="link__text">
-              <a :href="make_share_link(link.id)">Ссылка</a>{{ link.text }}
+            <div v-if="link.is_expired" class="link__text link__text_expired">
+              Истекло время жизни ссылки
+            </div>
+            <div v-else class="link__text">
+              <a :href="make_share_link_for_selected_file(link.id)">Ссылка</a
+              >{{ link.text }}
             </div>
           </div>
         </div>
@@ -138,7 +143,13 @@
           </div>
         </div>
 
-        <div v-for="file in files" :key="file.id" class="filerow">
+        <div
+          v-for="file in files"
+          :key="file.id"
+          class="filerow"
+          :class="{ filerow_selected: file.id === selected_file_id }"
+          @click="handle_select_file(file.id)"
+        >
           <div class="filerow__button">
             <div
               class="filerow__img filerow__img_delete"
@@ -196,6 +207,8 @@ import {
   DeleteFile,
   DownloadFile,
   AddFileShareLink,
+  GetFileShareLinks,
+  DeleteFileShareLink,
 } from "../logic/domain/command";
 import {
   UploadFileTooBigError,
@@ -242,7 +255,10 @@ export default {
 
     // HISTORY
     const user_actions = computed(() =>
-      uow.action_repository.values().map((obj) => obj.value)
+      uow.action_repository
+        .values()
+        .map((obj) => obj.value)
+        .toSorted((a, b) => b.created - a.created)
     );
     const ua_total_count = uow.action_repository.get_count(); // Ref
     const ua_current_page = ref(1);
@@ -292,6 +308,12 @@ export default {
       await refresh_actions();
     };
 
+    const selected_file_id = ref(null);
+    const handle_select_file = async (id) => {
+      selected_file_id.value = id;
+      await MessageBus.handle(new GetFileShareLinks(id), uow);
+    };
+
     // DRAGGING
     const is_drag_above_file_zone = ref(false);
 
@@ -308,14 +330,19 @@ export default {
     };
 
     // SHARE LINKS
-    const share_links = computed(() =>
-      uow.link_repository.values().map((obj) => obj.value)
-    );
+    const share_links = computed(() => {
+      let links = uow.link_repository
+        .values()
+        .map((obj) => obj.value)
+        .toSorted((a, b) => b.created - a.created);
+      return links;
+    });
 
-    const make_share_link = (link_id) => {
+    const make_share_link = (file_id, link_id) => {
       const props = router.resolve({
         name: "DownloadFilePage",
         params: {
+          file_id: file_id,
           link_id: link_id,
         },
       });
@@ -323,11 +350,11 @@ export default {
       return window.location.origin + props.href;
     };
 
-    const handle_copy_link_into_clipboard = (link_id) => {
-      const url = make_share_link(link_id);
+    const make_share_link_for_selected_file = (link_id) =>
+      make_share_link(selected_file_id.value, link_id);
 
-      console.log("LINK");
-      console.log(url);
+    const handle_copy_link_into_clipboard = (file_id, link_id) => {
+      const url = make_share_link(file_id, link_id);
 
       if (navigator.clipboard)
         navigator.clipboard
@@ -336,12 +363,19 @@ export default {
       else console.log(url);
     };
 
+    const handle_delete_link = async (link_id) => {
+      await MessageBus.handle(
+        new DeleteFileShareLink(selected_file_id.value, link_id),
+        uow
+      );
+    };
+
     // FORM
     const is_form_opened = ref(false);
     const form_attributes = reactive({
       FILE_ID: null,
-      LIFETIME: "20",
-      PASSWORD: "1234",
+      LIFETIME: "0",
+      PASSWORD: "",
     });
 
     const handle_copy_link = (file_id) => {
@@ -355,26 +389,32 @@ export default {
 
     const handle_form_apply = async () => {
       const file_id = form_attributes["FILE_ID"];
-      const lifetime = Number.parseInt(form_attributes["LIFETIME"]);
+      let lifetime = Number.parseInt(form_attributes["LIFETIME"]);
       let password = form_attributes["PASSWORD"];
 
       if (!password) password = null;
-      if (!lifetime || lifetime <= 0) {
+
+      if (isNaN(lifetime) || lifetime < 0) {
         await MessageBus.handle(
-          new Notify(
-            "error",
-            "Время жизни должно быть целым положительным числом"
-          ),
+          new Notify("error", "Время жизни должно быть целым числом"),
           uow
         );
         return;
       }
 
+      if (lifetime === 0) {
+        lifetime = null;
+      } else {
+        lifetime *= 60;
+      }
+
       is_form_opened.value = false;
-      await MessageBus.handle(
+      const results = await MessageBus.handle(
         new AddFileShareLink(file_id, lifetime, password),
         uow
       );
+      const link = results[0]
+      handle_copy_link_into_clipboard(file_id, link.id);
     };
 
     const handle_update_form_attribute = (name, value) =>
@@ -390,7 +430,7 @@ export default {
             parameters: {
               font_weight: "bold",
             },
-            value: "Время жизни ссылки:",
+            value: "Время жизни ссылки в минутах (0 - бессрочно):",
           },
           {
             type: "FormTextInput",
@@ -455,6 +495,8 @@ export default {
 
       // FILE
       files,
+      selected_file_id,
+      handle_select_file,
       downloading_files,
       max_file_size,
       is_drag_above_file_zone,
@@ -474,7 +516,9 @@ export default {
       // SHARE LINK
       share_links,
       make_share_link,
+      make_share_link_for_selected_file,
       handle_copy_link_into_clipboard,
+      handle_delete_link,
     };
   },
 };
@@ -581,6 +625,14 @@ export default {
   align-items: center;
 }
 
+.filerow {
+  cursor: pointer;
+}
+
+.filerow_selected {
+  background-color: lightgray !important;
+}
+
 .filerowheader {
   font-weight: 600;
   text-align: center;
@@ -659,6 +711,18 @@ export default {
   flex-wrap: wrap;
 }
 
+.link__text_expired {
+  text-decoration: line-through;
+}
+
+.link__delete {
+  background: url("../../public/delete.png") top left/20px 20px no-repeat;
+  cursor: pointer;
+  min-width: 20px;
+  max-width: 20px;
+  margin-right: 5px;
+}
+
 .page__form-backdrop {
   position: fixed;
   top: 0;
@@ -676,5 +740,9 @@ export default {
   box-shadow: 2px 2px 20px 1px;
   padding: 20px;
   border-radius: 10px;
+}
+
+.filerowdescription {
+  text-align: end;
 }
 </style>

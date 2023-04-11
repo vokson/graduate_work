@@ -200,12 +200,18 @@ class ShareLink {
     return this._expire_at;
   }
 
+  get is_expired() {
+    if (this._expire_at === null ||this._expire_at > Date.now()) return false;
+    return true;
+  }
+
   get created() {
     return this._created;
   }
 
   get text() {
-    return `${this._is_secured ? ', защищенная паролем' : ' без пароля'}. Действует до ${this._expire_at.toLocaleString()}.`;
+    const expire_text = this._expire_at ? 'до ' + this._expire_at.toLocaleString() : 'бессрочно';
+    return `${this._is_secured ? ', защищенная паролем' : ' без пароля'}. Действует ${expire_text}.`;
   }
 }
 

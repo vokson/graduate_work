@@ -92,6 +92,38 @@ class AddFileShareLink extends Command {
   }
 }
 
+class GetFileShareLinks extends Command {
+  constructor(file_id) {
+    super();
+    this.file_id = file_id;
+  }
+}
+
+class GetFileShareLink extends Command {
+  constructor(file_id, link_id) {
+    super();
+    this.file_id = file_id;
+    this.link_id = link_id;
+  }
+}
+
+class DeleteFileShareLink extends Command {
+  constructor(file_id, link_id) {
+    super();
+    this.file_id = file_id;
+    this.link_id = link_id;
+  }
+}
+
+class DownloadFileByFileShareLink extends Command {
+  constructor(file_id, link_id, password) {
+    super();
+    this.file_id = file_id;
+    this.link_id = link_id;
+    this.password = password;
+  }
+}
+
 export {
   Command,
   Notify,
@@ -114,4 +146,8 @@ export {
   DownloadFileByLink,
   // LINK
   AddFileShareLink,
+  DeleteFileShareLink,
+  GetFileShareLinks,
+  GetFileShareLink,
+  DownloadFileByFileShareLink,
 };

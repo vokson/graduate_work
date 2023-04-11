@@ -1,5 +1,5 @@
-from uuid import UUID
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Request, Response, status
 from src.api.decorators import auth
@@ -112,14 +112,112 @@ async def get_servers(
 async def create_file_share_link(
     file_id: UUID,
     body: schemes.AddFileShareLinkRequest,
+    user_id: UUID = Depends(extract_user_id()),
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.FileShareLinkResponse:
     return transform_command_result(
         await bus.handle(
             commands.CreateFileShareLink(
-                id=file_id,
-                expire_at=timedelta(seconds=body.lifetime) + datetime.now(),
+                file_id=file_id,
+                user_id=user_id,
+                expire_at=timedelta(seconds=body.lifetime) + datetime.now()
+                if body.lifetime
+                else None,
                 password=body.password,
             )
         )
+    )
+
+
+@router.get(
+    "/{file_id}/links/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Получение общедоступных ссылок на файл",
+)
+@auth(permissions=["can_view_filesharelink"])
+async def get_file_share_links(
+    file_id: UUID,
+    user_id: UUID = Depends(extract_user_id()),
+    bus: MessageBus = Depends(get_bus()),
+) -> list[schemes.FileShareLinkResponse]:
+    return transform_command_result(
+        await bus.handle(
+            commands.GetFileShareLinks(
+                user_id=user_id,
+                file_id=file_id,
+            )
+        )
+    )
+
+
+@router.delete(
+    "/{file_id}/links/{link_id}/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Удаление общедоступной ссылки на файл",
+)
+@auth(permissions=["can_delete_filesharelink"])
+async def delete_file_share_link(
+    file_id: UUID,
+    link_id: UUID,
+    user_id: UUID = Depends(extract_user_id()),
+    bus: MessageBus = Depends(get_bus()),
+):
+    return transform_command_result(
+        await bus.handle(
+            commands.DeleteFileShareLink(
+                user_id=user_id, file_id=file_id, link_id=link_id
+            )
+        )
+    )
+
+
+@router.get(
+    "/{file_id}/links/{link_id}/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Получение общедоступной ссылки на файл",
+)
+@auth(permissions=[])
+async def get_file_share_link(
+    file_id: UUID,
+    link_id: UUID,
+    bus: MessageBus = Depends(get_bus()),
+) -> schemes.FileShareLinkResponse:
+    return transform_command_result(
+        await bus.handle(
+            commands.GetFileShareLink(
+                file_id=file_id,
+                link_id=link_id,
+            )
+        )
+    )
+
+
+@router.post(
+    "/{file_id}/links/{link_id}/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Получение ссылки для скачивания общедоступной ссылке",
+)
+@auth(permissions=[])
+async def get_download_link_by_file_share_link(
+    file_id: UUID,
+    link_id: UUID,
+    body: schemes.DownloadByShareLinkRequest,
+    ip: str = Depends(get_ip()),
+    bus: MessageBus = Depends(get_bus()),
+) -> schemes.LinkResponse:
+    results = await bus.handle(
+        commands.ValidateFileShareLink(
+            file_id=file_id, link_id=link_id, password=body.password
+        )
+    )
+
+    if results.is_first_result_negative:
+        return transform_command_result(results)
+
+    return transform_command_result(
+        await bus.handle(commands.GetDownloadLink(file_id=file_id, ip=ip))
     )

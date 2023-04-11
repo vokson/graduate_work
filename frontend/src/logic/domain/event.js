@@ -28,6 +28,7 @@ class RenameFileSuccess extends Event {}
 class DeleteFileSuccess extends Event {}
 
 class FileShareLinkCopied extends Event {}
+class FileShareLinkDeleted extends Event {}
 
 export {
   Event,
@@ -50,4 +51,5 @@ export {
 
   // LINK
   FileShareLinkCopied,
+  FileShareLinkDeleted,
 };

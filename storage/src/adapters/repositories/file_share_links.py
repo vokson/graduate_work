@@ -27,10 +27,17 @@ class FileShareLinkRepository:
                         ($1, $2, $3, $4, $5);
                     """
 
-    GET_QUERY = f"""
+    GET_MANY_QUERY = f"""
                     SELECT * FROM {__tablename__} WHERE
                     file_id = $1 ORDER BY created DESC;
                 """
+
+    GET_QUERY = f"""
+                    SELECT * FROM {__tablename__} WHERE
+                    file_id = $1 AND id = $2;
+                """
+
+    DELETE_QUERY = f"DELETE FROM {__tablename__} WHERE id = $1;"
 
     def __init__(self, conn):
         self._conn = conn
@@ -49,8 +56,22 @@ class FileShareLinkRepository:
             obj.created,
         )
 
-    async def get(self, file_id: UUID) -> FileShareLink:
+    async def get_many(self, file_id: UUID) -> FileShareLink:
         logger.debug(f"Get share links of file {file_id}")
 
-        rows = await self._conn.fetch(self.GET_QUERY, file_id)
+        rows = await self._conn.fetch(self.GET_MANY_QUERY, file_id)
         return [self._convert_row_to_obj(row) for row in rows]
+
+    async def get(self, file_id: UUID, link_id: UUID) -> FileShareLink:
+        logger.debug(f"Get share link {link_id} of file {file_id}")
+
+        row = await self._conn.fetchrow(self.GET_QUERY, file_id, link_id)
+
+        if not row:
+            return
+
+        return self._convert_row_to_obj(row)
+
+    async def delete(self, link_id: UUID):
+        logger.debug(f"Delete link with id {link_id}")
+        await self._conn.execute(self.DELETE_QUERY, link_id)

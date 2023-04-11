@@ -16,6 +16,14 @@ import {
   DownloadFileResponse,
   AddFileShareLinkRequest,
   AddFileShareLinkResponse,
+  GetFileShareLinksRequest,
+  GetFileShareLinksResponse,
+  GetFileShareLinkRequest,
+  GetFileShareLinkResponse,
+  DeleteFileShareLinkRequest,
+  DeleteFileShareLinkResponse,
+  GetDownloadLinkByFileShareLinkRequest,
+  GetDownloadLinkByFileShareLinkResponse,
 } from "../../adapters/api";
 
 import {
@@ -29,6 +37,7 @@ import {
   UploadFileSuccess,
   DownloadFileSuccess,
   DeleteFileSuccess,
+  FileShareLinkDeleted
 } from "../../domain/event";
 
 import { File, ShareLink } from "../../domain/model";
@@ -204,15 +213,15 @@ const download_file_by_link = async (event, uow) => {
 
 const convert_file_link_response_obj_to_model = (obj) => {
   const f = convert_file_response_obj_to_model(obj.file)
-  const user = new ShareLink(
+  const link = new ShareLink(
     obj.id,
     f,
     obj.is_secured,
-    new Date(obj.expire_at),
+    obj.expire_at ? new Date(obj.expire_at) : null,
     new Date(obj.created),
   );
 
-  return user;
+  return link;
 };
 
 const add_file_share_link = async (event, uow) => {
@@ -232,11 +241,101 @@ const add_file_share_link = async (event, uow) => {
   if (response instanceof AddFileShareLinkResponse) {
     const obj = convert_file_link_response_obj_to_model(response.data);
     uow.link_repository.set(obj.id, obj);
+    return obj;
+  }
+
+  throw new WrongResponseError();
+};
+
+const get_file_share_links = async (event, uow) => {
+  const request = new GetFileShareLinksRequest({
+    file_id: event.file_id,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof GetFileShareLinksResponse) {
+    uow.link_repository.reset_keeping_refs();
+    response.data.forEach((obj) => {
+      const f = convert_file_link_response_obj_to_model(obj);
+      uow.link_repository.set(f.id, f);
+    })
     return;
   }
 
   throw new WrongResponseError();
 };
+
+const get_file_share_link = async (event, uow) => {
+  const request = new GetFileShareLinkRequest({
+    file_id: event.file_id,
+    link_id: event.link_id,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof GetFileShareLinkResponse) {
+    return convert_file_link_response_obj_to_model(response.data);
+  }
+
+  throw new WrongResponseError();
+};
+
+const delete_file_share_link = async (event, uow) => {
+  const request = new DeleteFileShareLinkRequest({
+    file_id: event.file_id,
+    link_id: event.link_id,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof DeleteFileShareLinkResponse) {
+    uow.link_repository.delete(event.link_id);
+    uow.push_message(new FileShareLinkDeleted());
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+const download_file_by_file_share_link = async (event, uow) => {
+  // Получаем ссылку на скачаивание файла
+  const request = new GetDownloadLinkByFileShareLinkRequest({
+    file_id: event.file_id,
+    link_id: event.link_id,
+    password: event.password,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+  if (response instanceof GetDownloadLinkByFileShareLinkResponse) {
+    uow.push_message(new DownloadFileByLink(
+      response.data.link, response.data.file.name, response.data.file.size));
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
 
 export {
   upload_file,
@@ -245,5 +344,9 @@ export {
   delete_file,
   download_file,
   download_file_by_link,
-  add_file_share_link
+  add_file_share_link,
+  get_file_share_links,
+  get_file_share_link,
+  delete_file_share_link,
+  download_file_by_file_share_link
 };

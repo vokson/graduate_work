@@ -42,6 +42,10 @@ class FileDoesNotExist(ApplicationException):
     pass
 
 
+class FileShareLinkDoesNotExist(ApplicationException):
+    pass
+
+
 class BadS3Event(ApplicationException):
     pass
 

@@ -57,6 +57,12 @@ const file_share_link_copied = (event, uow) => {
   );
 };
 
+const file_share_link_deleted = (event, uow) => {
+  uow.push_message(
+    new Notify("success", `Ссылка на файл удалена`)
+  );
+};
+
 
 export {
   handle_api_error,
@@ -69,5 +75,6 @@ export {
   download_file_success,
   rename_file_success,
   delete_file_success,
-  file_share_link_copied
+  file_share_link_copied,
+  file_share_link_deleted
 };

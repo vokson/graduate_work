@@ -16,7 +16,8 @@ import {
   List as UserActionList
 } from "./api_responses/models/user_action";
 import {
-  Single as ShareLinkSingle
+  Single as ShareLinkSingle,
+  List as ShareLinkList
 } from "./api_responses/models/file_share_link";
 
 class NotImplementedError extends Error { }
@@ -241,10 +242,10 @@ class AddFileShareLinkRequest extends Request {
       type: "object",
       properties: {
         id: { type: "string" },
-        lifetime: { type: "integer" },
+        lifetime: { type: ["null", "integer"] },
         password: { type: ["null", "string"] },
       },
-      additionalProperties: true, // set_size_method
+      additionalProperties: false,
     };
   }
 }
@@ -254,6 +255,73 @@ class AddFileShareLinkResponse extends Response {
   }
 }
 
+class GetFileShareLinksRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        file_id: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class GetFileShareLinksResponse extends Response {
+  get schema() {
+    return ShareLinkList;
+  }
+}
+
+class GetFileShareLinkRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        file_id: { type: "string" },
+        link_id: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class GetFileShareLinkResponse extends Response {
+  get schema() {
+    return ShareLinkSingle;
+  }
+}
+
+class DeleteFileShareLinkRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        file_id: { type: "string" },
+        link_id: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class DeleteFileShareLinkResponse extends EmptyPositiveResponse {}
+
+class GetDownloadLinkByFileShareLinkRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        file_id: { type: "string" },
+        link_id: { type: "string" },
+        password: { type: ["null", "string"] },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class GetDownloadLinkByFileShareLinkResponse extends Response {
+  get schema() {
+    return LinkSingle;
+  }
+}
 
 class AbstractApi {
   constructor() {
@@ -340,6 +408,18 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  get_file_share_links = () => {
+    throw new NotImplementedError();
+  };
+
+  delete_file_share_link = () => {
+    throw new NotImplementedError();
+  };
+
+  get_download_link_by_file_share_link = () => {
+    throw new NotImplementedError();
+  };
+
 }
 
 export {
@@ -380,5 +460,13 @@ export {
 
   // SHARE LINK
   AddFileShareLinkRequest,
-  AddFileShareLinkResponse
+  AddFileShareLinkResponse,
+  GetFileShareLinksRequest,
+  GetFileShareLinksResponse,
+  GetFileShareLinkRequest,
+  GetFileShareLinkResponse,
+  DeleteFileShareLinkRequest,
+  DeleteFileShareLinkResponse,
+  GetDownloadLinkByFileShareLinkRequest,
+  GetDownloadLinkByFileShareLinkResponse,
 };

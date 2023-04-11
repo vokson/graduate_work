@@ -11,7 +11,7 @@ const Single = {
       type: "string",
     },
     expire_at: {
-      type: "string",
+      type: ["null", "string"],
     }
   },
   required: [
@@ -20,5 +20,10 @@ const Single = {
   additionalProperties: false,
 };
 
+const List = {
+  type: "array",
+  items: Single,
+};
 
-export { Single };
+
+export { Single, List };

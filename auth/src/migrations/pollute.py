@@ -35,7 +35,9 @@ async def main():
                 "can_download_file",
                 "can_delete_file",
                 "can_view_cdnserver",
+                "can_view_filesharelink",
                 "can_add_filesharelink",
+                "can_delete_filesharelink",
             ],
         )
     )
@@ -55,7 +57,9 @@ async def main():
                 "can_download_file",
                 "can_delete_file",
                 "can_view_cdnserver",
+                "can_view_filesharelink",
                 "can_add_filesharelink",
+                "can_delete_filesharelink",
             ],
         )
     )
