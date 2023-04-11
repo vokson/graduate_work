@@ -59,7 +59,7 @@
               @update="selected_file_name = $event"
             />
             <btn-component
-            или
+              или
               v-if="selected_file_name"
               class="fileinfo__button"
               caption="Применить"
@@ -170,8 +170,14 @@
           :key="file.id"
           class="filerow"
           :class="{ filerow_selected: file.id === selected_file_id }"
-          @click="handle_select_file(file.id, file.name)"
         >
+          <div class="filerow__selector">
+            <form-boolean-input
+              :value="file.id === selected_file_id"
+              :parameters="{size: 26}"
+              @click="handle_select_file(file.id, file.name)"
+            />
+          </div>
           <div class="filerow__button">
             <div
               class="filerow__img filerow__img_delete"
@@ -231,6 +237,7 @@ import {
   RenameFile,
   AddFileShareLink,
   GetFileShareLinks,
+  FlushFileShareLinks,
   DeleteFileShareLink,
 } from "../logic/domain/command";
 import {
@@ -239,7 +246,6 @@ import {
 } from "../logic/domain/event";
 import HeadingComponent from "../components/HeadingComponent.vue";
 import DocumentPaginationRow from "../components/document/DocumentPaginationRow.vue";
-// import FileList from "../components/file/FileList.vue";
 import FileDropZone from "../components/file/FileDropZone.vue";
 import FileBlock from "../components/file/FileBlock.vue";
 import FileList from "../components/file/FileList.vue";
@@ -248,6 +254,7 @@ import { MessageBus } from "../logic/service_layer/message_bus";
 import BaseForm from "../components/forms/BaseForm.vue";
 import FormTextField from "../components/fields/FormTextField.vue";
 import FormTextInput from "../components/fields/FormTextInput.vue";
+import FormBooleanInput from "../components/fields/FormBooleanInput.vue";
 import BtnComponent from "../components/buttons/BtnComponent.vue";
 import { useBeforeEnterPage } from "../logic/service_layer/use_modules";
 
@@ -259,6 +266,7 @@ export default {
     FileList,
     FormTextField,
     FormTextInput,
+    FormBooleanInput,
     DocumentPaginationRow,
     BaseForm,
     BtnComponent,
@@ -324,6 +332,8 @@ export default {
 
     const handle_delete = async (id) => {
       await MessageBus.handle(new DeleteFile(id), uow);
+      selected_file_id.value = null
+      selected_file_name.value = ''
       await refresh_actions();
     };
 
@@ -403,7 +413,7 @@ export default {
         new DeleteFileShareLink(selected_file_id.value, link_id),
         uow
       );
-      await refresh_actions();
+      await MessageBus.handle(new FlushFileShareLinks(), uow);
     };
 
     // FORM
@@ -706,6 +716,11 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.filerow__selector {
+  min-width: 30px;
+  max-width: 30px;
 }
 
 .filerow__server {

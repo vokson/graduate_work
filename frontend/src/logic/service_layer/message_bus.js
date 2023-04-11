@@ -31,6 +31,7 @@ import {
   download_file_by_link,
   add_file_share_link,
   get_file_share_links,
+  flush_file_share_links,
   get_file_share_link,
   delete_file_share_link,
   download_file_by_file_share_link,
@@ -81,6 +82,7 @@ const COMMAND_HANDLERS = {
   // SHARE LINK
   AddFileShareLink: [add_file_share_link],
   GetFileShareLinks: [get_file_share_links],
+  FlushFileShareLinks: [flush_file_share_links],
   GetFileShareLink: [get_file_share_link],
   DeleteFileShareLink: [delete_file_share_link],
   DownloadFileByFileShareLink: [download_file_by_file_share_link],

@@ -299,6 +299,10 @@ const get_file_share_links = async (event, uow) => {
   throw new WrongResponseError();
 };
 
+const flush_file_share_links = async (event, uow) => {
+    uow.link_repository.reset();
+};
+
 const get_file_share_link = async (event, uow) => {
   const request = new GetFileShareLinkRequest({
     file_id: event.file_id,
@@ -375,6 +379,7 @@ export {
   download_file_by_link,
   add_file_share_link,
   get_file_share_links,
+  flush_file_share_links,
   get_file_share_link,
   delete_file_share_link,
   download_file_by_file_share_link

@@ -107,6 +107,8 @@ class GetFileShareLinks extends Command {
   }
 }
 
+class FlushFileShareLinks extends Command {}
+
 class GetFileShareLink extends Command {
   constructor(file_id, link_id) {
     super();
@@ -157,6 +159,7 @@ export {
   AddFileShareLink,
   DeleteFileShareLink,
   GetFileShareLinks,
+  FlushFileShareLinks,
   GetFileShareLink,
   DownloadFileByFileShareLink,
 };
