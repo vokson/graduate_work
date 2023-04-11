@@ -22,12 +22,10 @@ class GetManyCdnServers(Command):
     pass
 
 
-# class CreateFile(Command):
-#     name: str
-#     size: str
-#     user_id: UUID
-#     servers: list[str]
-
+class RenameFile(Command):
+    id: UUID
+    user_id: UUID
+    name: str
 
 class DeleteFile(Command):
     id: UUID
@@ -73,8 +71,8 @@ class GetFileShareLinks(Command):
 
 
 class GetFileShareLink(Command):
-    link_id: UUID
     file_id: UUID
+    link_id: UUID
 
 
 class DeleteFileShareLink(Command):

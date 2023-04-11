@@ -49,13 +49,7 @@ class FileRepository:
 
     GET_ALL_QUERY = f"SELECT * FROM {__files_tablename__} WHERE user_id = $1;"
 
-    # GET_ALL_NON_DELETED_QUERY = f"""
-    #                     SELECT * FROM {__files_tablename__} WHERE
-    #                     has_deleted = false AND user_id = $1;
-    #                     """
-
     DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
-    # DELETE_QUERY = f"UPDATE {__files_tablename__} SET has_deleted = true WHERE id = $1;"
 
     GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
 

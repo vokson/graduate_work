@@ -69,6 +69,22 @@ async def delete(
         await bus.handle(commands.DeleteFile(id=file_id, user_id=user_id))
     )
 
+@router.put(
+    "/{file_id}/",
+    responses=collect_reponses(),
+    status_code=status.HTTP_200_OK,
+    summary="Переименование файла",
+)
+@auth(permissions=["can_change_file"])
+async def rename_file(
+    file_id: UUID,
+    body: schemes.RenameFileRequest,
+    user_id: UUID = Depends(extract_user_id()),
+    bus: MessageBus = Depends(get_bus()),
+) -> schemes.FileResponse:
+    return transform_command_result(
+        await bus.handle(commands.RenameFile(id=file_id, user_id=user_id, name=body.name))
+    )
 
 @router.get(
     "/{file_id}/",

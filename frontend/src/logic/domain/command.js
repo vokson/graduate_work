@@ -51,6 +51,14 @@ class DeleteFile extends Command {
   }
 }
 
+class RenameFile extends Command {
+  constructor(id, name) {
+    super();
+    this.id = id;
+    this.name = name;
+  }
+}
+
 class DownloadFile extends Command {
   constructor(id) {
     super();
@@ -140,6 +148,7 @@ export {
   GetFiles,
   GetFileServers,
   DeleteFile,
+  RenameFile,
   UploadFile,
   UploadFileByLink,
   DownloadFile,

@@ -14,6 +14,7 @@ COMMAND_RESULTS_RESPONSE_CODES = {
     # command_results.ValidationError: (400, "Request.Error.Validation"),
     # command_results.UserDoesNotExist: (400, "User.DoesNotExist"),
     command_results.FileDoesNotExist: (400, "File.DoesNotExist"),
+    command_results.FileAlreadyExists: (400, "File.AlreadyExists"),
     command_results.FileShareLinkDoesNotExist: (
         400,
         "FileShareLink.DoesNotExist",

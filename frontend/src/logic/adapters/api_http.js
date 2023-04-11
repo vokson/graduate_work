@@ -20,6 +20,7 @@ import {
   GetFilesResponse,
   GetFileServersResponse,
   DeleteFileResponse,
+  RenameFileResponse,
   GetUploadLinkResponse,
   UploadFileResponse,
   GetDownloadLinkResponse,
@@ -56,6 +57,7 @@ class HttpApi extends AbstractApi {
       GetFilesRequest: this.get_files,
       GetFileServersRequest: this.get_file_servers,
       DeleteFileRequest: this.delete_file,
+      RenameFileRequest: this.rename_file,
       GetUploadLinkRequest: this.get_upload_link,
       UploadFileRequest: this.upload_file,
       GetDownloadLinkRequest: this.get_download_link,
@@ -329,6 +331,19 @@ class HttpApi extends AbstractApi {
       `/storage/api/v1/files/${request.data.id}/`,
       {
         method: "delete",
+      }
+    );
+  };
+
+  rename_file = async (request) => {
+    return await this.perform_request(
+      RenameFileResponse,
+      `/storage/api/v1/files/${request.data.id}/`,
+      {
+        method: "put",
+        data: JSON.stringify({
+          name: request.data.name,
+        }),
       }
     );
   };

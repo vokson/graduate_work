@@ -18,40 +18,61 @@
         </base-form>
       </div>
       <div class="page__topcontainer">
-        <div v-if="user" class="page__userinfo">
-          <div class="page__userrow">
-            <p class="page__userlabel">Имя пользователя:</p>
-            <p class="page__uservalue">{{ user.username }}</p>
+        <div class="page__infocontainer">
+          <div v-if="user" class="page__userinfo">
+            <div class="page__userrow">
+              <p class="page__userlabel">Имя пользователя:</p>
+              <p class="page__uservalue">{{ user.username }}</p>
+            </div>
+            <div class="page__userrow">
+              <p class="page__userlabel">E-mail:</p>
+              <p class="page__uservalue">{{ user.email }}</p>
+            </div>
+            <div class="page__userrow">
+              <p class="page__userlabel">Имя:</p>
+              <p class="page__uservalue">{{ user.first_name }}</p>
+            </div>
+            <div class="page__userrow">
+              <p class="page__userlabel">Фамилия:</p>
+              <p class="page__uservalue">{{ user.last_name }}</p>
+            </div>
+            <div class="page__userrow">
+              <p class="page__userlabel">Суперпользователь ?:</p>
+              <p class="page__uservalue">
+                {{ user.is_superuser ? "Да" : "Нет" }}
+              </p>
+            </div>
+            <div class="page__userrow">
+              <p class="page__userlabel">Разрешения:</p>
+              <ul class="page__uservalue">
+                <li v-for="perm in user.permissions" :key="perm">{{ perm }}</li>
+              </ul>
+            </div>
           </div>
-          <div class="page__userrow">
-            <p class="page__userlabel">E-mail:</p>
-            <p class="page__uservalue">{{ user.email }}</p>
-          </div>
-          <div class="page__userrow">
-            <p class="page__userlabel">Имя:</p>
-            <p class="page__uservalue">{{ user.first_name }}</p>
-          </div>
-          <div class="page__userrow">
-            <p class="page__userlabel">Фамилия:</p>
-            <p class="page__uservalue">{{ user.last_name }}</p>
-          </div>
-          <div class="page__userrow">
-            <p class="page__userlabel">Суперпользователь ?:</p>
-            <p class="page__uservalue">
-              {{ user.is_superuser ? "Да" : "Нет" }}
-            </p>
-          </div>
-          <div class="page__userrow">
-            <p class="page__userlabel">Разрешения:</p>
-            <ul class="page__uservalue">
-              <li v-for="perm in user.permissions" :key="perm">{{ perm }}</li>
-            </ul>
+          <div v-if="selected_file_id" class="page__fileinfo">
+            <form-text-field
+              value="Сменить имя файла"
+              :parameters="{ font_weight: 600 }"
+            />
+            <form-text-input
+              :value="selected_file_name"
+              @update="selected_file_name = $event"
+            />
+            <btn-component
+            или
+              v-if="selected_file_name"
+              class="fileinfo__button"
+              caption="Применить"
+              type="success"
+              @click="handle_rename_file()"
+            />
           </div>
         </div>
         <div class="page__filecontainer">
           <file-list
             :files="downloading_files"
             :can_be_deleted="false"
+            или
             :can_be_dragged="false"
           />
           <file-drop-zone
@@ -61,9 +82,10 @@
             @update:dragging="is_drag_above_file_zone = $event"
           >
             <span v-if="!is_drag_above_file_zone" class="page__dropzonetitle">
-              &lt; {{ max_file_size }} МБ</span
+              Drag&Drop &lt; {{ max_file_size }} МБ</span
             >
           </file-drop-zone>
+          или
           <input
             type="file"
             id="file-input"
@@ -148,7 +170,7 @@
           :key="file.id"
           class="filerow"
           :class="{ filerow_selected: file.id === selected_file_id }"
-          @click="handle_select_file(file.id)"
+          @click="handle_select_file(file.id, file.name)"
         >
           <div class="filerow__button">
             <div
@@ -206,6 +228,7 @@ import {
   UploadFile,
   DeleteFile,
   DownloadFile,
+  RenameFile,
   AddFileShareLink,
   GetFileShareLinks,
   DeleteFileShareLink,
@@ -224,8 +247,8 @@ import { MessageBus } from "../logic/service_layer/message_bus";
 
 import BaseForm from "../components/forms/BaseForm.vue";
 import FormTextField from "../components/fields/FormTextField.vue";
-// import FolderTreeNode from "../components/folder/FolderTreeNode.vue";
-// import ToggleTextButton from "../components/buttons/ToggleTextButton.vue";
+import FormTextInput from "../components/fields/FormTextInput.vue";
+import BtnComponent from "../components/buttons/BtnComponent.vue";
 import { useBeforeEnterPage } from "../logic/service_layer/use_modules";
 
 export default {
@@ -235,10 +258,11 @@ export default {
     FileDropZone,
     FileList,
     FormTextField,
+    FormTextInput,
     DocumentPaginationRow,
     BaseForm,
+    BtnComponent,
     // FolderTreeNode,
-    // FormTextInput,
     // ToggleTextButton,
   },
   name: "MainPage",
@@ -309,9 +333,20 @@ export default {
     };
 
     const selected_file_id = ref(null);
-    const handle_select_file = async (id) => {
+    const selected_file_name = ref("");
+
+    const handle_select_file = async (id, name) => {
       selected_file_id.value = id;
+      selected_file_name.value = name;
       await MessageBus.handle(new GetFileShareLinks(id), uow);
+    };
+
+    const handle_rename_file = async () => {
+      await MessageBus.handle(
+        new RenameFile(selected_file_id.value, selected_file_name.value),
+        uow
+      );
+      await refresh_actions();
     };
 
     // DRAGGING
@@ -368,6 +403,7 @@ export default {
         new DeleteFileShareLink(selected_file_id.value, link_id),
         uow
       );
+      await refresh_actions();
     };
 
     // FORM
@@ -413,8 +449,9 @@ export default {
         new AddFileShareLink(file_id, lifetime, password),
         uow
       );
-      const link = results[0]
+      const link = results[0];
       handle_copy_link_into_clipboard(file_id, link.id);
+      await refresh_actions();
     };
 
     const handle_update_form_attribute = (name, value) =>
@@ -496,6 +533,7 @@ export default {
       // FILE
       files,
       selected_file_id,
+      selected_file_name,
       handle_select_file,
       downloading_files,
       max_file_size,
@@ -504,6 +542,7 @@ export default {
       handle_delete,
       handle_download,
       handle_copy_link,
+      handle_rename_file,
 
       // FORM
       is_form_opened,
@@ -570,8 +609,8 @@ export default {
 
 .page__filedropzone {
   width: 100%;
-  /* height: 100%; */
   max-width: 300px;
+  max-height: 200px;
   border: 2px dashed grey;
   border-radius: 5px;
   display: flex;
@@ -615,6 +654,15 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   margin-left: 20px;
+}
+
+.page__historycontainer {
+  flex-grow: 1;
+}
+
+.page__linkcontainer {
+  min-width: 450px;
+  max-width: 450px;
 }
 
 .filerow,
@@ -744,5 +792,20 @@ export default {
 
 .filerowdescription {
   text-align: end;
+}
+
+.page__infocontainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.page__fileinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.fileinfo__button {
+  margin-top: 5px;
 }
 </style>

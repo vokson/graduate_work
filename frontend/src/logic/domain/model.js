@@ -148,6 +148,8 @@ class UserAction {
     if (this._event === 'FILE.DOWNLOADED') return this._file_downloaded_text;
     if (this._event === 'FILE.RENAMED') return this._file_renamed_text;
     if (this._event === 'FILE.DELETED') return this._file_deleted_text;
+    if (this._event === 'FILE_SHARE_LINK.CREATED') return this._file_share_link_created_text;
+    if (this._event === 'FILE_SHARE_LINK.DELETED') return this._file_share_link_deleted_text;
     return `Wrong event ${this._event}`;
   }
 
@@ -165,6 +167,14 @@ class UserAction {
 
   get _file_deleted_text() {
     return `Файл "${this._data['name']}" был удален`;
+  }
+
+  get _file_share_link_created_text() {
+    return `Создана общедоступная ссылка на файл "${this._data['name']}"`;
+  }
+
+  get _file_share_link_deleted_text() {
+    return `Общедоступная ссылка на файл "${this._data['name']}", созданная ${new Date(this._data['created']).toLocaleString()}, была удалена`;
   }
 
 }
@@ -191,7 +201,7 @@ class ShareLink {
   get file() {
     return this._file;
   }
-  
+
   get is_secured() {
     return this._is_secured;
   }
@@ -201,7 +211,7 @@ class ShareLink {
   }
 
   get is_expired() {
-    if (this._expire_at === null ||this._expire_at > Date.now()) return false;
+    if (this._expire_at === null || this._expire_at > Date.now()) return false;
     return true;
   }
 

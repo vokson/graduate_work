@@ -7,6 +7,7 @@ import {
   List as CdnServerList,
 } from "./api_responses/models/cdn_server";
 import {
+  Single as FileSingle,
   List as FileList,
 } from "./api_responses/models/file";
 import {
@@ -140,6 +141,24 @@ class DeleteFileRequest extends Request {
   }
 }
 class DeleteFileResponse extends EmptyPositiveResponse { }
+
+class RenameFileRequest extends Request {
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class RenameFileResponse extends Response {
+  get schema() {
+    return FileSingle;
+  }
+}
 
 class GetCdnServersRequest extends Request { }
 class GetCdnServersResponse extends Response {
@@ -388,6 +407,10 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  rename_file = () => {
+    throw new NotImplementedError();
+  };
+
   get_upload_link = () => {
     throw new NotImplementedError();
   };
@@ -457,6 +480,8 @@ export {
   UploadFileResponse,
   DownloadFileRequest,
   DownloadFileResponse,
+  RenameFileRequest,
+  RenameFileResponse,
 
   // SHARE LINK
   AddFileShareLinkRequest,

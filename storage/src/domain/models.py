@@ -69,6 +69,10 @@ class UserAction(AbstractIdModel, CreatedMixin):
 class FileActionData(BaseModel):
     name: str
 
+class FileRenameActionData(BaseModel):
+    old_name: str
+    new_name: str
+
 
 class FileUserAction(UserAction):
     data: FileActionData
@@ -86,8 +90,23 @@ class FileDeletedUserAction(FileUserAction):
     event: str = Field("FILE.DELETED")
 
 
-class FileRenamedUserAction(FileUserAction):
+class FileRenamedUserAction(UserAction):
+    data: FileRenameActionData
     event: str = Field("FILE.RENAMED")
+
+
+class FileShareLinkActionData(BaseModel):
+    name: str
+    created: datetime
+
+class FileShareLinkUserAction(UserAction):
+    data: FileShareLinkActionData
+
+class FileShareLinkCreatedUserAction(FileShareLinkUserAction):
+    event: str = Field("FILE_SHARE_LINK.CREATED")
+
+class FileShareLinkDeletedUserAction(FileShareLinkUserAction):
+    event: str = Field("FILE_SHARE_LINK.DELETED")
 
 
 # BROKER MESSAGES

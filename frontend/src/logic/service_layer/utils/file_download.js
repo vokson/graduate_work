@@ -1,6 +1,7 @@
 import { get_extension_of_file } from "./filename";
 
 const js_download_file = ({ data, filename, mime, bom, inline = false }) => {
+  console.log(filename)
   const is_pdf =
     mime === "application/pdf" ||
     get_extension_of_file(filename).toLowerCase() == "pdf";

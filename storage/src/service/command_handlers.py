@@ -7,7 +7,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 import jwt
-from asyncpg.exceptions import PostgresError
+from asyncpg.exceptions import PostgresError, UniqueViolationError
 from src.adapters.s3 import AbstractS3Storage
 from src.core import exceptions
 from src.core.config import settings
@@ -72,10 +72,8 @@ async def delete_file(
 ):
     async with uow:
         obj = await uow.files.get_by_id(cmd.id)
-        if not obj:
-            raise exceptions.FileDoesNotExist
 
-        if obj.user_id != cmd.user_id:
+        if not obj or obj.user_id != cmd.user_id:
             raise exceptions.FileDoesNotExist
 
         await uow.files.delete(cmd.id)
@@ -92,6 +90,39 @@ async def delete_file(
 
     uow.push_message(events.FileDeleted(id=cmd.id))
     return command_results.PositiveCommandResult({})
+
+async def rename_file(
+    cmd: commands.RenameFile,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        obj = await uow.files.get_by_id(cmd.id)
+
+        if not obj or obj.user_id != cmd.user_id:
+            raise exceptions.FileDoesNotExist
+
+        old_name = obj.name
+
+        obj.name = cmd.name
+        obj.updated = datetime.now()
+
+        try:
+            await uow.files.update(obj)
+        except UniqueViolationError:
+            raise exceptions.FileAlreadyExists
+
+        await uow.history.add(
+            models.FileRenamedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": obj.user_id,
+                    "data": {"old_name": old_name, "new_name": cmd.name},
+                }
+            )
+        )
+        await uow.commit()
+
+    return command_results.PositiveCommandResult(obj.dict())
 
 
 async def get_file_servers(
@@ -415,6 +446,17 @@ async def create_file_share_link(
         )
 
         await uow.file_share_links.add(obj)
+
+        await uow.history.add(
+            models.FileShareLinkCreatedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": cmd.user_id,
+                    "data": {"name": file.name, "created": obj.created},
+                }
+            )
+        )
+
         await uow.commit()
 
     return command_results.PositiveCommandResult(
@@ -465,7 +507,21 @@ async def delete_file_share_link(
         if not file or file.user_id != cmd.user_id:
             raise exceptions.FileDoesNotExist
 
+        link = await uow.file_share_links.get(cmd.file_id, cmd.link_id)
+        if not link:
+            raise exceptions.FileShareLinkDoesNotExist
+
         await uow.file_share_links.delete(cmd.link_id)
+        
+        await uow.history.add(
+            models.FileShareLinkDeletedUserAction(
+                **{
+                    "obj_id": cmd.link_id,
+                    "user_id": cmd.user_id,
+                    "data": {"name": file.name, "created": link.created},
+                }
+            )
+        )
         await uow.commit()
 
     return command_results.PositiveCommandResult({})

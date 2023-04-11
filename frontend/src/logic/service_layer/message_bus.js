@@ -24,6 +24,7 @@ import {
 import {
   get_files,
   delete_file,
+  rename_file,
   upload_file,
   upload_file_by_link,
   download_file,
@@ -71,6 +72,7 @@ const COMMAND_HANDLERS = {
   GetFiles: [get_files],
   GetFileServers: [get_file_servers],
   DeleteFile: [delete_file],
+  RenameFile: [rename_file],
   UploadFile: [upload_file],
   UploadFileByLink: [upload_file_by_link],
   DownloadFile: [download_file],
@@ -93,8 +95,8 @@ const EVENT_HANDLERS = {
   UploadFileError: [upload_file_error],
   UploadFileSuccess: [upload_file_success],
   DownloadFileSuccess: [download_file_success],
-  RenameFileSuccess: [rename_file_success],
   DeleteFileSuccess: [delete_file_success],
+  RenameFileSuccess: [rename_file_success],
   FileShareLinkCopied: [file_share_link_copied],
   FileShareLinkDeleted: [file_share_link_deleted],
 };

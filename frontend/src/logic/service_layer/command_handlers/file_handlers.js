@@ -6,6 +6,8 @@ import {
   GetFilesResponse,
   DeleteFileRequest,
   DeleteFileResponse,
+  RenameFileRequest,
+  RenameFileResponse,
   UploadFileRequest,
   UploadFileResponse,
   GetUploadLinkRequest,
@@ -37,6 +39,7 @@ import {
   UploadFileSuccess,
   DownloadFileSuccess,
   DeleteFileSuccess,
+  RenameFileSuccess,
   FileShareLinkDeleted
 } from "../../domain/event";
 
@@ -95,6 +98,30 @@ const delete_file = async (event, uow) => {
   if (response instanceof DeleteFileResponse) {
     uow.file_repository.delete(event.id);
     uow.push_message(new DeleteFileSuccess());
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+const rename_file = async (event, uow) => {
+  const request = new RenameFileRequest({
+    id: event.id,
+    name: event.name,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof RenameFileResponse) {
+    const f = convert_file_response_obj_to_model(response.data);
+    f.set_size_complete();
+    uow.file_repository.set(f.id, f);
+    uow.push_message(new RenameFileSuccess());
     return;
   }
 
@@ -185,6 +212,7 @@ const download_file_by_link = async (event, uow) => {
   const id = uuidv4();
 
   const file = new File(id, event.name, event.size, new Date(), new Date());
+  console.log(file)
   uow.download_progress.set(id, file);
 
   const request = new DownloadFileRequest({
@@ -342,6 +370,7 @@ export {
   upload_file_by_link,
   get_files,
   delete_file,
+  rename_file,
   download_file,
   download_file_by_link,
   add_file_share_link,

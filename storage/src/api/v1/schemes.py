@@ -41,6 +41,8 @@ class FileResponse(BaseModel):
     created: datetime
     updated: datetime
 
+class RenameFileRequest(BaseModel):
+    name: str
 
 class UploadLinkRequest(BaseModel):
     name: str
