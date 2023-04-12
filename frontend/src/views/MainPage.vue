@@ -426,6 +426,7 @@ export default {
 
     const handle_copy_link = (file_id) => {
       handle_update_form_attribute("FILE_ID", file_id);
+      selected_file_id.value = file_id;
       is_form_opened.value = true;
     };
 
