@@ -1,14 +1,11 @@
-from uuid import UUID
+from fastapi import APIRouter, Depends, status
 
-from fastapi import APIRouter, Depends, Header, Request, Response, status
 from src.api.dependables import get_bus, required_permissions_dependable
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
-from src.domain.models import User
 from src.service.messagebus import MessageBus
-
 
 router = APIRouter()
 
@@ -28,6 +25,6 @@ async def get_user_by_id(
         await bus.handle(
             commands.GetUserById(
                 user_id=commons["user_id"],
-            )
-        )
+            ),
+        ),
     )

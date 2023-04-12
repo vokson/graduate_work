@@ -1,14 +1,11 @@
-from uuid import UUID
+from fastapi import APIRouter, Depends, status
 
-from fastapi import APIRouter, Depends, Header, Request, Response, status
 from src.api.dependables import get_bus, required_permissions_dependable
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
-from src.domain.models import User
 from src.service.messagebus import MessageBus
-
 
 router = APIRouter()
 
@@ -20,7 +17,6 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     summary="Регистрация пользователя",
 )
-# @rate_limit()
 async def register(
     credentials: schemes.RegisterUserRequest,
     bus: MessageBus = Depends(get_bus()),
@@ -33,8 +29,8 @@ async def register(
                 email=credentials.email,
                 first_name=credentials.first_name,
                 last_name=credentials.last_name,
-            )
-        )
+            ),
+        ),
     )
 
 
@@ -45,7 +41,6 @@ async def register(
     status_code=status.HTTP_200_OK,
     summary="Авторизация пользователя",
 )
-# @rate_limit()
 async def login(
     credentials: schemes.LoginByCredentialsRequest,
     bus: MessageBus = Depends(get_bus()),
@@ -55,8 +50,8 @@ async def login(
             commands.LoginByCredentials(
                 username=credentials.username,
                 password=credentials.password,
-            )
-        )
+            ),
+        ),
     )
 
 
@@ -72,7 +67,7 @@ async def logout(
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.EmptyResponse:
     return transform_command_result(
-        await bus.handle(commands.Logout(user_id=commons["user_id"]))
+        await bus.handle(commands.Logout(user_id=commons["user_id"])),
     )
 
 
@@ -89,7 +84,7 @@ async def refresh_tokens(
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.RefreshTokensResponse:
     return transform_command_result(
-        await bus.handle(commands.RefreshTokens(user_id=commons["user_id"]))
+        await bus.handle(commands.RefreshTokens(user_id=commons["user_id"])),
     )
 
 
@@ -112,6 +107,6 @@ async def verify_token(
                 is_superuser=commons["is_superuser"],
                 required_permissions=body.permissions,
                 existing_permissions=commons["permissions"],
-            )
-        )
+            ),
+        ),
     )

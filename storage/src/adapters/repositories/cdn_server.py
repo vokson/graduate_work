@@ -92,7 +92,7 @@ class CdnServerRepository:
             obj.is_on,
             obj.is_active,
             obj.created,
-            obj.updated
+            obj.updated,
         )
 
     async def get_by_id(self, id: UUID) -> CdnServer:
@@ -118,11 +118,26 @@ class CdnServerRepository:
         rows = await self._conn.fetch(self.GET_ALL_QUERY)
         return [self._convert_row_to_obj(row) for row in rows]
 
-    async def get_switched_on(self, is_active: bool = True, zone: str|None = None) -> list[CdnServer]:
-        logger.info(f"Get switched on cdn servers in zone {zone}, is_active {is_active}")
+    async def get_switched_on(
+        self, is_active: bool = True, zone: str | None = None
+    ) -> list[CdnServer]:
+        logger.info(
+            f"Get switched on cdn servers in zone {zone}, is_active {is_active}"
+        )
 
-        query = self.GET_SWITCHED_ON_QUERY if zone is None else self.GET_SWITCHED_ON_WITHIN_ZONE_QUERY
-        params = (is_active, ) if zone is None else (zone, is_active,)
+        query = (
+            self.GET_SWITCHED_ON_QUERY
+            if zone is None
+            else self.GET_SWITCHED_ON_WITHIN_ZONE_QUERY
+        )
+        params = (
+            (is_active,)
+            if zone is None
+            else (
+                zone,
+                is_active,
+            )
+        )
 
         rows = await self._conn.fetch(query, *params)
         return [self._convert_row_to_obj(row) for row in rows]
@@ -183,7 +198,7 @@ class CdnServerRepository:
             obj.is_on,
             obj.is_active,
             obj.created,
-            obj.updated
+            obj.updated,
         )
 
     async def delete(self, id: UUID):

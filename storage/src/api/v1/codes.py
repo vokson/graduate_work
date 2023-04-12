@@ -19,7 +19,10 @@ COMMAND_RESULTS_RESPONSE_CODES = {
         400,
         "FileShareLink.DoesNotExist",
     ),
-    command_results.CdnServerConnectionError: (400, "CdnServer.ConnectionError"),
+    command_results.CdnServerConnectionError: (
+        400,
+        "CdnServer.ConnectionError",
+    ),
     command_results.CdnServerAlreadyExists: (400, "CdnServer.AlreadyExists"),
     # command_results.WrongCredentials: (401, "Login.Error.Credentials"),
     # command_results.AuthTokenMissedException: (401, "Auth.Error.TokenMissed"),

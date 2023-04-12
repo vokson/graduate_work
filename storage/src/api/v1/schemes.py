@@ -13,6 +13,7 @@ class ErrorResponse(BaseModel):
     error: str
     detail: str | None
 
+
 class CdnServerRequest(BaseModel):
     name: str
     host: str
@@ -23,6 +24,7 @@ class CdnServerRequest(BaseModel):
     longitude: float
     is_on: bool
     is_active: bool
+
 
 class CdnServerResponse(BaseModel):
     id: UUID

@@ -1,26 +1,23 @@
 import os
 import sys
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
-from src.adapters.cache import close_cache
-from src.adapters.db import close_db
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from src.adapters.cache import close_cache
+from src.adapters.db import close_db
 
 BASE_DIR = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 )
 sys.path.append(BASE_DIR)
 
 
 from src.api.v1 import auth, users
 from src.core.config import settings
-from src.service.messagebus import MessageBus
-from src.service.uow import UnitOfWork
-
 
 app = FastAPI(
     title="Auth API",
@@ -29,14 +26,14 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
-# For DEV
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if settings.debug:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 @app.on_event("shutdown")
@@ -48,7 +45,8 @@ async def shutdown_event():
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
     return ORJSONResponse(
-        status_code=exc.status_code, content={"error": exc.detail}
+        status_code=exc.status_code,
+        content={"error": exc.detail},
     )
 
 
@@ -61,6 +59,8 @@ async def validation_exception_handler(request, exc):
 
 
 app.include_router(
-    auth.router, prefix="/users/api/v1/auth", tags=["Authentication"]
+    auth.router,
+    prefix="/users/api/v1/auth",
+    tags=["Authentication"],
 )
 app.include_router(users.router, prefix="/users/api/v1/users", tags=["Users"])

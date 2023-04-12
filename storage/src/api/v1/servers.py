@@ -27,6 +27,7 @@ async def get_servers(
         await bus.handle(commands.GetManyCdnServers())
     )
 
+
 @router.post(
     "/",
     responses=collect_reponses(),
@@ -39,10 +40,9 @@ async def add_server(
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.CdnServerResponse:
     return transform_command_result(
-        await bus.handle(
-            commands.CreateCdnServer(**body.dict())
-        )
+        await bus.handle(commands.CreateCdnServer(**body.dict()))
     )
+
 
 @router.put(
     "/{server_id}/",
@@ -57,10 +57,9 @@ async def update_server(
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.CdnServerResponse:
     return transform_command_result(
-        await bus.handle(
-            commands.UpdateCdnServer(id=server_id, **body.dict())
-        )
+        await bus.handle(commands.UpdateCdnServer(id=server_id, **body.dict()))
     )
+
 
 @router.delete(
     "/{server_id}/",
@@ -74,7 +73,5 @@ async def delete_server(
     bus: MessageBus = Depends(get_bus()),
 ):
     return transform_command_result(
-        await bus.handle(
-            commands.DeleteCdnServer(id=server_id)
-        )
+        await bus.handle(commands.DeleteCdnServer(id=server_id))
     )

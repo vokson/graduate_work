@@ -2,8 +2,6 @@ import asyncio
 import logging
 import os
 import sys
-from uuid import UUID
-
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
@@ -13,7 +11,6 @@ sys.path.append(BASE_DIR)
 from src.domain import commands
 from src.service.messagebus import get_message_bus
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -21,7 +18,7 @@ async def main():
     bus = await get_message_bus(["db"])
 
     await bus.handle(
-        commands.CreateUser(
+        commands.CreateUser(  # noqa
             username="admin",
             password="admin",
             email="admin@mail.ru",
@@ -42,11 +39,11 @@ async def main():
                 "can_add_filesharelink",
                 "can_delete_filesharelink",
             ],
-        )
+        ),
     )
 
     await bus.handle(
-        commands.CreateUser(
+        commands.CreateUser(  # noqa
             username="user",
             password="user",
             email="user@mail.ru",
@@ -64,7 +61,7 @@ async def main():
                 "can_add_filesharelink",
                 "can_delete_filesharelink",
             ],
-        )
+        ),
     )
 
 

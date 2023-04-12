@@ -144,7 +144,7 @@ class StoragePool:
                 await storage.startup(**dsl)
             except Exception:
                 raise exceptions.CdnServerConnectionError
-                
+
             self._storages[name] = storage
 
         return self._storages[name]

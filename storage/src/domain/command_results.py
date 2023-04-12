@@ -137,5 +137,6 @@ class FileNotFoundInTempStorage(NegativeCommandResult):
 class RemoveFileError(NegativeCommandResult):
     pass
 
+
 class CdnServerConnectionError(NegativeCommandResult):
     pass

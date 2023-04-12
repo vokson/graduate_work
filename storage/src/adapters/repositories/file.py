@@ -57,7 +57,9 @@ class FileRepository:
                                     ) AND has_deleted = false;
                                     """
 
-    DELETE_QUERY = f"UPDATE {__files_tablename__} SET has_deleted = true WHERE id = $1;"
+    DELETE_QUERY = (
+        f"UPDATE {__files_tablename__} SET has_deleted = true WHERE id = $1;"
+    )
     # DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
 
     GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
@@ -75,9 +77,9 @@ class FileRepository:
     # IS_FILE_ON_ALL_SERVERS = f""" SELECT (
     #                                 SELECT COUNT(server_id)
     #                                 FROM {__file_server_tablename__}
-    #                                 WHERE file_id = $1 
+    #                                 WHERE file_id = $1
     #                             ) = (
-    #                                 SELECT COUNT(id) from {__servers_tablename__} 
+    #                                 SELECT COUNT(id) from {__servers_tablename__}
     #                             ) as result;
     #                         """
 
@@ -108,7 +110,9 @@ class FileRepository:
 
         return self._convert_row_to_obj(row)
 
-    async def get_non_deleted_by_name_and_user_id(self, name: str, user_id: UUID) -> UUID:
+    async def get_non_deleted_by_name_and_user_id(
+        self, name: str, user_id: UUID
+    ) -> UUID:
         logger.debug(f"Get file with name {name} and user_id {user_id}")
         row = await self._conn.fetchrow(
             self.GET_BY_NAME_AND_USER_ID_QUERY, name, user_id
@@ -124,9 +128,15 @@ class FileRepository:
         rows = await self._conn.fetch(self.GET_NON_DELETED_QUERY, user_id)
         return [self._convert_row_to_obj(row) for row in rows]
 
-    async def get_non_deleted_on_servers(self, only_servers: list[UUID]) -> list[File]:
-        logger.debug(f"Get all files located on servers with ids {only_servers}")
-        rows = await self._conn.fetch(self.GET_NON_DELETED_ON_SERVERS_QUERY, only_servers)
+    async def get_non_deleted_on_servers(
+        self, only_servers: list[UUID]
+    ) -> list[File]:
+        logger.debug(
+            f"Get all files located on servers with ids {only_servers}"
+        )
+        rows = await self._conn.fetch(
+            self.GET_NON_DELETED_ON_SERVERS_QUERY, only_servers
+        )
         return [self._convert_row_to_obj(row) for row in rows]
 
     async def update(self, obj: File):

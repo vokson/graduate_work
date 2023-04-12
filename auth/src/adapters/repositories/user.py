@@ -1,9 +1,7 @@
 import logging
-from abc import ABC, abstractmethod
 from uuid import uuid4
 
 from src.domain.models import User
-
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +14,7 @@ class UserRepository:
     ADD_QUERY = f"""
                     INSERT INTO {__users_tablename__}
                         (
-                            id, 
+                            id,
                             username,
                             password,
                             email,
@@ -33,7 +31,7 @@ class UserRepository:
     UPDATE_QUERY = f"""
                     UPDATE {__users_tablename__} SET
                         (
-                            id, 
+                            id,
                             username,
                             password,
                             email,
@@ -47,16 +45,17 @@ class UserRepository:
                             created,
                             updated
                         ) = (
-                            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+                            $1, $2, $3, $4, $5, $6, $7, $8,
+                            $9, $10, $11, $12, $13
                         )
                     WHERE id = $1;
                     """
 
     GET_BY_ID_QUERY = f"SELECT * FROM {__users_tablename__} WHERE id = $1;"
 
-    GET_BY_USERNAME_QUERY = (
-        f"SELECT * FROM {__users_tablename__} WHERE username = $1;"
-    )
+    GET_BY_USERNAME_QUERY = f"""
+                    SELECT * FROM {__users_tablename__} WHERE username = $1;
+                    """
 
     ADD_PERMISSIONS_QUERY = f"""
                     INSERT INTO {__permissions_tablename__} (id, name)
@@ -66,12 +65,14 @@ class UserRepository:
 
     GET_PERMISSIONS_OF_USER_QUERY = f"""
                     SELECT p.name FROM {__user_permission_tablename__} up
-                    JOIN {__permissions_tablename__} p ON up.permission_id  = p.id
+                    JOIN {__permissions_tablename__} p
+                    ON up.permission_id  = p.id
                     WHERE up.user_id = $1;
                     """
 
     DELETE_ALL_PERMISSIONS_FROM_USER = f"""
-                    DELETE FROM {__user_permission_tablename__} WHERE user_id = $1;
+                    DELETE FROM {__user_permission_tablename__}
+                    WHERE user_id = $1;
                     """
 
     SET_PERMISSIONS_TO_USER = f"""
@@ -108,7 +109,9 @@ class UserRepository:
                 [(uuid4(), x) for x in obj.permissions],
             )
             await self._conn.execute(
-                self.SET_PERMISSIONS_TO_USER, obj.id, obj.permissions
+                self.SET_PERMISSIONS_TO_USER,
+                obj.id,
+                obj.permissions,
             )
 
     async def get_by_id(self, id) -> User:
@@ -121,9 +124,9 @@ class UserRepository:
 
         return User(
             **{
-                **{k: v for k, v in row.items()},
+                **dict(row.items()),
                 **{"permissions": [x["name"] for x in perms]},
-            }
+            },
         )
 
     async def get_by_username(self, username) -> User:
@@ -133,14 +136,15 @@ class UserRepository:
             return
 
         perms = await self._conn.fetch(
-            self.GET_PERMISSIONS_OF_USER_QUERY, row["id"]
+            self.GET_PERMISSIONS_OF_USER_QUERY,
+            row["id"],
         )
 
         return User(
             **{
-                **{k: v for k, v in row.items()},
+                **dict(row.items()),
                 **{"permissions": [x["name"] for x in perms]},
-            }
+            },
         )
 
     async def update(self, obj: User):
@@ -169,5 +173,7 @@ class UserRepository:
                 [(uuid4(), x) for x in obj.permissions],
             )
             await self._conn.execute(
-                self.SET_PERMISSIONS_TO_USER, obj.id, obj.permissions
+                self.SET_PERMISSIONS_TO_USER,
+                obj.id,
+                obj.permissions,
             )

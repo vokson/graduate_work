@@ -1,11 +1,11 @@
 """Настройки"""
 
 import os
+from datetime import datetime, timedelta
 from logging import config as logging_config
 
 from pydantic import BaseModel, BaseSettings, Field
 from src.core.logger import LOGGING
-from datetime import datetime, timedelta
 
 
 logging_config.dictConfig(LOGGING)
@@ -65,6 +65,7 @@ class RabbitSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+    debug: bool
     app_name: str
     auth: AuthServiceSettings
     storage_db: DatabaseSettings
@@ -85,8 +86,10 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+
 def tz_now():
     return datetime.now() + timedelta(hours=3)  # Moscow Time
+
 
 db_dsl = {
     "host": settings.storage_db.host,

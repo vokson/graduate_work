@@ -1,6 +1,3 @@
-from src.domain import commands
-
-
 class CommandResult:
     def __init__(self, data):
         self._data = data

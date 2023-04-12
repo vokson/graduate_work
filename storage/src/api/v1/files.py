@@ -7,10 +7,10 @@ from src.api.dependables import extract_user_id, get_bus, get_ip
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
+from src.core.config import tz_now
 from src.domain import commands
 from src.domain.models import CdnServer
 from src.service.messagebus import MessageBus
-from src.core.config import tz_now
 
 
 router = APIRouter()

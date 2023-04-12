@@ -1,11 +1,11 @@
-"""Настройки"""
+"""Настройки."""
 
 import os
 from logging import config as logging_config
 
 from pydantic import BaseModel, BaseSettings
-from src.core.logger import LOGGING
 
+from src.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
@@ -35,6 +35,7 @@ class TokenSettings(BaseModel):
 
 
 class Settings(BaseSettings):
+    debug: bool
     auth_db: DatabaseSettings
     cache: CacheSettings
     token: TokenSettings

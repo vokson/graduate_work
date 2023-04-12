@@ -25,7 +25,9 @@ class CreatedUpdatedMixin(BaseModel):
 
 
 class AbstractIdCreatedUpdatedModel(
-    AbstractModel, IdMixin, CreatedUpdatedMixin
+    AbstractModel,
+    IdMixin,
+    CreatedUpdatedMixin,
 ):
     pass
 
@@ -42,8 +44,3 @@ class User(AbstractIdCreatedUpdatedModel):
     access_token_expire_at: int | None
     refresh_token_expire_at: int | None
     permissions: list[str] = Field(default=[])
-
-
-# class Token(BaseModel):
-#     access_token: str
-#     refresh_token: str

@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from src.adapters.cache import close_cache, init_cache
+from src.adapters.cache import init_cache
 from src.adapters.db import get_db_conn, release_db_conn
 from src.adapters.repositories.user import UserRepository
-from src.core.config import cache_dsl, db_dsl, settings
+from src.core.config import cache_dsl, db_dsl
 
 
 def get_db_connection():

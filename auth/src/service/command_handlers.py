@@ -4,14 +4,13 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 import jwt
-from asyncpg.exceptions import PostgresError
+
 from src.core import exceptions
 from src.core.config import settings
-from src.domain import command_results, commands, events
+from src.domain import command_results, commands
 from src.domain.models import User
 from src.service.uow import AbstractUnitOfWork
 from src.tools.hasher import PBKDF2PasswordHasher
-
 
 logger = logging.getLogger(__name__)
 hasher = PBKDF2PasswordHasher()
@@ -33,7 +32,9 @@ async def check_required_permissions(
 
     try:
         payload = jwt.decode(
-            encoded_token, settings.token.secret_key, [settings.token.algo]
+            encoded_token,
+            settings.token.secret_key,
+            [settings.token.algo],
         )
 
     except (
@@ -112,7 +113,7 @@ async def create_user(
         await uow.commit()
 
     return command_results.PositiveCommandResult(
-        user.dict(exclude={"password"})
+        user.dict(exclude={"password"}),
     )
 
 
@@ -127,7 +128,7 @@ async def get_user_by_id(
             raise exceptions.UserDoesNotExist
 
     return command_results.PositiveCommandResult(
-        user.dict(exclude={"password"})
+        user.dict(exclude={"password"}),
     )
 
 
@@ -244,7 +245,7 @@ async def login_by_credentials(
         await uow.commit()
 
     return command_results.PositiveCommandResult(
-        {"access_token": access_token, "refresh_token": refresh_token}
+        {"access_token": access_token, "refresh_token": refresh_token},
     )
 
 
@@ -279,14 +280,15 @@ async def refresh_tokens(
         #  Обновление токенов пользователя
         try:
             access_token, refresh_token = await refresh_tokens_of_user(
-                uow, user
+                uow,
+                user,
             )
             await uow.commit()
         except Exception as e:
             print(e)
 
     return command_results.PositiveCommandResult(
-        {"access_token": access_token, "refresh_token": refresh_token}
+        {"access_token": access_token, "refresh_token": refresh_token},
     )
 
 
@@ -298,7 +300,7 @@ async def verify_token(
         if (
             cmd.is_superuser
             or len(
-                set(cmd.required_permissions) - set(cmd.existing_permissions)
+                set(cmd.required_permissions) - set(cmd.existing_permissions),
             )
             == 0
         ):

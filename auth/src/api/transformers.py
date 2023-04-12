@@ -1,6 +1,6 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
+
 from src.api.v1.codes import COMMAND_RESULTS_RESPONSE_CODES
-from src.domain.command_results import NegativeCommandResult
 
 
 def transform_command_result(results):
@@ -16,31 +16,6 @@ def transform_command_result(results):
         raise HTTPException(status_code=code, detail=detail)
 
     raise Exception(
-        f"Transform command result function has received {first_command_result} not even CommandResult"
+        "Transform command result function has received "
+        f"{first_command_result} not even CommandResult",
     )
-
-
-# def transform_file_result(results):
-#     first_result = results.first_result
-
-#     if isinstance(first_result, NegativeCommandResult):
-#         return transform_command_result(results)
-
-#     filename = first_result.data["original_name"]
-
-#     if first_result.data.get("server_name"):
-#         file = open(first_result.data["server_name"], "rb")
-#     else:
-#         file = first_result.data["bytes_io"]
-#         file.seek(0)
-
-#     response = FileResponse(
-#         file,
-#         as_attachment=True,
-#         filename=filename,
-#         headers={
-#             "Access-Control-Expose-Headers": "*",
-#         },
-#     )
-#     response["Content-Type"] = "application/octet-stream"
-#     return response
