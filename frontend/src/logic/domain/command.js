@@ -27,8 +27,51 @@ class Logout extends Command { }
 
 class MyCredentials extends Command { }
 class RefreshTokens extends Command { }
+
 class GetCdnServers extends Command { }
-class GetUserActions extends Command { 
+
+class AddCdnServer extends Command {
+  constructor(name, host, port, location, zone, latitude, longitude, is_on, is_active) {
+    super();
+    this.name = name;
+    this.host = host;
+    this.port = port;
+    this.location = location;
+    this.zone = zone;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.is_on = is_on;
+    this.is_active = is_active;
+  }
+}
+
+class UpdateCdnServer extends Command {
+  constructor(id, name, host, port, location, zone, latitude, longitude, is_on, is_active) {
+    super();
+    this.id = id;
+    this.name = name;
+    this.host = host;
+    this.port = port;
+    this.location = location;
+    this.zone = zone;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.is_on = is_on;
+    this.is_active = is_active;
+  }
+}
+
+class DeleteCdnServer extends Command {
+  constructor(id) {
+    super();
+    this.id = id;
+  }
+}
+
+
+
+
+class GetUserActions extends Command {
   constructor(page_num, page_size) {
     super();
     this.page_num = page_num;
@@ -83,7 +126,7 @@ class UploadFileByLink extends Command {
 }
 
 class DownloadFileByLink extends Command {
-  constructor(link,name, size) {
+  constructor(link, name, size) {
     super();
     this.link = link;
     this.name = name;
@@ -107,7 +150,7 @@ class GetFileShareLinks extends Command {
   }
 }
 
-class FlushFileShareLinks extends Command {}
+class FlushFileShareLinks extends Command { }
 
 class GetFileShareLink extends Command {
   constructor(file_id, link_id) {
@@ -146,6 +189,9 @@ export {
   GetUserActions,
   // CDN SERVERS
   GetCdnServers,
+  AddCdnServer,
+  UpdateCdnServer,
+  DeleteCdnServer,
   // FILE
   GetFiles,
   GetFileServers,

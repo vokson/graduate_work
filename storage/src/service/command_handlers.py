@@ -20,6 +20,16 @@ logger = logging.getLogger(__name__)
 hasher = PBKDF2PasswordHasher()
 
 
+async def get_many_cdn_servers(
+    cmd: commands.GetManyCdnServers,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        objs = await uow.cdn_servers.get_all()
+
+    return command_results.PositiveCommandResult([x.dict() for x in objs])
+
+
 async def create_cdn_server(
     cmd: commands.CreateCdnServer,
     uow: AbstractUnitOfWork,
@@ -40,15 +50,39 @@ async def create_cdn_server(
 
     return command_results.PositiveCommandResult(obj.dict())
 
-
-async def get_many_cdn_servers(
-    cmd: commands.GetManyCdnServers,
+async def update_cdn_server(
+    cmd: commands.UpdateCdnServer,
     uow: AbstractUnitOfWork,
 ):
     async with uow:
-        objs = await uow.cdn_servers.get_all()
+        server = await uow.cdn_servers.get_by_id(cmd.id)
 
-    return command_results.PositiveCommandResult([x.dict() for x in objs])
+        if not server:
+            raise exceptions.CdnServerDoesNotExist
+
+        obj = models.CdnServer(
+            **{**server.dict(), **cmd.dict(), **{"updated": datetime.now()}}
+        )
+
+        await uow.cdn_servers.update(obj)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult(obj.dict())
+
+async def delete_cdn_server(
+    cmd: commands.DeleteCdnServer,
+    uow: AbstractUnitOfWork,
+):
+    async with uow:
+        obj = await uow.cdn_servers.get_by_id(cmd.id)
+
+        if not obj:
+            raise exceptions.CdnServerDoesNotExist
+
+        await uow.cdn_servers.delete(cmd.id)
+        await uow.commit()
+
+    return command_results.PositiveCommandResult({})
 
 
 async def get_many_files(

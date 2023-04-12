@@ -46,6 +46,7 @@
         :convert_obj_to_item="convert_model_to_item"
         :current_id="current_id"
         sort_by="name"
+        :sort_asc="true"
         :search_time="search_time"
         :is_searching="is_searching"
         :should_emit_search_event_on_any_keypress="true"
@@ -59,6 +60,8 @@
 <script>
 import { computed, onMounted, ref } from "vue";
 import {
+  RefreshTokens,
+  GetCdnServers,
   AddCdnServer,
   UpdateCdnServer,
   DeleteCdnServer,
@@ -72,6 +75,7 @@ import {
   // validate_json,
   useCurrentMixin,
   // useGetFolders,
+  convertDateToDateTimeString,
 } from "../logic/service_layer/use_modules";
 // import { FolderSettings } from "../logic/adapters/api_responses/models/folder/folder_settings";
 
@@ -79,6 +83,8 @@ import HeadingComponent from "../components/HeadingComponent.vue";
 import BtnComponent from "../components/buttons/BtnComponent.vue";
 import BaseForm from "../components/forms/BaseForm.vue";
 import SearchComponent from "../components/SearchComponent.vue";
+
+import { useBeforeEnterPage } from "../logic/service_layer/use_modules";
 
 export default {
   components: {
@@ -91,6 +97,7 @@ export default {
 
   setup() {
     const uow = new VueUnitOfWork();
+    const user = uow.user_repository.get_current(); // Ref
 
     const convert_model_to_item = (obj) => {
       return {
@@ -98,14 +105,16 @@ export default {
         attributes: {
           id: obj.id.toString(),
           name: obj.name,
+          host: obj.host,
+          port: obj.port.toString(),
           location: obj.location,
           zone: obj.zone,
-          latitude: obj.latitude,
-          longitude: obj.longitude,
-          is_on: obj.is_on,
-          is_ready: obj.is_ready,
-          created: obj.created,
-          updated: obj.updated,
+          latitude: obj.latitude.toString(),
+          longitude: obj.longitude.toString(),
+          is_on: obj.is_on === true ? "Y" : "N",
+          is_active: obj.is_active === true ? "Y" : "N",
+          created: convertDateToDateTimeString(obj.created),
+          updated: convertDateToDateTimeString(obj.updated),
         },
         actions: {},
       };
@@ -119,9 +128,19 @@ export default {
       )
     );
 
-    const can_add = uow.permission_repository.has("can_add_cdnserver");
-    const can_change = uow.permission_repository.has("can_change_cdnserver");
-    const can_delete = uow.permission_repository.has("can_delete_cdnserver");
+    const can_add = computed(() =>
+      user.value ? user.value.permissions.includes("can_add_cdnserver") : false
+    );
+    const can_change = computed(() =>
+      user.value
+        ? user.value.permissions.includes("can_change_cdnserver")
+        : false
+    );
+    const can_delete = computed(() =>
+      user.value
+        ? user.value.permissions.includes("can_delete_cdnserver")
+        : false
+    );
 
     // STATUS
     const search_time = ref(0);
@@ -131,10 +150,18 @@ export default {
 
     const search_schema = [
       {
+        name: "name",
+        size: "w200",
+        fields: [
+          {
+            placeholder: "Имя",
+            rule: "icontains",
+          },
+        ],
+      },
+      {
         name: "location",
         size: "w200",
-        align: "left",
-        grow: true,
         fields: [
           {
             placeholder: "Расположение",
@@ -144,7 +171,7 @@ export default {
       },
       {
         name: "zone",
-        size: "w400",
+        size: "w200",
         fields: [
           {
             placeholder: "Зона",
@@ -153,21 +180,43 @@ export default {
         ],
       },
       {
-        name: "is_on",
-        size: "w50",
+        name: "host",
+        size: "w200",
         fields: [
           {
-            placeholder: "On/Off",
+            placeholder: "Host",
+            rule: "icontains",
+          },
+        ],
+      },
+      {
+        name: "port",
+        size: "w100",
+        fields: [
+          {
+            placeholder: "Port",
+            rule: "icontains",
+          },
+        ],
+      },
+      {
+        name: "is_on",
+        size: "w30",
+        fields: [
+          {
+            type: "bool",
+            placeholder: "Включен?",
             rule: "exact",
           },
         ],
       },
       {
-        name: "is_ready",
-        size: "w50",
+        name: "is_active",
+        size: "w30",
         fields: [
           {
-            placeholder: "Ready",
+            type: "bool",
+            placeholder: "Активен?",
             rule: "exact",
           },
         ],
@@ -178,22 +227,28 @@ export default {
     const init_obj = {
       id: null,
       name: "",
+      host: "",
+      port: "",
       location: "",
       zone: "",
       latitude: "",
       longitude: "",
       is_on: false,
-      is_ready: false,
+      is_active: false,
       created: Date.now(),
       updated: Date.now(),
     };
 
     const to_repository_convertion = {
-      // settings: (x) => JSON.parse(x),
+      port: (x) => parseInt(x),
+      latitude: (x) => parseFloat(x),
+      longitude: (x) => parseFloat(x),
     };
 
     const from_repository_convertion = {
-      // settings: (x) => JSON.stringify(x, null, 3), // Каждый новый отступ - 3 пробела
+      port: (x) => x.toString(),
+      latitude: (x) => x.toString(),
+      longitude: (x) => x.toString(),
     };
 
     const { current_id, current, handle_update_attribute } = useCurrentMixin(
@@ -202,25 +257,28 @@ export default {
       from_repository_convertion
     );
 
-    // const is_settings_valid = computed(() =>
-    //   validate_json(current.value.settings, FolderSettings)
-    // );
-
     const is_edit_block_valid = computed(
-      // () => is_settings_valid.value && current.value.name.length > 0
-      () => true
+      () => current.value.name.length > 0
+       && current.value.host.length > 0 
+       && parseInt(current.value.port) 
+       && current.value.location.length > 0 
+       && current.value.zone.length > 0 
+       && parseFloat(current.value.latitude)
+       && parseFloat(current.value.longitude)
     );
 
     const add_action = async () => {
       const message = new AddCdnServer(
         ...[
           "name",
+          "host",
+          "port",
           "location",
           "zone",
           "latitude",
           "longitude",
           "is_on",
-          "is_ready"
+          "is_active",
         ].map((k) => convertObject(current.value, to_repository_convertion)[k])
       );
       await MessageBus.handle(message, uow);
@@ -231,12 +289,14 @@ export default {
         ...[
           "id",
           "name",
+          "host",
+          "port",
           "location",
           "zone",
           "latitude",
           "longitude",
           "is_on",
-          "is_ready"
+          "is_active",
         ].map((k) => convertObject(current.value, to_repository_convertion)[k])
       );
       await MessageBus.handle(message, uow);
@@ -254,7 +314,27 @@ export default {
         fields: [
           {
             type: "FormTextField",
-            bind: "id",
+            value: "Имя:",
+          },
+          {
+            type: "FormTextInput",
+            bind: "name",
+          },
+          {
+            type: "FormTextField",
+            value: "Хост:",
+          },
+          {
+            type: "FormTextInput",
+            bind: "host",
+          },
+          {
+            type: "FormTextField",
+            value: "Порт:",
+          },
+          {
+            type: "FormTextInput",
+            bind: "port",
           },
           {
             type: "FormTextField",
@@ -298,19 +378,29 @@ export default {
           },
           {
             type: "FormTextField",
-            value: "Готов к работе ?",
+            value: "Активен ?",
           },
           {
             type: "FormBooleanInput",
-            bind: "is_ready",
+            bind: "is_active",
           },
         ],
       },
     ]);
+
+    // TIMERS
+    const refresh_tokens = async () =>
+      await MessageBus.handle(new RefreshTokens(), uow);
+
+    uow.token_timer.set_callback(refresh_tokens);
+    uow.token_timer.start();
+
     onMounted(async () => {
       // Пытаемся автоматически зaлогинится
       // await useBeforeEnterPage(uow, ["can_view_flow"]);
       // await useGetFolders(uow);
+      await useBeforeEnterPage(uow, []);
+      await MessageBus.handle(new GetCdnServers(), uow);
     });
 
     return {
@@ -360,7 +450,7 @@ export default {
 }
 
 .page__editblock {
-  width: 600px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   padding-right: 15px;

@@ -9,6 +9,10 @@ class Command(BaseModel):
     pass
 
 
+class GetManyCdnServers(Command):
+    pass
+
+
 class CreateCdnServer(Command):
     name: str
     host: str
@@ -18,11 +22,15 @@ class CreateCdnServer(Command):
     latitude: float
     longitude: float
     is_on: bool
-    is_ready: bool
+    is_active: bool
 
 
-class GetManyCdnServers(Command):
-    pass
+class UpdateCdnServer(CreateCdnServer):
+    id: UUID
+
+
+class DeleteCdnServer(Command):
+    id: UUID
 
 
 class RenameFile(Command):

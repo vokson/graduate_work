@@ -18,6 +18,9 @@ import {
 
 import {
   get_cdn_servers,
+  add_cdn_server,
+  update_cdn_server,
+  delete_cdn_server,
   get_file_servers,
 } from "./command_handlers/cdn_server_handlers";
 
@@ -68,6 +71,9 @@ const COMMAND_HANDLERS = {
 
   // CDN SERVERS
   GetCdnServers: [get_cdn_servers],
+  AddCdnServer: [add_cdn_server],
+  UpdateCdnServer: [update_cdn_server],
+  DeleteCdnServer: [delete_cdn_server],
 
   // FILE
   GetFiles: [get_files],

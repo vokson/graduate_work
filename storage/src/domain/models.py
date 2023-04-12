@@ -47,7 +47,7 @@ class CdnServer(AbstractIdCreatedUpdatedModel):
     latitude: float
     longitude: float
     is_on: bool
-    is_ready: bool
+    is_active: bool
 
 
 class File(AbstractIdCreatedUpdatedModel):

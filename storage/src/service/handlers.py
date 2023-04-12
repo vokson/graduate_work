@@ -17,8 +17,10 @@ EVENT_HANDLERS = {
 }
 
 COMMAND_HANDLERS = {
-    commands.CreateCdnServer: command_handlers.create_cdn_server,
     commands.GetManyCdnServers: command_handlers.get_many_cdn_servers,
+    commands.CreateCdnServer: command_handlers.create_cdn_server,
+    commands.UpdateCdnServer: command_handlers.update_cdn_server,
+    commands.DeleteCdnServer: command_handlers.delete_cdn_server,
     commands.DeleteFile: command_handlers.delete_file,
     commands.RenameFile: command_handlers.rename_file,
     commands.GetManyFiles: command_handlers.get_many_files,

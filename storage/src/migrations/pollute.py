@@ -39,7 +39,7 @@ async def main():
                 latitude=latitude,
                 longitude=longitude,
                 is_on=on,
-                is_ready=ready,
+                is_active=ready,
             )
         )
 

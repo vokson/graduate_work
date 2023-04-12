@@ -7,6 +7,12 @@ const Single = {
     name: {
       type: "string",
     },
+    host: {
+      type: "string",
+    },
+    port: {
+      type: "integer",
+    },
     location: {
       type: "string"
     },
@@ -22,7 +28,7 @@ const Single = {
     is_on: {
       type: "boolean",
     },
-    is_ready: {
+    is_active: {
       type: "boolean",
     },
     created: {
@@ -35,12 +41,14 @@ const Single = {
   required: [
     "id",
     "name",
+    "host",
+    "port",
     "location",
     "zone",
     "latitude",
     "longitude",
     "is_on",
-    "is_ready",
+    "is_active",
     "created",
     "updated",
   ],

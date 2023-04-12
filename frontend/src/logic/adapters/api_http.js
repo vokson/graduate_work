@@ -15,6 +15,9 @@ import {
 
   // CDN SERVER
   GetCdnServersResponse,
+  AddCdnServerResponse,
+  UpdateCdnServerResponse,
+  DeleteCdnServerResponse,
 
   // FILE
   GetFilesResponse,
@@ -48,10 +51,13 @@ class HttpApi extends AbstractApi {
       LogoutRequest: this.logout,
       MyCredentialsRequest: this.my_credentials,
       RefreshTokensRequest: this.refresh_tokens,
+      GetUserActionsRequest: this.get_user_actions,
 
       // CDN SERVER
       GetCdnServersRequest: this.get_cdn_servers,
-      GetUserActionsRequest: this.get_user_actions,
+      AddCdnServerRequest: this.add_cdn_server,
+      UpdateCdnServerRequest: this.update_cdn_server,
+      DeleteCdnServerRequest: this.delete_cdn_server,
 
       // FILE
       GetFilesRequest: this.get_files,
@@ -294,6 +300,58 @@ class HttpApi extends AbstractApi {
     return await this.perform_request(
       GetCdnServersResponse,
       `/storage/api/v1/servers/`
+    );
+  };
+
+  add_cdn_server = async (request) => {
+    return await this.perform_request(
+      AddCdnServerResponse,
+      `/storage/api/v1/servers/`,
+      {
+        method: "post",
+        data: JSON.stringify({
+          name: request.data.name,
+          host: request.data.host,
+          port: request.data.port,
+          location: request.data.location,
+          zone: request.data.zone,
+          latitude: request.data.latitude,
+          longitude: request.data.longitude,
+          is_on: request.data.is_on,
+          is_active: request.data.is_active,
+        }),
+      }
+    );
+  };
+
+  update_cdn_server = async (request) => {
+    return await this.perform_request(
+      UpdateCdnServerResponse,
+      `/storage/api/v1/servers/${request.data.id}/`,
+      {
+        method: "put",
+        data: JSON.stringify({
+          name: request.data.name,
+          host: request.data.host,
+          port: request.data.port,
+          location: request.data.location,
+          zone: request.data.zone,
+          latitude: request.data.latitude,
+          longitude: request.data.longitude,
+          is_on: request.data.is_on,
+          is_active: request.data.is_active,
+        }),
+      }
+    );
+  };
+
+  delete_cdn_server = async (request) => {
+    return await this.perform_request(
+      DeleteCdnServerResponse,
+      `/storage/api/v1/servers/${request.data.id}/`,
+      {
+        method: "delete",
+      }
     );
   };
 

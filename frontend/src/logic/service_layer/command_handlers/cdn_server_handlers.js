@@ -2,6 +2,12 @@ import {
   NegativeResponse,
   GetCdnServersRequest,
   GetCdnServersResponse,
+  AddCdnServerRequest,
+  AddCdnServerResponse,
+  UpdateCdnServerRequest,
+  UpdateCdnServerResponse,
+  DeleteCdnServerRequest,
+  DeleteCdnServerResponse,
   GetFileServersRequest,
   GetFileServersResponse,
 } from "../../adapters/api";
@@ -18,12 +24,14 @@ const convert_cdn_server_response_obj_to_model = (obj) => {
   const user = new CdnServer(
     obj.id,
     obj.name,
+    obj.host,
+    obj.port,
     obj.location,
     obj.zone,
     obj.latitude,
     obj.longitude,
     obj.is_on,
-    obj.is_ready,
+    obj.is_active,
     obj.created,
     obj.updated
   );
@@ -45,6 +53,89 @@ const get_cdn_servers = async (event, uow) => {
       uow.cdn_server_repository.set(obj.id,
         convert_cdn_server_response_obj_to_model(obj)
       ))
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+const add_cdn_server = async (event, uow) => {
+  const request = new AddCdnServerRequest({
+    name: event.name,
+    host: event.host,
+    port: event.port,
+    location: event.location,
+    zone: event.zone,
+    latitude: event.latitude,
+    longitude: event.longitude,
+    is_on: event.is_on,
+    is_active: event.is_active,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof AddCdnServerResponse) {
+    const obj = response.data;
+    uow.cdn_server_repository.set(obj.id,
+      convert_cdn_server_response_obj_to_model(obj)
+    )
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+const update_cdn_server = async (event, uow) => {
+  const request = new UpdateCdnServerRequest({
+    id: event.id,
+    name: event.name,
+    host: event.host,
+    port: event.port,
+    location: event.location,
+    zone: event.zone,
+    latitude: event.latitude,
+    longitude: event.longitude,
+    is_on: event.is_on,
+    is_active: event.is_active,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof UpdateCdnServerResponse) {
+    const obj = response.data;
+    uow.cdn_server_repository.set(obj.id,
+      convert_cdn_server_response_obj_to_model(obj)
+    )
+    return;
+  }
+
+  throw new WrongResponseError();
+};
+
+const delete_cdn_server = async (event, uow) => {
+  const request = new DeleteCdnServerRequest({
+    id: event.id,
+  });
+
+  const response = await uow.api.call(request);
+
+  if (response instanceof NegativeResponse) {
+    uow.push_message(new ApiError(response.data.code));
+    return;
+  }
+
+  if (response instanceof DeleteCdnServerResponse) {
+    uow.cdn_server_repository.delete(event.id)
     return;
   }
 
@@ -73,6 +164,9 @@ const get_file_servers = async (event, uow) => {
 
 
 export {
-  get_cdn_servers,
   get_file_servers,
+  get_cdn_servers,
+  add_cdn_server,
+  update_cdn_server,
+  delete_cdn_server,
 };

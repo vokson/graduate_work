@@ -13,8 +13,8 @@ class HttpApiProvider extends AbstractApiProvider {
     return new HttpApi(
       process.env.NODE_ENV === "production"
         ? window.location.origin
-        // : "http://localhost"
-        : "http://10.95.27.163"
+        : "http://localhost"
+        // : "http://10.95.27.163"
     );
   };
 }

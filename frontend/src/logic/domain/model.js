@@ -89,25 +89,46 @@ class CdnServer {
   constructor(
     id,
     name,
+    host,
+    port,
     location,
     zone,
     latitude,
     longitude,
     is_on,
-    is_ready,
+    is_active,
     created,
     updated
   ) {
     this._id = id;
     this._name = name;
+    this._host = host;
+    this._port = port;
     this._location = location;
     this._zone = zone;
     this._latitude = latitude;
     this._longitude = longitude;
     this._is_on = is_on;
-    this._is_ready = is_ready;
+    this._is_active = is_active;
     this._created = created;
     this._updated = updated;
+  }
+
+  get to_dict() {
+    return {
+      id: this._id,
+      name: this._name,
+      host: this._host,
+      port: this._port,
+      location: this._location,
+      zone: this._zone,
+      latitude: this._latitude,
+      longitude: this._longitude,
+      is_on: this._is_on,
+      is_active: this._is_active,
+      created: this._created,
+      updated: this._updated,
+    };
   }
 
   get id() {
@@ -116,6 +137,14 @@ class CdnServer {
 
   get name() {
     return this._name;
+  }
+
+  get host() {
+    return this._host;
+  }
+
+  get port() {
+    return this._port;
   }
 
   get location() {
@@ -138,8 +167,16 @@ class CdnServer {
     return this._is_on;
   }
 
-  get is_ready() {
-    return this._is_ready;
+  get is_active() {
+    return this._is_active;
+  }
+
+  get created() {
+    return this._created;
+  }
+
+  get updated() {
+    return this._updated;
   }
 
 }

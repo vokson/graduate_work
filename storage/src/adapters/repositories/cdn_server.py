@@ -26,13 +26,35 @@ class CdnServerRepository:
                             latitude,
                             longitude,
                             is_on,
-                            is_ready,
+                            is_active,
                             created,
                             updated
                         )
                     VALUES
                         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
                     """
+
+    UPDATE_QUERY = f"""
+                    UPDATE {__tablename__} SET
+                        (
+                            name,
+                            host,
+                            port,
+                            location,
+                            zone,
+                            latitude,
+                            longitude,
+                            is_on,
+                            is_active,
+                            created,
+                            updated
+                        ) = (
+                            $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+                        )
+                    WHERE id = $1;
+                    """
+
+    DELETE_QUERY = f"DELETE FROM {__tablename__} WHERE id = $1;"
 
     GET_ALL_QUERY = f"SELECT * FROM {__tablename__};"
     GET_BY_ID_QUERY = f"SELECT * FROM {__tablename__} WHERE id = $1;"
@@ -57,7 +79,7 @@ class CdnServerRepository:
             obj.latitude,
             obj.longitude,
             obj.is_on,
-            obj.is_ready,
+            obj.is_active,
             obj.created,
             obj.updated
         )
@@ -126,31 +148,24 @@ class CdnServerRepository:
         )
         return filtered_servers[min_index]
 
-    # async def update(self, obj: User):
-    #     logger.debug(f"Update user: {obj.dict()}")
-    #     await self._conn.execute(
-    #         self.UPDATE_QUERY,
-    #         obj.id,
-    #         obj.username,
-    #         obj.password,
-    #         obj.email,
-    #         obj.first_name,
-    #         obj.last_name,
-    #         obj.is_superuser,
-    #         obj.access_token,
-    #         obj.refresh_token,
-    #         obj.access_token_expire_at,
-    #         obj.refresh_token_expire_at,
-    #         obj.created,
-    #         obj.updated,
-    #     )
+    async def update(self, obj: CdnServer):
+        logger.debug(f"Updated cdn server: {obj.dict()}")
+        await self._conn.execute(
+            self.UPDATE_QUERY,
+            obj.id,
+            obj.name,
+            obj.host,
+            obj.port,
+            obj.location,
+            obj.zone,
+            obj.latitude,
+            obj.longitude,
+            obj.is_on,
+            obj.is_active,
+            obj.created,
+            obj.updated
+        )
 
-    #     await self._conn.execute(self.DELETE_ALL_PERMISSIONS_FROM_USER, obj.id)
-    #     if obj.permissions:
-    #         await self._conn.executemany(
-    #             self.ADD_PERMISSIONS_QUERY,
-    #             [(uuid4(), x) for x in obj.permissions],
-    #         )
-    #         await self._conn.execute(
-    #             self.SET_PERMISSIONS_TO_USER, obj.id, obj.permissions
-    #         )
+    async def delete(self, id: UUID):
+        logger.debug(f"Delete cdn server with id {id}")
+        await self._conn.execute(self.DELETE_QUERY, id)

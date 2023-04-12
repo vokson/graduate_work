@@ -4,6 +4,7 @@ import {
   Single as UserSingle
 } from "./api_responses/models/user";
 import {
+  Single as CdnServerSingle,
   List as CdnServerList,
 } from "./api_responses/models/cdn_server";
 import {
@@ -166,6 +167,70 @@ class GetCdnServersResponse extends Response {
     return CdnServerList;
   }
 }
+
+class AddCdnServerRequest extends Request { 
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        host: { type: "string" },
+        port: { type: "integer" },
+        location: { type: "string" },
+        zone: { type: "string" },
+        latitude: { type: "number" },
+        longitude: { type: "number" },
+        is_on: { type: "boolean" },
+        is_active: { type: "boolean" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class AddCdnServerResponse extends Response {
+  get schema() {
+    return CdnServerSingle;
+  }
+}
+
+class UpdateCdnServerRequest extends Request { 
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+        host: { type: "string" },
+        port: { type: "integer" },
+        location: { type: "string" },
+        zone: { type: "string" },
+        latitude: { type: "number" },
+        longitude: { type: "number" },
+        is_on: { type: "boolean" },
+        is_active: { type: "boolean" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class UpdateCdnServerResponse extends Response {
+  get schema() {
+    return CdnServerSingle;
+  }
+}
+
+class DeleteCdnServerRequest extends Request { 
+  get schema() {
+    return {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+  }
+}
+class DeleteCdnServerResponse extends EmptyPositiveResponse {}
 
 class GetUploadLinkRequest extends Request {
   get schema() {
@@ -391,6 +456,18 @@ class AbstractApi {
     throw new NotImplementedError();
   };
 
+  add_cdn_server = () => {
+    throw new NotImplementedError();
+  };
+
+  update_cdn_server = () => {
+    throw new NotImplementedError();
+  };
+
+  delete_cdn_server = () => {
+    throw new NotImplementedError();
+  };
+
   get_user_actions = () => {
     throw new NotImplementedError();
   };
@@ -464,6 +541,12 @@ export {
   // CDN SERVER
   GetCdnServersRequest,
   GetCdnServersResponse,
+  AddCdnServerRequest,
+  AddCdnServerResponse,
+  UpdateCdnServerRequest,
+  UpdateCdnServerResponse,
+  DeleteCdnServerRequest,
+  DeleteCdnServerResponse,
 
   // FILE
   GetFilesRequest,

@@ -86,7 +86,7 @@ const refresh_tokens = async (event, uow) => {
   const access_token = uow.token_repository.get_access_token()
   const refresh_token = uow.token_repository.get_refresh_token()
 
-  // console.log('CURRENT REFRESH TOKEN', refresh_token);
+  console.log('CURRENT REFRESH TOKEN', refresh_token);
 
   if (!refresh_token) {
     uow.push_message(new RefreshTokenOutdated());

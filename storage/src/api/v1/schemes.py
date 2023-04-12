@@ -13,16 +13,28 @@ class ErrorResponse(BaseModel):
     error: str
     detail: str | None
 
-
-class CdnServerResponse(BaseModel):
-    id: UUID
+class CdnServerRequest(BaseModel):
     name: str
+    host: str
+    port: int
     location: str
     zone: str
     latitude: float
     longitude: float
     is_on: bool
-    is_ready: bool
+    is_active: bool
+
+class CdnServerResponse(BaseModel):
+    id: UUID
+    name: str
+    host: str
+    port: int
+    location: str
+    zone: str
+    latitude: float
+    longitude: float
+    is_on: bool
+    is_active: bool
     created: datetime
     updated: datetime
 
