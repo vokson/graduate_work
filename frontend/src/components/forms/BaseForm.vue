@@ -54,33 +54,15 @@
 import { ref, computed } from "vue";
 
 import FormTextField from "../fields/FormTextField.vue";
-import FormHtmlField from "../fields/FormHtmlField.vue";
 import FormBooleanInput from "../fields/FormBooleanInput.vue";
 import FormTextInput from "../fields/FormTextInput.vue";
-import FormMultilineTextInput from "../fields/FormMultilineTextInput.vue";
-import FormDateInput from "../fields/FormDateInput.vue";
-import FormEmailToAddressField from "../fields/FormEmailToAddressField.vue";
-import FormEmailToAddressInput from "../fields/FormEmailToAddressInput.vue";
-import FormHtmlInput from "../fields/FormHtmlInput.vue";
-// import FormHiddenInput from "../fields/FormHiddenInput.vue";
-import FormSelectInput from "../fields/FormSelectInput.vue";
-import FormFilteredSelectInput from "../fields/FormFilteredSelectInput.vue";
 
 export default {
   name: "BaseForm",
   components: {
     FormTextField,
-    FormHtmlField,
     FormBooleanInput,
     FormTextInput,
-    FormMultilineTextInput,
-    FormEmailToAddressField,
-    FormEmailToAddressInput,
-    FormDateInput,
-    FormHtmlInput,
-    // FormHiddenInput,
-    FormSelectInput,
-    FormFilteredSelectInput,
   },
   props: {
     settings: {

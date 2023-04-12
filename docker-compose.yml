@@ -68,8 +68,8 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ__PASSWORD}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ__VHOST}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5672:5672"  # Порт открыт для возможности подключения внешних S3 серверов
+      - "15672:15672"  # Порт открыт для возможности входа ревьювера
 
   auth:
     build: auth
@@ -127,7 +127,7 @@ services:
     image: 'quay.io/minio/minio:latest'
     ports:
       - '9001:9000'
-      - '9091:9090'
+      - '9091:9090'  # Порт открыт для возможности входа ревьювера
     depends_on:
       - rabbit
     volumes:
@@ -151,7 +151,7 @@ services:
     image: 'quay.io/minio/minio:latest'
     ports:
       - '9002:9000'
-      - '9092:9090'
+      - '9092:9090'  # Порт открыт для возможности входа ревьювера
     depends_on:
       - rabbit
     volumes:
@@ -175,7 +175,7 @@ services:
     image: 'quay.io/minio/minio:latest'
     ports:
       - '9003:9000'
-      - '9093:9090'
+      - '9093:9090'  # Порт открыт для возможности входа ревьювера
     depends_on:
       - rabbit
     volumes:
@@ -199,7 +199,7 @@ services:
     image: 'quay.io/minio/minio:latest'
     ports:
       - '9004:9000'
-      - '9094:9090'
+      - '9094:9090'  # Порт открыт для возможности входа ревьювера
     depends_on:
       - rabbit
     volumes:
@@ -223,7 +223,7 @@ services:
     image: 'quay.io/minio/minio:latest'
     ports:
       - '9005:9000'
-      - '9095:9090'
+      - '9095:9090'  # Порт открыт для возможности входа ревьювера
     depends_on:
       - rabbit
     volumes:

@@ -1,41 +1,8 @@
-// import Ajv from "ajv";
-// import AjvErrors from "ajv-errors";
-
 import { ref, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import {
   MyCredentials,
-  // GetInfo,
-  // GetFolders,
-  // GetRoles,
-  // GetUserFolderSettings,
-  // GetUsers,
-  // GetUserReplacements,
-  // GetOnBehalfUsers,
-  // GetUserGroups,
-  // GetPermissions,
-  // GetUserPermissionsForFolder,
-  // GetUserSearchSchema,
-  // GetSpareFiles,
-  // GetFlowItem,
-  // GetFlowItemSteps,
-  // GetDocument,
-  // ValidateDocument,
-  // GetWaitingDocumentApprovals,
-  // GetDocumentApprovals,
-  // GetDocumentApprovalSpareFiles,
-  // GetDocumentApprovalFlow,
-  // GetCart,
-  // GetServerSettings,
-  // GetMailBoxes,
-  // GetMailChannels,
-  // GetCounters,
-  // // CONTEXT
-  // GetDocumentAttributesContext,
-  // GetDocumentPreviousAttributeContext,
-  // GetUserEmailContext,
 } from "../domain/command";
-// import { AccessPagePermissionCheckFail } from "../domain/event";
 import { MessageBus } from "./message_bus";
 import router from "../../router";
 
@@ -43,43 +10,6 @@ const deepObjectCopy = (obj) => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-// const filterArrayOfObjects = (
-//   arrOfObjects,
-//   queryObject,
-//   caseSensitive = true
-// ) => {
-//   return arrOfObjects.filter((obj) => {
-//     let to_be_taken = true;
-
-//     Object.keys(queryObject).forEach((key) => {
-//       let value = obj[key];
-
-//       if (value === undefined) {
-//         to_be_taken = false;
-//         return;
-//       }
-
-//       // Если значение NULL
-//       if (value === null) {
-//         // Если запрос пустой, значение попадает в выборку
-//         // в противном случае, нет
-//         if (queryObject[key]) to_be_taken = false;
-//         return;
-//       }
-
-//       let needle = queryObject[key];
-
-//       if (!caseSensitive) {
-//         value = value.toLowerCase();
-//         needle = needle.toLowerCase();
-//       }
-
-//       if (!String.prototype.includes.call(value, needle)) to_be_taken = false;
-//     });
-
-//     return to_be_taken;
-//   });
-// };
 
 const filterArrayOfObjectsByQuery = (arrOfObjects, queryObject) => {
   return arrOfObjects.filter((obj) => {
@@ -160,9 +90,6 @@ const filterArrayOfObjectsByQuery = (arrOfObjects, queryObject) => {
 
 const useBeforeEnterPage = async (
   uow,
-  // required_permissions,
-  // folder_id = null,
-  // usergroup_id = null
 ) => {
 
   const route = useRoute();
@@ -177,240 +104,12 @@ const useBeforeEnterPage = async (
   };
 
   await auto_login_action(uow);
-  // // Проверяем разрешения
-  // if (folder_id !== null && usergroup_id !== null) {
-  //   await MessageBus.handle(
-  //     new GetUserPermissionsForFolder(folder_id, usergroup_id),
-  //     uow
-  //   );
-  // }
   if (!uow.user_repository.is_authenticated())
     router.push({
       name: "LoginPage",
       query: { url: encodeURIComponent(route.fullPath) },
     });
-
-  // required_permissions.forEach((e) => {
-  //   if (
-  //     uow.permission_repository.has(e).value !== true &&
-  //     uow.permission_repository.has_for_folder(folder_id, e).value !== true
-  //   ) {
-  //     router.push({
-  //       name: "LoginPage",
-  //       query: { url: encodeURIComponent(route.fullPath) },
-  //     });
-  //     // TODO
-  //     MessageBus.handle(new AccessPagePermissionCheckFail(), uow);
-  //   }
-  // });
 };
-
-// const useGetInfo = async (uow) => {
-//   const message = new GetInfo();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetFolders = async (uow) => {
-//   const message = new GetFolders();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetPermissions = async (uow) => {
-//   const message = new GetPermissions();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetRoles = async (uow) => {
-//   const message = new GetRoles();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetUserFolderSettings = async (uow) => {
-//   const message = new GetUserFolderSettings();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetUsers = async (uow) => {
-//   const message = new GetUsers();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetUserReplacements = async (uow) => {
-//   const message = new GetUserReplacements();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetOnBehalfUsers = async (uow) => {
-//   const message = new GetOnBehalfUsers();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetUserGroups = async (uow) => {
-//   const message = new GetUserGroups();
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetUserSearchSchema = async (uow, folder_id, usergroup_id) => {
-//   const message = new GetUserSearchSchema(folder_id, usergroup_id);
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetSpareFiles = async (uow, folder_id, usergroup_id) => {
-//   const message = new GetSpareFiles(folder_id, usergroup_id);
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetFlowItem = async (uow, flowitem_id) => {
-//   const message = new GetFlowItem(flowitem_id);
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetFlowItemSteps = async (uow, flowitem_id) => {
-//   const message = new GetFlowItemSteps(flowitem_id);
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetDocument = async (uow, folder_id, usergroup_id, doc_id) => {
-//   const message = new GetDocument(folder_id, usergroup_id, doc_id);
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useValidateDocument = async (uow, folder_id, usergroup_id, doc_id) => {
-//   const message = new ValidateDocument(folder_id, usergroup_id, doc_id);
-//   await MessageBus.handle(message, uow);
-// };
-
-// const useGetDocumentsWaitingApproval = async (uow) => {
-//   await MessageBus.handle(new GetWaitingDocumentApprovals(), uow);
-// };
-
-// const useGetDocumentApprovalsWithSpareFiles = async (
-//   uow,
-//   folder_id,
-//   usergroup_id,
-//   doc_id
-// ) => {
-//   await Promise.all([
-//     MessageBus.handle(
-//       new GetDocumentApprovals(folder_id, usergroup_id, doc_id),
-//       uow
-//     ),
-
-//     MessageBus.handle(
-//       new GetDocumentApprovalSpareFiles(folder_id, usergroup_id, doc_id),
-//       uow
-//     ),
-//   ]);
-// };
-
-// const useGetDocumentApprovalFlow = async (
-//   uow,
-//   folder_id,
-//   usergroup_id,
-//   doc_id
-// ) => {
-//   await MessageBus.handle(
-//     new GetDocumentApprovalFlow(folder_id, usergroup_id, doc_id),
-//     uow
-//   );
-// };
-
-// const useGetCart = async (uow) => {
-//   await MessageBus.handle(new GetCart(), uow);
-// };
-
-// const useGetServerSettings = async (uow) => {
-//   await MessageBus.handle(new GetServerSettings(), uow);
-// };
-
-// const useGetMailBoxes = async (uow) => {
-//   await MessageBus.handle(new GetMailBoxes(), uow);
-// };
-
-// const useGetMailChannels = async (uow) => {
-//   await MessageBus.handle(new GetMailChannels(), uow);
-// };
-
-// const useGetCounters = async (uow) => {
-//   await MessageBus.handle(new GetCounters(), uow);
-// };
-
-// // CONTEXT
-
-// const useGetContext = async (uow, uid, settings, ...props) => {
-//   const context_map = {
-//     DOCUMENT_ATTRIBUTES: useGetDocumentAttributesContext,
-//     PREVIOUS_DOCUMENTS_ATTRIBUTE: useGetDocumentPreviousContext,
-//     USERS_EMAILS: useGetUserEmailContext,
-//   };
-
-//   uow.context_repository.reset(uid);
-//   await Promise.all(
-//     settings.map((e) => {
-//       const func = context_map[e["type"]];
-//       return func(uow, uid, e["name"], e["parameters"] || {}, ...props);
-//     })
-//   );
-// };
-
-// const useGetDocumentAttributesContext = (
-//   uow,
-//   ctx_id,
-//   ctx_name,
-//   parameters,
-//   folder_id,
-//   usergroup_id,
-//   document_id
-// ) => {
-//   MessageBus.handle(
-//     new GetDocumentAttributesContext(
-//       ctx_id,
-//       ctx_name,
-//       folder_id,
-//       document_id,
-//       parameters["is_raw_attribute"]
-//     ),
-//     uow
-//   );
-// };
-
-// const useGetDocumentPreviousContext = async (
-//   uow,
-//   ctx_id,
-//   ctx_name,
-//   parameters,
-//   folder_id,
-//   usergroup_id,
-//   document_id
-// ) => {
-//   await MessageBus.handle(
-//     new GetDocumentPreviousAttributeContext(
-//       ctx_id,
-//       ctx_name,
-//       folder_id,
-//       usergroup_id,
-//       document_id,
-//       parameters["attribute_name"],
-//       parameters["is_raw_attribute"],
-//       parameters["count"]
-//     ),
-//     uow
-//   );
-// };
-
-// const useGetUserEmailContext = (uow, ctx_id, ctx_name) => {
-//   MessageBus.handle(new GetUserEmailContext(ctx_id, ctx_name), uow);
-// };
-
-// const use404 = () => {
-//   router.push({ name: "PageNotFound" });
-// };
-
-// const useValidateIntOr404 = (value) => {
-//   const num = Number.parseInt(value, 10);
-//   if (isNaN(num)) use404();
-//   return num;
-// };
 
 const convertStringToDate = (value, rule) => {
   const parts = value.split(".");
@@ -595,85 +294,6 @@ const usePaginationMixin = (
   };
 };
 
-// // promises: array of Promises - Массив промисов, которые необходимо выполнить
-// // chunk_size: int - Кол-во Promise, выполняемых за один раз
-// // progress: Ref(int) - Прогресс выполнения
-// const usePromiseExecuteMixin = async (
-//   promises,
-//   chunk_size,
-//   progress = null
-// ) => {
-//   if (progress !== null) progress.value = 0;
-//   let promises_executed = 0;
-
-//   let start = 0;
-
-//   while (start < promises.length) {
-//     await Promise.all(
-//       promises.slice(start, start + chunk_size).map(async (f) => {
-//         // console.log("PROMISE", f);
-//         await f();
-//         promises_executed++;
-//         // console.log("EXECUTED:", promises_executed);
-
-//         if (progress !== null)
-//           progress.value = Math.round(
-//             (promises_executed / promises.length) * 100
-//           );
-//       })
-//     );
-
-//     start += chunk_size;
-//   }
-// };
-
-// // items: array of Object - Массив объектов, у которых есть свойство actions c действиями,
-// //                          которые нужно выполнить
-// // simultaneous_process_count: int - Количество одновременно выполняемых действий
-// const usePerformActionMixin = (
-//   items, // Ref
-//   simultaneous_process_count
-// ) => {
-//   const action_progress = ref(100);
-
-//   const perform_action_on_items = async (action_name) => {
-//     const actions = items.value
-//       .filter((item) => item.actions[action_name])
-//       .map((item) => item.actions[action_name]);
-
-//     await usePromiseExecuteMixin(
-//       actions,
-//       simultaneous_process_count,
-//       action_progress
-//     );
-//   };
-
-//   return {
-//     action_progress,
-//     perform_action_on_items,
-//   };
-// };
-
-// // DECORATORS
-
-// // uow: - Unit of Work
-// // cmd: - Команда, которую нужно отправить в шину для выполнения асинхронно
-// // in_progress: Ref(bool) - Команда находится в процессе выполнения
-// // execution_time: Ref(Number) - Время выполнения команды
-// const useExecutionTimeDecorator = async (
-//   uow,
-//   cmd,
-//   execution_time,
-//   in_progress = null
-// ) => {
-//   if (in_progress !== null) in_progress.value = true;
-
-//   const t0 = performance.now();
-//   await MessageBus.handle(cmd, uow);
-//   execution_time.value = Math.round(performance.now() - t0) / 1000;
-
-//   if (in_progress !== null) in_progress.value = false;
-// };
 
 // FUNCTIONS
 
@@ -772,126 +392,20 @@ const useGetSortFunction = (name) => {
   return rules[name];
 };
 
-// const shuffleArray = (array) => {
-//   var m = array.length,
-//     t,
-//     i;
-
-//   while (m) {
-//     i = Math.floor(Math.random() * m--);
-
-//     t = array[m];
-//     array[m] = array[i];
-//     array[i] = t;
-//   }
-
-//   return array;
-// };
-
-// const generate_states_obj_from_approvals = (approvals) => {
-//   if (approvals.length === 0) return {};
-
-//   let approval_by_id = {};
-//   approvals.forEach((x) => {
-//     approval_by_id[x.id] = x;
-//   });
-
-//   let approval_state_by_username = {};
-
-//   // Делаем копию, чтобы сортировка не затрагивала массив,
-//   // который был передан в функцию
-//   const approvals_copy = approvals.map((x) => x);
-
-//   approvals_copy
-//     .sort((a, b) => a.updated_at - b.updated_at)
-//     .map((approval) => {
-//       const state = approval.state;
-//       approval_state_by_username[approval.to_username] = state;
-
-//       //  Заменяем статусы для делегирований без возврата
-//       while (approval.delegated_from) {
-//         approval = approval_by_id[approval.delegated_from];
-//         approval_state_by_username[approval.to_username] = state;
-//       }
-//     });
-
-//   return approval_state_by_username;
-// };
-
-// const validate_json = (text, schema_obj = null) => {
-//   let obj = null;
-//   try {
-//     obj = JSON.parse(text);
-//   } catch (e) {
-//     return false;
-//   }
-
-//   if (schema_obj === null) return true;
-
-//   const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
-//   AjvErrors(ajv);
-
-//   const validate = ajv.compile(schema_obj);
-//   validate(obj);
-
-//   if (validate.errors !== null) {
-//     validate.errors.forEach((err) => console.log(err.message));
-//     return false;
-//   }
-
-//   return true;
-// };
-
 export {
   deepObjectCopy,
   useBeforeEnterPage,
-  // useGetInfo,
-  // useGetFolders,
-  // useGetPermissions,
-  // useGetRoles,
-  // useGetUserFolderSettings,
-  // useGetUsers,
-  // useGetUserReplacements,
-  // useGetOnBehalfUsers,
-  // useGetUserGroups,
-  // useGetUserSearchSchema,
-  // useGetSpareFiles,
-  // useGetFlowItem,
-  // useGetFlowItemSteps,
-  // useGetDocument,
-  // useValidateDocument,
-  // useGetDocumentsWaitingApproval,
-  // useGetDocumentApprovalsWithSpareFiles,
-  // useGetDocumentApprovalFlow,
-  // useGetCart,
-  // useGetServerSettings,
-  // useGetMailBoxes,
-  // useGetMailChannels,
-  // useGetCounters,
-  // use404,
-  // useValidateIntOr404,
   useDataEncode,
   useGetSortFunction,
-  // // CONTEXT
-  // useGetContext,
   // MIXINS
   useCurrentMixin,
   useSelectionMixin,
   usePaginationMixin,
-  // usePromiseExecuteMixin,
-  // usePerformActionMixin,
-  // // DECORATORS
-  // useExecutionTimeDecorator,
-  // // FUNCTIONS
+  // FUNCTIONS
   convertObject,
   convertDateToDateString,
   convertDateToDateTimeString,
   convertDateToDateObject,
-  // shuffleArray,
-  // generate_states_obj_from_approvals,
-  // // VALIDATION
-  // validate_json,
   // FILTERS
-  // filterArrayOfObjects,
   filterArrayOfObjectsByQuery,
 };

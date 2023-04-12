@@ -87,24 +87,4 @@ class WaitSecondsTimer {
   };
 }
 
-// class CallFunctionTimer {
-//   constructor(period, func) {
-//     console.log('TIMER', period)
-//     this._timer = null;
-//     this._period = period;
-//   }
-
-//   start = (func) => {
-//     console.log('START TIMER', func);
-//     if (this._timer) this.stop()
-//     this._timer = setInterval(func, this._period);
-//   };
-
-//   stop = () => {
-//     clearInterval(this._timer);
-//     this._timer = null;
-//   };
-
-// }
-
 export { AbstractTimer, UploadProgressTimer, WaitSecondsTimer };

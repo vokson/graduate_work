@@ -205,30 +205,6 @@ class HttpApi extends AbstractApi {
     }
 
 
-    // // Если получен файл для скачивания
-    // if (response.content_type === "application/octet-stream") {
-    //   // Достаем имя файла из Content-Disposition
-
-    //   // Проверяем вариант для английского имени файла
-    //   const regex_en = /filename\s*=\s*"(?<filename>.+)"/g;
-    //   const match_en = regex_en.exec(response.content_disposition);
-
-    //   // Проверяем вариант для русского имени файла
-    //   const regex_ru = /filename\*=utf-8''(?<filename>.+)/g;
-    //   const match_ru = regex_ru.exec(response.content_disposition);
-
-    //   const match = match_en === null ? match_ru : match_en;
-    //   // Заменяем управляющие последовательности с % на символы
-    //   return {
-    //     file: response.data,
-    //     name: decodeURI(match.groups.filename)
-    //       .replace(/%2C/g, ",")
-    //       .replace(/%40/g, "@")
-    //       .replace(/%3F/g, "?"),
-    //     size: response.content_length,
-    //   };
-    // }
-
     // Если это не файл, то должен быть формат JSON
     let json_data = {};
     try {

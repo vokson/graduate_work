@@ -1,5 +1,3 @@
-// import { v4 as uuidv4 } from "uuid";
-
 class User {
   constructor(
     username,
@@ -26,55 +24,22 @@ class User {
     this._permissions = []
   }
 
-  // get to_dict() {
-  //   return {
-  //     username: this._username,
-  //     email: this._email,
-  //     first_name: this._first_name,
-  //     last_name: this._last_name,
-  //     patronomic: this._patronomic,
-  //     position: this._position,
-  //     department: this._department,
-  //     is_active: this._is_active,
-  //     access_group_regex: this._access_group_regex,
-  //     role: this._role,
-  //     role_inside_group: this._role_inside_group,
-  //     role_outside_group: this._role_outside_group,
-  //     on_behalf: this._on_behalf,
-  //   };
-  // }
 
   get username() {
     return this._username;
   }
 
-  // set username(value) {
-  //   this._username = value;
-  // }
-
   get email() {
     return this._email;
   }
-
-  // set email(value) {
-  //   this._email = value;
-  // }
 
   get first_name() {
     return this._first_name;
   }
 
-  // set first_name(value) {
-  //   this._first_name = value;
-  // }
-
   get last_name() {
     return this._last_name;
   }
-
-  // set last_name(value) {
-  //   this._last_name = value;
-  // }
 
   get is_superuser() {
     return this._is_superuser;
@@ -358,7 +323,6 @@ class File {
   }
 
   set_size(size) {
-    // console.log(`Size = ${size} bytes`);
     if (size < 0) {
       this._uploaded_size = 0;
       return;
@@ -368,7 +332,6 @@ class File {
       return;
     }
 
-    // Always increase size
     if (size > this._uploaded_size) this._uploaded_size = size;
   }
 }

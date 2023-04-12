@@ -70,14 +70,10 @@ import { MessageBus } from "../logic/service_layer/message_bus";
 import { VueUnitOfWork } from "../logic/service_layer/uow";
 import {
   convertObject,
-  // useBeforeEnterPage,
   filterArrayOfObjectsByQuery,
-  // validate_json,
   useCurrentMixin,
-  // useGetFolders,
   convertDateToDateTimeString,
 } from "../logic/service_layer/use_modules";
-// import { FolderSettings } from "../logic/adapters/api_responses/models/folder/folder_settings";
 
 import HeadingComponent from "../components/HeadingComponent.vue";
 import BtnComponent from "../components/buttons/BtnComponent.vue";
@@ -400,9 +396,6 @@ export default {
     uow.token_timer.start();
 
     onMounted(async () => {
-      // Пытаемся автоматически зaлогинится
-      // await useBeforeEnterPage(uow, ["can_view_flow"]);
-      // await useGetFolders(uow);
       await useBeforeEnterPage(uow, []);
       await MessageBus.handle(new GetCdnServers(), uow);
     });

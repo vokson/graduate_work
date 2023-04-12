@@ -1,8 +1,8 @@
 up:
-	docker compose --env-file .env.prod up -d --build
-createsuperuser:
-	docker compose --env-file .env.prod exec flask flask -A src.app:app users createsuperuser
+	docker compose up -d --build
 migrate:
-	docker compose exec --workdir /opt/app/src flask alembic upgrade head
-
-uvicorn src.entrypoints.main:app --reload --host 0.0.0.0 --port 8001 --forwarded-allow-ips '*'
+	docker compose exec --workdir /opt/app/src/migrations auth python migrate.py && \
+	docker compose exec --workdir /opt/app/src/migrations storage python migrate.py
+pollute:
+	docker compose exec --workdir /opt/app/src/migrations auth python pollute.py && \
+	docker compose exec --workdir /opt/app/src/migrations storage python pollute.py

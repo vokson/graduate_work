@@ -7,7 +7,6 @@ class ApiError extends Event {
   }
 }
 
-// class AccessPagePermissionCheckFail extends Event {}
 class UserLoginSuccess extends Event { }
 class AccessTokenOutdated extends Event { }
 class RefreshTokenOutdated extends Event { }

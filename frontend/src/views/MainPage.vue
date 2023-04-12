@@ -644,7 +644,6 @@ export default {
 .page__container {
   display: flex;
   flex-direction: column;
-  /* max-width: 1000px; */
 }
 
 .page__topcontainer {

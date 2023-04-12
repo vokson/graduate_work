@@ -20,9 +20,7 @@ const refresh_token_outdated = async (event, uow) => {
   uow.push_message(new Notify("error", "Время жизни Refresh Token истекло. Пожалуйста, войдите заново."));
   router.push({
     name: "LoginPage",
-    // query: { url: encodeURIComponent(route.fullPath) },
   });
-  // await MessageBus.handle(new GetUserPermissions(), uow);
 };
 
 const user_logout_success = (event, uow) => {
@@ -80,9 +78,6 @@ const cdn_server_deleted = (event, uow) => {
     new Notify("success", `Сервер удален`)
   );
 };
-
-
-
 
 export {
   handle_api_error,

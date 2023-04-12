@@ -62,13 +62,11 @@ import {
 const COMMAND_HANDLERS = {
   Notify: [notify],
   NotifyApiError: [notify_api_error],
-  // GetInfo: [get_info],
 
   // USER
   LoginWithCredentials: [login_with_credentials],
   MyCredentials: [my_credentials],
   RefreshTokens: [refresh_tokens],
-  // LoginWithToken: [login_with_token],
   Logout: [logout],
   GetUserActions: [get_user_actions],
 
