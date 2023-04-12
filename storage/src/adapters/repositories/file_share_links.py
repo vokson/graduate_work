@@ -1,12 +1,7 @@
 import logging
-import math
-import operator
-import random
-from abc import ABC, abstractmethod
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from src.domain.models import FileShareLink
-
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +38,7 @@ class FileShareLinkRepository:
         self._conn = conn
 
     def _convert_row_to_obj(self, row) -> FileShareLink:
-        return FileShareLink(**{k: v for k, v in row.items()})
+        return FileShareLink(dict(row.items()))
 
     async def add(self, obj: FileShareLink):
         logger.debug(f"Add share link for file: {obj.file_id}")

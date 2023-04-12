@@ -2,12 +2,10 @@ import asyncio
 import logging
 import os
 import sys
-import time
 from contextlib import asynccontextmanager
 
-
 BASE_DIR = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 )
 sys.path.append(BASE_DIR)
 
@@ -16,8 +14,6 @@ from src.adapters.cache import close_cache, init_cache
 from src.core.config import cache_dsl, rabbitmq_url, settings
 from src.domain import commands
 from src.service.messagebus import MessageBus, get_message_bus
-from src.tools.delay import DelayCalculator
-
 
 logger = logging.getLogger(__name__)
 

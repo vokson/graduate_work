@@ -1,12 +1,12 @@
-"""Настройки"""
+"""Настройки."""
 
 import os
 from datetime import datetime, timedelta
 from logging import config as logging_config
 
 from pydantic import BaseModel, BaseSettings, Field
-from src.core.logger import LOGGING
 
+from src.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 

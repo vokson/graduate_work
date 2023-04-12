@@ -1,19 +1,15 @@
 import asyncio
 import functools
-from functools import wraps
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, status
+
 from src.adapters.http import http_session
 from src.api.middlewares import get_request_var
 from src.core.config import settings
 
 
-# async def get_request(request: Request):
-#     return request
-
-
 def auth(permissions: list[str], timeout: int = 1):
-    """Проверка разрешений через сервис авторизации"""
+    """Проверка разрешений через сервис авторизации."""
 
     def inner(func):
         @functools.wraps(func)
@@ -53,14 +49,16 @@ def auth(permissions: list[str], timeout: int = 1):
                         json_data = await resp.json()
                         error = json_data["error"]
                         raise HTTPException(
-                            status_code=resp.status, detail=error
+                            status_code=resp.status,
+                            detail=error,
                         )
 
                     return await func(*args, **kwargs)
 
             except asyncio.TimeoutError:
                 raise HTTPException(
-                    status_code=503, detail="Auth.Error.ServerUnavailable"
+                    status_code=503,
+                    detail="Auth.Error.ServerUnavailable",
                 )
 
         return wrapper

@@ -1,13 +1,9 @@
-# from __future__ import annotations
 import logging
 from typing import Callable, Type
 
-# from src.domain import commands, events
 from src.domain import command_results, commands, events
 from src.service.handlers import COMMAND_HANDLERS, EVENT_HANDLERS, RESULTS
-# from src.service import command_handlers, event_handlers
 from src.service.uow import AbstractUnitOfWork, UnitOfWork
-
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +101,8 @@ async def get_message_bus(
     uow: AbstractUnitOfWork = None,
     event_handlers: dict[Type[events.Event], list[Callable]] = EVENT_HANDLERS,
     command_handlers: dict[
-        Type[commands.Command], Callable
+        Type[commands.Command],
+        Callable,
     ] = COMMAND_HANDLERS,
 ):
     if not uow:

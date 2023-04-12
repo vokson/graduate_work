@@ -1,20 +1,14 @@
-import asyncio
 import logging
 import os
-import time
-from collections import deque
-from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-import jwt
-from asyncpg.exceptions import PostgresError, UniqueViolationError
-from src.adapters.s3 import AbstractS3Storage
+from asyncpg.exceptions import UniqueViolationError
+
 from src.core import exceptions
 from src.core.config import settings, tz_now
 from src.domain import command_results, commands, events, models
 from src.service.uow import AbstractUnitOfWork
 from src.tools.hasher import PBKDF2PasswordHasher
-
 
 logger = logging.getLogger(__name__)
 hasher = PBKDF2PasswordHasher()
@@ -45,7 +39,7 @@ async def create_cdn_server(
 
         dt = tz_now()
         obj = models.CdnServer(
-            **{**cmd.dict(), **{"id": uuid4(), "created": dt, "updated": dt}}
+            **{**cmd.dict(), **{"id": uuid4(), "created": dt, "updated": dt}},
         )
 
         await uow.cdn_servers.add(obj)
@@ -67,7 +61,7 @@ async def update_cdn_server(
             raise exceptions.CdnServerDoesNotExist
 
         obj = models.CdnServer(
-            **{**server.dict(), **cmd.dict(), **{"updated": tz_now()}}
+            **{**server.dict(), **cmd.dict(), **{"updated": tz_now()}},
         )
 
         await uow.cdn_servers.update(obj)
@@ -105,7 +99,8 @@ async def enrich_cdn_server_by_files(
         new_server = await uow.cdn_servers.get_by_id(cmd.id)
         if new_server.is_on and new_server.is_active:
             servers_in_zone = await uow.cdn_servers.get_switched_on(
-                True, new_server.zone
+                True,
+                new_server.zone,
             )
             servers_ids_in_zone = [x.id for x in servers_in_zone]
 
@@ -117,20 +112,22 @@ async def enrich_cdn_server_by_files(
                     ] = await uow.files.get_non_deleted_on_servers([server_id])
 
             files_on_new_server = await uow.files.get_non_deleted_on_servers(
-                [new_server.id]
+                [new_server.id],
             )
-            files_ids_on_new_server = set([x.id for x in files_on_new_server])
+            files_ids_on_new_server = {x.id for x in files_on_new_server}
 
             for server_id in files_on_servers:
                 for file in files_on_servers[server_id]:
                     if file.id not in files_ids_on_new_server:
                         logger.info(
-                            f"Order file {file.id} to download from CDN server {server_id}"
+                            f"Order file {file.id} to download from "
+                            f"CDN server {server_id}",
                         )
                         uow.push_message(
                             commands.OrderFileToDownload(
-                                file_id=file.id, server_id=server_id
-                            )
+                                file_id=file.id,
+                                server_id=server_id,
+                            ),
                         )
 
     logger.info(f"CDN server with id {cmd.id} has been enriched by files")
@@ -166,8 +163,8 @@ async def delete_file(
                     "obj_id": obj.id,
                     "user_id": obj.user_id,
                     "data": {"name": obj.name},
-                }
-            )
+                },
+            ),
         )
         await uow.commit()
 
@@ -202,8 +199,8 @@ async def rename_file(
                     "obj_id": obj.id,
                     "user_id": obj.user_id,
                     "data": {"old_name": old_name, "new_name": cmd.name},
-                }
-            )
+                },
+            ),
         )
         await uow.commit()
 
@@ -236,11 +233,13 @@ async def get_upload_link(
         coordinates = await uow.geoip.get_info(cmd.ip)
         nearest_server = await uow.cdn_servers.get_nearest(coordinates)
         logger.info(
-            f"Get upload link for file {cmd.name} on server {nearest_server.name}"
+            f"Get upload link for file {cmd.name} on "
+            f"server {nearest_server.name}",
         )
 
         obj = await uow.files.get_non_deleted_by_name_and_user_id(
-            cmd.name, cmd.user_id
+            cmd.name,
+            cmd.user_id,
         )
         is_new = False if obj else True
 
@@ -264,7 +263,9 @@ async def get_upload_link(
             await uow.files.update(obj)
 
         storage = await uow.s3_pool.get(
-            nearest_server.name, nearest_server.host, nearest_server.port
+            nearest_server.name,
+            nearest_server.host,
+            nearest_server.port,
         )
         link = await storage.get_upload_url(str(obj.id))
         await uow.files.remove_all_servers_from_file(obj.id)
@@ -275,8 +276,8 @@ async def get_upload_link(
                     "obj_id": obj.id,
                     "user_id": obj.user_id,
                     "data": {"name": obj.name},
-                }
-            )
+                },
+            ),
         )
 
         await uow.commit()
@@ -294,7 +295,7 @@ async def get_user_actions(
         count = await uow.history.count(cmd.user_id)
 
     return command_results.PositiveCommandResult(
-        {"count": count, "data": [x.dict() for x in objs]}
+        {"count": count, "data": [x.dict() for x in objs]},
     )
 
 
@@ -311,14 +312,18 @@ async def get_download_link(
 
         coordinates = await uow.geoip.get_info(cmd.ip)
         nearest_server = await uow.cdn_servers.get_nearest(
-            coordinates, only_servers=ids_of_servers
+            coordinates,
+            only_servers=ids_of_servers,
         )
         storage = await uow.s3_pool.get(
-            nearest_server.name, nearest_server.host, nearest_server.port
+            nearest_server.name,
+            nearest_server.host,
+            nearest_server.port,
         )
 
         logger.info(
-            f"Get download link for file {cmd.file_id} on server {nearest_server.name}"
+            f"Get download link for file {cmd.file_id} on "
+            f"server {nearest_server.name}",
         )
         link = await storage.get_download_url(str(obj.id))
 
@@ -328,8 +333,8 @@ async def get_download_link(
                     "obj_id": obj.id,
                     "user_id": obj.user_id,
                     "data": {"name": obj.name},
-                }
-            )
+                },
+            ),
         )
 
         await uow.commit()
@@ -360,7 +365,7 @@ async def handle_s3_event(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Handling S3 event with key {cmd.routing_key}, body {cmd.body}"
+        f"Handling S3 event with key {cmd.routing_key}, body {cmd.body}",
     )
     async with uow:
         try:
@@ -383,7 +388,7 @@ async def handle_s3_event(
             raise exceptions.BadS3Event
 
         uow.push_message(
-            events_mapping[action](id=key, storage_name=storage_name)
+            events_mapping[action](id=key, storage_name=storage_name),
         )
 
     return command_results.PositiveCommandResult({})
@@ -394,7 +399,7 @@ async def handle_service_event(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Handling service event with key {cmd.routing_key}, body {cmd.body}"
+        f"Handling service event with key {cmd.routing_key}, body {cmd.body}",
     )
 
     key = cmd.routing_key.split(".", 1)[1]
@@ -423,7 +428,7 @@ async def mark_file_as_stored(
 
         server = await uow.cdn_servers.get_by_id(cmd.server_id)
         ids_of_servers_where_file_located = await uow.files.get_ids_of_servers(
-            cmd.file_id
+            cmd.file_id,
         )
         ids_of_servers_in_zone = [
             x.id
@@ -432,16 +437,10 @@ async def mark_file_as_stored(
 
         await uow.commit()
 
-    # print('***** MARK FILE AS STORED ******')
-    # print(ids_of_servers_in_zone)
-    # print(ids_of_servers_where_file_located)
-    # print(set(ids_of_servers_in_zone) - set(ids_of_servers_where_file_located))
-    # print(len(set(ids_of_servers_in_zone) - set(ids_of_servers_where_file_located)))
-
     if (
         len(
             set(ids_of_servers_in_zone)
-            - set(ids_of_servers_where_file_located)
+            - set(ids_of_servers_where_file_located),
         )
         == 0
     ):
@@ -450,8 +449,9 @@ async def mark_file_as_stored(
         if len(ids_of_servers_where_file_located) == 1:
             uow.push_message(
                 commands.OrderFileToDownload(
-                    file_id=cmd.file_id, server_id=cmd.server_id
-                )
+                    file_id=cmd.file_id,
+                    server_id=cmd.server_id,
+                ),
             )
 
     return command_results.PositiveCommandResult({})
@@ -461,7 +461,7 @@ async def order_file_to_download(
     cmd: commands.OrderFileToDownload,
     uow: AbstractUnitOfWork,
 ):
-    logger.info(f"Ordering file to download")
+    logger.info("Ordering file to download")
     message = models.FileOrderedToDownloadBrokerMessage(message=cmd.dict())
     uow.push_message(commands.PublishMessage(message=message))
     return command_results.PositiveCommandResult({})
@@ -472,7 +472,8 @@ async def download_file_to_temp_storage(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Downloading file with id {cmd.file_id} from server with id {cmd.server_id}"
+        f"Downloading file with id {cmd.file_id} from "
+        f"server with id {cmd.server_id}",
     )
     async with uow:
         server = await uow.cdn_servers.get_by_id(cmd.server_id)
@@ -482,10 +483,10 @@ async def download_file_to_temp_storage(
         await storage.download_file(filename, path)
 
     uow.push_message(
-        events.FileDownloadedToTempStorage(id=cmd.file_id, zone=server.zone)
+        events.FileDownloadedToTempStorage(id=cmd.file_id, zone=server.zone),
     )
     logger.info(
-        f"File with id {cmd.file_id} has been downloaded to temp storage"
+        f"File with id {cmd.file_id} has been downloaded to temp storage",
     )
     return command_results.PositiveCommandResult({})
 
@@ -505,7 +506,7 @@ async def distribute_file_within_zone(
                     commands.OrderFileToCopy(
                         file_id=cmd.file_id,
                         server_id=server.id,
-                    )
+                    ),
                 )
 
     logger.info(f"File with id {cmd.file_id} has been distributed")
@@ -517,7 +518,8 @@ async def order_file_to_copy(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Ordering file with id {cmd.file_id} to copy to server with id {cmd.server_id}"
+        f"Ordering file with id {cmd.file_id} to "
+        f"copy to server with id {cmd.server_id}",
     )
     message = models.FileOrderedToCopyBrokerMessage(message=cmd.dict())
     uow.push_message(commands.PublishMessage(message=message))
@@ -529,7 +531,8 @@ async def copy_file(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Coping file with id {cmd.file_id} to copy to server with id {cmd.server_id}"
+        f"Coping file with id {cmd.file_id} to "
+        f"copy to server with id {cmd.server_id}",
     )
     async with uow:
         server = await uow.cdn_servers.get_by_id(cmd.server_id)
@@ -539,7 +542,8 @@ async def copy_file(
         await storage.upload_file(filename, path)
 
     logger.info(
-        f"File with id {cmd.file_id} has been copied to server with id {cmd.server_id}"
+        f"File with id {cmd.file_id} has been "
+        f"copied to server with id {cmd.server_id}",
     )
     return command_results.PositiveCommandResult({})
 
@@ -557,12 +561,12 @@ async def remove_file_from_temp_storage(
 
         os.remove(path)
         logger.info(
-            f"File with id {cmd.file_id} has been removed temp storage"
+            f"File with id {cmd.file_id} has been removed temp storage",
         )
 
     except FileNotFoundError:
         logger.warning(
-            f"File with id {cmd.file_id} was not found in temp storage"
+            f"File with id {cmd.file_id} was not found in temp storage",
         )
         pass
 
@@ -574,7 +578,8 @@ async def order_file_to_remove(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Ordering file with id {cmd.file_id} to remove from server with id {cmd.server_id}"
+        f"Ordering file with id {cmd.file_id} to "
+        f"remove from server with id {cmd.server_id}",
     )
     message = models.FileOrderedToRemoveBrokerMessage(message=cmd.dict())
     uow.push_message(commands.PublishMessage(message=message))
@@ -586,19 +591,23 @@ async def remove_file(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Removing file with id {cmd.file_id} from server with id {cmd.server_id}"
+        f"Removing file with id {cmd.file_id} from "
+        f"server with id {cmd.server_id}",
     )
     async with uow:
         server = await uow.cdn_servers.get_by_id(cmd.server_id)
 
         if server.is_on:
             storage = await uow.s3_pool.get(
-                server.name, server.host, server.port
+                server.name,
+                server.host,
+                server.port,
             )
             await storage.remove_file(str(cmd.file_id))
 
     logger.info(
-        f"File with id {cmd.file_id} has been removed from server with id {cmd.server_id}"
+        f"File with id {cmd.file_id} has been removed "
+        f"from server with id {cmd.server_id}",
     )
     return command_results.PositiveCommandResult({})
 
@@ -608,7 +617,8 @@ async def mark_file_as_removed(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Marking file with id {cmd.file_id} as removed from server with id {cmd.server_id}"
+        f"Marking file with id {cmd.file_id} as removed from server "
+        f"with id {cmd.server_id}",
     )
     async with uow:
         await uow.files.remove_server_from_file(cmd.file_id, cmd.server_id)
@@ -654,15 +664,15 @@ async def create_file_share_link(
                     "obj_id": obj.id,
                     "user_id": cmd.user_id,
                     "data": {"name": file.name, "created": obj.created},
-                }
-            )
+                },
+            ),
         )
 
         await uow.commit()
 
     logger.info(f"Share link for file with id {cmd.file_id} has been created")
     return command_results.PositiveCommandResult(
-        make_share_link_result(obj, file)
+        make_share_link_result(obj, file),
     )
 
 
@@ -680,7 +690,7 @@ async def get_file_share_links(
 
     logger.info(f"Get {len(objs)} share links for file with id {cmd.file_id}")
     return command_results.PositiveCommandResult(
-        [make_share_link_result(x, file) for x in objs]
+        [make_share_link_result(x, file) for x in objs],
     )
 
 
@@ -701,10 +711,11 @@ async def get_file_share_link(
             raise exceptions.FileShareLinkDoesNotExist
 
     logger.info(
-        f"Info about share link {cmd.link_id} for file with id {cmd.file_id} has been returned"
+        f"Info about share link {cmd.link_id} for file "
+        f"with id {cmd.file_id} has been returned",
     )
     return command_results.PositiveCommandResult(
-        make_share_link_result(link, file)
+        make_share_link_result(link, file),
     )
 
 
@@ -713,7 +724,7 @@ async def delete_file_share_link(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Deleting share link {cmd.link_id} for file with id {cmd.file_id}"
+        f"Deleting share link {cmd.link_id} for file with id {cmd.file_id}",
     )
     async with uow:
         file = await uow.files.get_by_id(cmd.file_id)
@@ -732,13 +743,14 @@ async def delete_file_share_link(
                     "obj_id": cmd.link_id,
                     "user_id": cmd.user_id,
                     "data": {"name": file.name, "created": link.created},
-                }
-            )
+                },
+            ),
         )
         await uow.commit()
 
     logger.info(
-        f"Share link {cmd.link_id} for file with id {cmd.file_id} has been deleted"
+        f"Share link {cmd.link_id} for file "
+        f"with id {cmd.file_id} has been deleted",
     )
     return command_results.PositiveCommandResult({})
 
@@ -748,7 +760,7 @@ async def validate_file_share_link(
     uow: AbstractUnitOfWork,
 ):
     logger.info(
-        f"Validating share link {cmd.link_id} for file with id {cmd.file_id}"
+        f"Validating share link {cmd.link_id} for file with id {cmd.file_id}",
     )
     async with uow:
         file = await uow.files.get_by_id(cmd.file_id)
@@ -764,11 +776,13 @@ async def validate_file_share_link(
 
         if link.password:
             if not cmd.password or not hasher.verify(
-                cmd.password, link.password
+                cmd.password,
+                link.password,
             ):
                 raise exceptions.AuthNoPermissionException
 
     logger.info(
-        f"Share link {cmd.link_id} for file with id {cmd.file_id} has been validated"
+        f"Share link {cmd.link_id} for file "
+        f"with id {cmd.file_id} has been validated",
     )
     return command_results.PositiveCommandResult({})

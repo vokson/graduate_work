@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.adapters.broker import init_publisher
-from src.adapters.cache import close_cache, init_cache
+from src.adapters.cache import init_cache
 from src.adapters.db import get_db_conn, release_db_conn
 from src.adapters.geoip import init_geo_ip
 from src.adapters.repositories.cdn_server import CdnServerRepository

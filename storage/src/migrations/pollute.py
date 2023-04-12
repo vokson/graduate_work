@@ -2,8 +2,6 @@ import asyncio
 import logging
 import os
 import sys
-from uuid import UUID
-
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
@@ -12,7 +10,6 @@ sys.path.append(BASE_DIR)
 
 from src.domain import commands
 from src.service.messagebus import get_message_bus
-
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +97,7 @@ async def main():
                 longitude=longitude,
                 is_on=on,
                 is_active=active,
-            )
+            ),
         )
 
 

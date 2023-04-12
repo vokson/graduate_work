@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Request, Response, status
+from fastapi import APIRouter, Depends, status
+
 from src.api.decorators import auth
 from src.api.dependables import extract_user_id, get_bus, get_ip
 from src.api.transformers import transform_command_result
@@ -9,9 +10,7 @@ from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.core.config import tz_now
 from src.domain import commands
-from src.domain.models import CdnServer
 from src.service.messagebus import MessageBus
-
 
 router = APIRouter()
 
@@ -28,7 +27,7 @@ async def get_many(
     bus: MessageBus = Depends(get_bus()),
 ) -> list[schemes.FileResponse]:
     return transform_command_result(
-        await bus.handle(commands.GetManyFiles(user_id=user_id))
+        await bus.handle(commands.GetManyFiles(user_id=user_id)),
     )
 
 
@@ -48,9 +47,12 @@ async def get_upload_link(
     return transform_command_result(
         await bus.handle(
             commands.GetUploadLink(
-                name=body.name, size=body.size, user_id=user_id, ip=ip
-            )
-        )
+                name=body.name,
+                size=body.size,
+                user_id=user_id,
+                ip=ip,
+            ),
+        ),
     )
 
 
@@ -67,7 +69,7 @@ async def delete(
     bus: MessageBus = Depends(get_bus()),
 ):
     return transform_command_result(
-        await bus.handle(commands.DeleteFile(id=file_id, user_id=user_id))
+        await bus.handle(commands.DeleteFile(id=file_id, user_id=user_id)),
     )
 
 
@@ -86,8 +88,8 @@ async def rename_file(
 ) -> schemes.FileResponse:
     return transform_command_result(
         await bus.handle(
-            commands.RenameFile(id=file_id, user_id=user_id, name=body.name)
-        )
+            commands.RenameFile(id=file_id, user_id=user_id, name=body.name),
+        ),
     )
 
 
@@ -104,7 +106,7 @@ async def get_download_link(
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.LinkResponse:
     return transform_command_result(
-        await bus.handle(commands.GetDownloadLink(file_id=file_id, ip=ip))
+        await bus.handle(commands.GetDownloadLink(file_id=file_id, ip=ip)),
     )
 
 
@@ -116,10 +118,11 @@ async def get_download_link(
 )
 @auth(permissions=["can_view_cdnserver"])
 async def get_servers(
-    file_id: UUID, bus: MessageBus = Depends(get_bus())
+    file_id: UUID,
+    bus: MessageBus = Depends(get_bus()),
 ) -> list[schemes.CdnServerResponse]:
     return transform_command_result(
-        await bus.handle(commands.GetFileServers(id=file_id))
+        await bus.handle(commands.GetFileServers(id=file_id)),
     )
 
 
@@ -132,7 +135,7 @@ async def get_servers(
 @auth(permissions=["can_add_filesharelink"])
 async def create_file_share_link(
     file_id: UUID,
-    body: schemes.AddFileShareLinkRequest,
+    body: schemes.FileShareLinkRequest,
     user_id: UUID = Depends(extract_user_id()),
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.FileShareLinkResponse:
@@ -145,8 +148,8 @@ async def create_file_share_link(
                 if body.lifetime
                 else None,
                 password=body.password,
-            )
-        )
+            ),
+        ),
     )
 
 
@@ -167,8 +170,8 @@ async def get_file_share_links(
             commands.GetFileShareLinks(
                 user_id=user_id,
                 file_id=file_id,
-            )
-        )
+            ),
+        ),
     )
 
 
@@ -188,9 +191,11 @@ async def delete_file_share_link(
     return transform_command_result(
         await bus.handle(
             commands.DeleteFileShareLink(
-                user_id=user_id, file_id=file_id, link_id=link_id
-            )
-        )
+                user_id=user_id,
+                file_id=file_id,
+                link_id=link_id,
+            ),
+        ),
     )
 
 
@@ -211,8 +216,8 @@ async def get_file_share_link(
             commands.GetFileShareLink(
                 file_id=file_id,
                 link_id=link_id,
-            )
-        )
+            ),
+        ),
     )
 
 
@@ -232,13 +237,15 @@ async def get_download_link_by_file_share_link(
 ) -> schemes.LinkResponse:
     results = await bus.handle(
         commands.ValidateFileShareLink(
-            file_id=file_id, link_id=link_id, password=body.password
-        )
+            file_id=file_id,
+            link_id=link_id,
+            password=body.password,
+        ),
     )
 
     if results.is_first_result_negative:
         return transform_command_result(results)
 
     return transform_command_result(
-        await bus.handle(commands.GetDownloadLink(file_id=file_id, ip=ip))
+        await bus.handle(commands.GetDownloadLink(file_id=file_id, ip=ip)),
     )

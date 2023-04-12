@@ -1,16 +1,15 @@
 """Модуль для работы с S3 Storage."""
-import asyncio
+
 import logging
 import os
 from abc import ABC, abstractmethod
-from contextlib import asynccontextmanager
 from typing import Callable
 
 from miniopy_async import Minio
 from miniopy_async.notificationconfig import NotificationConfig, QueueConfig
+
 from src.core import exceptions
 from src.tools.decorators import backoff
-
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +95,8 @@ class MinioS3Storage(AbstractS3Storage):
             await self._conn.fget_object(self._bucket, object_name, path)
         except Exception as e:
             logger.error(
-                f"Error during downloading file {object_name} from {self.name}/{self._bucket}"
+                f"Error during downloading file {object_name} "
+                f"from {self.name}/{self._bucket}",
             )
             logger.info(e)
             raise exceptions.DownloadFileError
@@ -106,7 +106,8 @@ class MinioS3Storage(AbstractS3Storage):
             await self._conn.fput_object(self._bucket, object_name, path)
         except Exception as e:
             logger.error(
-                f"Error during uploading file {object_name} from {self.name}/{self._bucket}"
+                f"Error during uploading file {object_name} "
+                f"from {self.name}/{self._bucket}",
             )
             logger.info(e)
             raise exceptions.UploadFileError
@@ -116,7 +117,8 @@ class MinioS3Storage(AbstractS3Storage):
             await self._conn.remove_object(self._bucket, object_name)
         except Exception as e:
             logger.error(
-                f"Error during removing file {object_name} from {self.name}/{self._bucket}"
+                f"Error during removing file {object_name} "
+                f"from {self.name}/{self._bucket}",
             )
             logger.info(e)
             raise exceptions.RemoveFileError
@@ -154,14 +156,15 @@ pool: StoragePool | None = None
 
 
 async def init_s3_pool(
-    bucket: str, get_dsl_func: Callable[[str, int], dict]
+    bucket: str,
+    get_dsl_func: Callable[[str, int], dict],
 ) -> StoragePool:
     global pool
 
     if not pool:
-        logger.info(f"Initialization of S3 connection pool ..")
+        logger.info("Initialization of S3 connection pool ..")
         pool = StoragePool(bucket, get_dsl_func)
-        logger.info(f"S3 connection pool has been initialized.")
+        logger.info("S3 connection pool has been initialized.")
 
     return pool
 
@@ -169,6 +172,6 @@ async def init_s3_pool(
 async def close_s3_pool():
     global pool
     if pool:
-        logger.info(f"Closing S3 connection pool ..")
+        logger.info("Closing S3 connection pool ..")
         await pool.shutdown()
-        logger.info(f"S3 connection pool has been closed.")
+        logger.info("S3 connection pool has been closed.")

@@ -1,16 +1,14 @@
 from uuid import UUID
 
-from fastapi import (APIRouter, Depends, Header, Query, Request, Response,
-                     status)
+from fastapi import APIRouter, Depends, Query, status
+
 from src.api.decorators import auth
 from src.api.dependables import extract_user_id, get_bus
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
 from src.domain import commands
-from src.domain.models import CdnServer
 from src.service.messagebus import MessageBus
-
 
 router = APIRouter()
 
@@ -34,6 +32,6 @@ async def get_many(
                 user_id=user_id,
                 limit=page_size,
                 offset=(page_num - 1) * page_size,
-            )
-        )
+            ),
+        ),
     )

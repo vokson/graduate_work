@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 
 import orjson
 from pydantic import BaseModel, Field
+
 from src.core.config import settings, tz_now
 
 
@@ -33,7 +34,9 @@ class AbstractIdModel(AbstractModel, IdMixin):
 
 
 class AbstractIdCreatedUpdatedModel(
-    AbstractIdModel, CreatedMixin, UpdatedMixin
+    AbstractIdModel,
+    CreatedMixin,
+    UpdatedMixin,
 ):
     pass
 

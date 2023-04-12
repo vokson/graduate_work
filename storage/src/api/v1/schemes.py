@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -26,17 +25,8 @@ class CdnServerRequest(BaseModel):
     is_active: bool
 
 
-class CdnServerResponse(BaseModel):
+class CdnServerResponse(CdnServerRequest):
     id: UUID
-    name: str
-    host: str
-    port: int
-    location: str
-    zone: str
-    latitude: float
-    longitude: float
-    is_on: bool
-    is_active: bool
     created: datetime
     updated: datetime
 
@@ -75,7 +65,7 @@ class LinkResponse(BaseModel):
     link: str
 
 
-class AddFileShareLinkRequest(BaseModel):
+class FileShareLinkRequest(BaseModel):
     lifetime: int | None = Field(None, gt=0)
     password: str | None = Field(None)
 

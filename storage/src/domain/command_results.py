@@ -1,6 +1,3 @@
-from src.domain import commands
-
-
 class CommandResult:
     def __init__(self, data):
         self._data = data
@@ -64,34 +61,6 @@ class UniqueViolationDatabaseError(NegativeCommandResult):
 
 class AuthNoPermissionException(NegativeCommandResult):
     pass
-
-
-# class ValidationError(NegativeCommandResult):
-#     pass
-
-
-# class AuthTokenMissedException(NegativeCommandResult):
-#     pass
-
-
-# class AuthTokenWithWrongSignatureException(NegativeCommandResult):
-#     pass
-
-
-# class AuthTokenOutdatedException(NegativeCommandResult):
-#     pass
-
-
-# class AuthTokenWrongPayloadException(NegativeCommandResult):
-#     pass
-
-
-# class AuthNoPermissionException(NegativeCommandResult):
-#     pass
-
-
-# class UserDoesNotExist(NegativeCommandResult):
-#     pass
 
 
 class CdnServerAlreadyExists(NegativeCommandResult):

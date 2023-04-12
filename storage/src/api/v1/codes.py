@@ -1,6 +1,5 @@
 from src.domain import command_results
 
-
 COMMAND_RESULTS_RESPONSE_CODES = {
     command_results.DatabaseError: (400, "Database.Error"),
     command_results.UniqueViolationDatabaseError: (
@@ -11,8 +10,6 @@ COMMAND_RESULTS_RESPONSE_CODES = {
         403,
         "Auth.Error.NoPermission",
     ),
-    # command_results.ValidationError: (400, "Request.Error.Validation"),
-    # command_results.UserDoesNotExist: (400, "User.DoesNotExist"),
     command_results.FileDoesNotExist: (400, "File.DoesNotExist"),
     command_results.FileAlreadyExists: (400, "File.AlreadyExists"),
     command_results.FileShareLinkDoesNotExist: (
@@ -24,21 +21,6 @@ COMMAND_RESULTS_RESPONSE_CODES = {
         "CdnServer.ConnectionError",
     ),
     command_results.CdnServerAlreadyExists: (400, "CdnServer.AlreadyExists"),
-    # command_results.WrongCredentials: (401, "Login.Error.Credentials"),
-    # command_results.AuthTokenMissedException: (401, "Auth.Error.TokenMissed"),
-    # command_results.AuthTokenWithWrongSignatureException: (
-    #     401,
-    #     "Auth.Error.TokenWithWrongSignature",
-    # ),
-    # command_results.AuthTokenOutdatedException: (
-    #     401,
-    #     "Auth.Error.TokenOutdated",
-    # ),
-    # command_results.AuthTokenWrongPayloadException: (
-    #     401,
-    #     "Auth.Error.WrongTokenPayload",
-    # ),
-    # command_results.AuthNoPermissionException: (403, "Auth.Error.NoPermission")
 }
 
 
@@ -57,8 +39,8 @@ def get_response_json(error_codes: list[str]) -> dict:
                             "type": "string",
                         },
                     },
-                }
-            }
+                },
+            },
         },
     }
 

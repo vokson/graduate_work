@@ -1,4 +1,3 @@
-import argparse
 import asyncio
 import logging
 import os
@@ -8,7 +7,6 @@ from os import walk
 import asyncpg
 from asyncpg.exceptions import UndefinedTableError
 
-
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 SQL_DIR = os.path.join(CURRENT_DIR, "sql")
@@ -16,7 +14,6 @@ SQL_DIR = os.path.join(CURRENT_DIR, "sql")
 sys.path.append(BASE_DIR)
 
 from src.core.config import db_dsl
-
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +34,7 @@ async def create_migrations(conn):
             name VARCHAR(250) not null,
             created TIMESTAMP
         );
-        """
+        """,
     )
 
 
@@ -83,7 +80,7 @@ async def main():
     not_applied_migrations = filenames - migrations
 
     #  Применяем миграции
-    for filename in sorted(list(not_applied_migrations)):
+    for filename in sorted(not_applied_migrations):
         await apply_migration(conn, SQL_DIR, filename)
 
     await conn.close()

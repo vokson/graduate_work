@@ -1,4 +1,4 @@
-"""Модуль хэширования"""
+"""Модуль хэширования."""
 
 import math
 import secrets
@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 
 from Cryptodome.Hash import SHA256
 from Cryptodome.Protocol.KDF import PBKDF2
-
 
 RANDOM_STRING_CHARS = (
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -33,8 +32,7 @@ def constant_time_compare(val1, val2):
 
 
 class BasePasswordHasher(ABC):
-    """
-    Abstract base class for password hashers
+    """Abstract base class for password hashers.
 
     PasswordHasher objects are immutable.
     """
@@ -43,14 +41,15 @@ class BasePasswordHasher(ABC):
     salt_entropy = 64
 
     def salt(self) -> str:
-        """
+        """Generate salt.
+
         Generate a cryptographically secure nonce salt in ASCII with an entropy
         of at least `salt_entropy` bits.
         """
         # Each character in the salt provides
         # log_2(len(alphabet)) bits of entropy.
         char_count = math.ceil(
-            self.salt_entropy / math.log2(len(RANDOM_STRING_CHARS))
+            self.salt_entropy / math.log2(len(RANDOM_STRING_CHARS)),
         )
         return get_random_string(char_count, allowed_chars=RANDOM_STRING_CHARS)
 
@@ -86,16 +85,17 @@ class BasePasswordHasher(ABC):
 
 
 class PBKDF2PasswordHasher(BasePasswordHasher):
-    """
-    Secure password hashing using the PBKDF2 algorithm
-    """
+    """Secure password hashing using the PBKDF2 algorithm."""
 
     algorithm = "pbkdf2_sha256"
     iterations = 3900
     digest = SHA256
 
     def encode(
-        self, password: str, salt: str, iterations: int | None = None
+        self,
+        password: str,
+        salt: str,
+        iterations: int | None = None,
     ) -> str:
         self._check_encode_args(password, salt)
         iterations = iterations or self.iterations
@@ -115,6 +115,8 @@ class PBKDF2PasswordHasher(BasePasswordHasher):
     def verify(self, password: str, encoded: str) -> bool:
         decoded = self.decode(encoded)
         encoded_2 = self.encode(
-            password, decoded["salt"], decoded["iterations"]
+            password,
+            decoded["salt"],
+            decoded["iterations"],
         )
         return constant_time_compare(encoded, encoded_2)

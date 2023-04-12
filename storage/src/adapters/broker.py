@@ -6,8 +6,8 @@ from abc import ABC, abstractmethod
 
 import aioamqp
 from aioamqp.protocol import CONNECTING, OPEN
-from src.tools.delay import DelayCalculator
 
+from src.tools.delay import DelayCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -379,19 +379,10 @@ async def init_publisher(*args, **kwargs):
     global publisher
 
     if not publisher:
-        logger.info(f"Initialization of publisher ..")
+        logger.info("Initialization of publisher ..")
         publisher = RabbitPublisher(*args, **kwargs)
         loop = asyncio.get_event_loop()
         loop.create_task(publisher.run())
-        # await asyncio.gather(publisher.run())
-        logger.info(f"Publisher has been initialized.")
+        logger.info("Publisher has been initialized.")
 
     return publisher
-
-
-# async def close_cache():
-#     global cache
-#     if cache:
-#         logger.info(f'Closing cache ..')
-#         await cache.shutdown()
-#         logger.info(f'Cache has been closed.')

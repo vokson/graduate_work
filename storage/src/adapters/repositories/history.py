@@ -1,12 +1,7 @@
 import logging
-import math
-import operator
-import random
-from abc import ABC, abstractmethod
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from src.domain.models import UserAction
-
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +38,7 @@ class HistoryRepository:
         self._conn = conn
 
     def _convert_row_to_obj(self, row) -> UserAction:
-        return UserAction(**{k: v for k, v in row.items()})
+        return UserAction(**dict(row.items()))
 
     async def add(self, obj: UserAction):
         logger.debug(f"Add user action server: {obj.dict()}")

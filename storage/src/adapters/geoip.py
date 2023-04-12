@@ -1,11 +1,9 @@
 """Модуль для работы с S3 Storage."""
+
 import logging
 from abc import ABC, abstractmethod
-from contextlib import asynccontextmanager
 
 import geocoder
-from src.tools.decorators import backoff
-
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +42,8 @@ async def init_geo_ip():
     global geoip
 
     if not geoip:
-        logger.info(f"Initialization of geo IP service ..")
+        logger.info("Initialization of geo IP service ..")
         geoip = GeoCoderIpService()
-        logger.info(f"Geo IP service has been initialized.")
+        logger.info("Geo IP service has been initialized.")
 
     return geoip

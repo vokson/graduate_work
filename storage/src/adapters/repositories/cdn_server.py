@@ -2,11 +2,9 @@ import logging
 import math
 import operator
 import random
-from abc import ABC, abstractmethod
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from src.domain.models import CdnServer
-
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +15,7 @@ class CdnServerRepository:
     ADD_QUERY = f"""
                     INSERT INTO {__tablename__}
                         (
-                            id, 
+                            id,
                             name,
                             host,
                             port,
@@ -75,7 +73,7 @@ class CdnServerRepository:
         self._conn = conn
 
     def _convert_row_to_obj(self, row) -> CdnServer:
-        return CdnServer(**{k: v for k, v in row.items()})
+        return CdnServer(**dict(row.items()))
 
     async def add(self, obj: CdnServer):
         logger.debug(f"Add cdn server: {obj.dict()}")
@@ -114,15 +112,18 @@ class CdnServerRepository:
         return self._convert_row_to_obj(row)
 
     async def get_all(self) -> list[CdnServer]:
-        logger.debug(f"Get all cdn servers")
+        logger.debug("Get all cdn servers")
         rows = await self._conn.fetch(self.GET_ALL_QUERY)
         return [self._convert_row_to_obj(row) for row in rows]
 
     async def get_switched_on(
-        self, is_active: bool = True, zone: str | None = None
+        self,
+        is_active: bool = True,
+        zone: str | None = None,
     ) -> list[CdnServer]:
         logger.info(
-            f"Get switched on cdn servers in zone {zone}, is_active {is_active}"
+            f"Get switched on cdn servers in zone {zone}, "
+            f"is_active {is_active}",
         )
 
         query = (
@@ -143,15 +144,19 @@ class CdnServerRepository:
         return [self._convert_row_to_obj(row) for row in rows]
 
     def _calculate_distance(
-        self, lat1: float, lon1: float, lat2: float, lon2: float
+        self,
+        lat1: float,
+        lon1: float,
+        lat2: float,
+        lon2: float,
     ) -> float:
-        R = 6371  #  Radius of the Earth in km
-        dLat = math.radians(lat2 - lat1)
-        dLon = math.radians(lon2 - lon1)
+        R = 6371  # noqa Radius of the Earth in km
+        dLat = math.radians(lat2 - lat1)  # noqa
+        dLon = math.radians(lon2 - lon1)  # noqa
         a = math.sin(dLat / 2) * math.sin(dLat / 2) + math.cos(
-            math.radians(lat1)
+            math.radians(lat1),
         ) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) * math.sin(
-            dLon / 2
+            dLon / 2,
         )
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return R * c  # Distance in km
@@ -169,17 +174,18 @@ class CdnServerRepository:
         )
 
         if not coordinates:
-            logger.debug(f"Get random cdn server")
+            logger.debug("Get random cdn server")
             return random.choice(filtered_servers)
 
-        logger.debug(f"Get nearest cdn server")
+        logger.debug("Get nearest cdn server")
         lat, lon = coordinates
         distances = [
             self._calculate_distance(lat, lon, x.latitude, x.longitude)
             for x in filtered_servers
         ]
         min_index, min_value = min(
-            enumerate(distances), key=operator.itemgetter(1)
+            enumerate(distances),
+            key=operator.itemgetter(1),
         )
         return filtered_servers[min_index]
 

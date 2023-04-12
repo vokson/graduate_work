@@ -1,17 +1,16 @@
 from asyncpg.exceptions import (InterfaceError, PostgresError,
                                 UniqueViolationError)
-from pydantic.error_wrappers import ValidationError as PydanticValidationError
+
 from src.core import exceptions
 from src.domain import command_results, commands, events
 from src.service import command_handlers, event_handlers
-
 
 EVENT_HANDLERS = {
     events.CdnServerUpdated: [event_handlers.cdn_server_updated],
     events.FileStored: [event_handlers.file_stored],
     events.FileRemovedFromStorage: [event_handlers.file_removed_from_storage],
     events.FileDownloadedToTempStorage: [
-        event_handlers.file_downloaded_to_temp_storage
+        event_handlers.file_downloaded_to_temp_storage,
     ],
     events.FileDistributed: [event_handlers.file_distributed],
     events.FileDeleted: [event_handlers.file_deleted],
@@ -22,7 +21,7 @@ COMMAND_HANDLERS = {
     commands.CreateCdnServer: command_handlers.create_cdn_server,
     commands.UpdateCdnServer: command_handlers.update_cdn_server,
     commands.DeleteCdnServer: command_handlers.delete_cdn_server,
-    commands.EnrichCdnServerByFiles: command_handlers.enrich_cdn_server_by_files,
+    commands.EnrichCdnServerByFiles: command_handlers.enrich_cdn_server_by_files,  # noqa
     commands.DeleteFile: command_handlers.delete_file,
     commands.RenameFile: command_handlers.rename_file,
     commands.GetManyFiles: command_handlers.get_many_files,
@@ -35,11 +34,11 @@ COMMAND_HANDLERS = {
     commands.MarkFileAsStored: command_handlers.mark_file_as_stored,
     commands.OrderFileToCopy: command_handlers.order_file_to_copy,
     commands.OrderFileToDownload: command_handlers.order_file_to_download,
-    commands.DownloadFileToTempStorage: command_handlers.download_file_to_temp_storage,
+    commands.DownloadFileToTempStorage: command_handlers.download_file_to_temp_storage,  # noqa
     commands.PublishMessage: command_handlers.publish_message,
     commands.CopyFile: command_handlers.copy_file,
-    commands.DistributeFileWithinZone: command_handlers.distribute_file_within_zone,
-    commands.RemoveFileFromTempStorage: command_handlers.remove_file_from_temp_storage,
+    commands.DistributeFileWithinZone: command_handlers.distribute_file_within_zone,  # noqa
+    commands.RemoveFileFromTempStorage: command_handlers.remove_file_from_temp_storage,  # noqa
     commands.OrderFileToRemove: command_handlers.order_file_to_remove,
     commands.RemoveFile: command_handlers.remove_file,
     commands.MarkFileAsRemoved: command_handlers.mark_file_as_removed,
@@ -54,17 +53,17 @@ RESULTS = {
     PostgresError: command_results.DatabaseError,
     InterfaceError: command_results.DatabaseError,
     UniqueViolationError: command_results.UniqueViolationDatabaseError,
-    exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,
+    exceptions.AuthNoPermissionException: command_results.AuthNoPermissionException,  # noqa
     exceptions.FileDoesNotExist: command_results.FileDoesNotExist,
     exceptions.FileAlreadyExists: command_results.FileAlreadyExists,
-    exceptions.FileShareLinkDoesNotExist: command_results.FileShareLinkDoesNotExist,
+    exceptions.FileShareLinkDoesNotExist: command_results.FileShareLinkDoesNotExist,  # noqa
     exceptions.CdnServerAlreadyExists: command_results.CdnServerAlreadyExists,
     exceptions.BadS3Event: command_results.BadS3Event,
     exceptions.BadServiceEvent: command_results.BadServiceEvent,
     exceptions.PublishMessageError: command_results.PublishMessageError,
     exceptions.DownloadFileError: command_results.DownloadFileError,
     exceptions.UploadFileError: command_results.UploadFileError,
-    exceptions.FileNotFoundInTempStorage: command_results.FileNotFoundInTempStorage,
+    exceptions.FileNotFoundInTempStorage: command_results.FileNotFoundInTempStorage,  # noqa
     exceptions.RemoveFileError: command_results.RemoveFileError,
-    exceptions.CdnServerConnectionError: command_results.CdnServerConnectionError,
+    exceptions.CdnServerConnectionError: command_results.CdnServerConnectionError,  # noqa
 }

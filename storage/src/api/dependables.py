@@ -1,11 +1,9 @@
 import jwt
 from faker import Faker
 from fastapi import Header, Request
-from src.api.transformers import transform_command_result
-from src.core.config import settings
-from src.domain import commands
-from src.service.messagebus import get_message_bus
 
+from src.core.config import settings
+from src.service.messagebus import get_message_bus
 
 fake = Faker()
 
@@ -18,7 +16,8 @@ def extract_user_id():
         #  уже проверен через сервис Auth
         encoded_token = authorization.split()[1]
         payload = jwt.decode(
-            encoded_token, options={"verify_signature": False}
+            encoded_token,
+            options={"verify_signature": False},
         )
         return payload["user_id"]
 
