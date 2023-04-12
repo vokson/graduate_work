@@ -49,7 +49,7 @@ class Settings(BaseSettings):
         env_nested_delimiter = "__"
 
 
-settings = Settings()
+settings = Settings()  # type: ignore
 
 db_dsl = {
     "host": settings.auth_db.host,

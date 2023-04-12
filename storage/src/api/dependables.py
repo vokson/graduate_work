@@ -1,3 +1,5 @@
+from typing import Any, Callable, Coroutine
+
 import jwt
 from faker import Faker
 from fastapi import Header, Request
@@ -24,9 +26,14 @@ def extract_user_id():
     return inner
 
 
-def get_ip():
-    async def inner(request: Request):
-        return request.client.host if settings.geo.use_real_ip else fake.ipv4()
+def get_ip() -> Callable[[Request], Coroutine[Any, Any, str]]:
+    async def inner(request: Request) -> str:
+        host = None
+
+        if settings.geo.use_real_ip and request.client:
+            host = request.client.host
+
+        return host if host else fake.ipv4()
 
     return inner
 

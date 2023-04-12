@@ -1,8 +1,10 @@
+from typing import Callable
+
 from fastapi import Header
 
 from src.api.transformers import transform_command_result
 from src.domain import commands
-from src.service.messagebus import get_message_bus
+from src.service.messagebus import MessageBus, get_message_bus
 
 
 def required_permissions_dependable(
@@ -26,8 +28,8 @@ def required_permissions_dependable(
     return inner
 
 
-def get_bus():
-    async def inner():
+def get_bus() -> Callable[[], MessageBus]:
+    async def inner() -> MessageBus:
         return await get_message_bus(["db", "cache"])
 
     return inner

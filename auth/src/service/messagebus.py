@@ -98,7 +98,7 @@ class MessageBus:
 
 async def get_message_bus(
     bootstrap: list[str],
-    uow: AbstractUnitOfWork = None,
+    uow: AbstractUnitOfWork | None = None,
     event_handlers: dict[Type[events.Event], list[Callable]] = EVENT_HANDLERS,
     command_handlers: dict[
         Type[commands.Command],

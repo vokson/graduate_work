@@ -114,11 +114,11 @@ class UserRepository:
                 obj.permissions,
             )
 
-    async def get_by_id(self, id) -> User:
+    async def get_by_id(self, id) -> User | None:
         logger.debug(f"Get user with id {id}")
         row = await self._conn.fetchrow(self.GET_BY_ID_QUERY, id)
         if not row:
-            return
+            return None
 
         perms = await self._conn.fetch(self.GET_PERMISSIONS_OF_USER_QUERY, id)
 
@@ -129,11 +129,11 @@ class UserRepository:
             },
         )
 
-    async def get_by_username(self, username) -> User:
+    async def get_by_username(self, username) -> User | None:
         logger.debug(f"Get user with username {username}")
         row = await self._conn.fetchrow(self.GET_BY_USERNAME_QUERY, username)
         if not row:
-            return
+            return None
 
         perms = await self._conn.fetch(
             self.GET_PERMISSIONS_OF_USER_QUERY,
