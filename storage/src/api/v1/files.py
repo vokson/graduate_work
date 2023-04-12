@@ -10,6 +10,7 @@ from src.api.v1.codes import collect_reponses
 from src.domain import commands
 from src.domain.models import CdnServer
 from src.service.messagebus import MessageBus
+from src.core.config import tz_now
 
 
 router = APIRouter()
@@ -76,7 +77,7 @@ async def delete(
     status_code=status.HTTP_200_OK,
     summary="Переименование файла",
 )
-@auth(permissions=["can_change_file"])
+@auth(permissions=["can_rename_file"])
 async def rename_file(
     file_id: UUID,
     body: schemes.RenameFileRequest,
@@ -140,7 +141,7 @@ async def create_file_share_link(
             commands.CreateFileShareLink(
                 file_id=file_id,
                 user_id=user_id,
-                expire_at=timedelta(seconds=body.lifetime) + datetime.now()
+                expire_at=timedelta(seconds=body.lifetime) + tz_now()
                 if body.lifetime
                 else None,
                 password=body.password,

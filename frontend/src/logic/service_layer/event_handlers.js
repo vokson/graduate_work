@@ -63,6 +63,26 @@ const file_share_link_deleted = (event, uow) => {
   );
 };
 
+const cdn_server_added = (event, uow) => {
+  uow.push_message(
+    new Notify("success", `Сервер добавлен`)
+  );
+};
+
+const cdn_server_updated = (event, uow) => {
+  uow.push_message(
+    new Notify("success", `Сервер обновлен`)
+  );
+};
+
+const cdn_server_deleted = (event, uow) => {
+  uow.push_message(
+    new Notify("success", `Сервер удален`)
+  );
+};
+
+
+
 
 export {
   handle_api_error,
@@ -76,5 +96,8 @@ export {
   rename_file_success,
   delete_file_success,
   file_share_link_copied,
-  file_share_link_deleted
+  file_share_link_deleted,
+  cdn_server_added,
+  cdn_server_updated,
+  cdn_server_deleted
 };

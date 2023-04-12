@@ -720,7 +720,7 @@ const convertDateToDateString = (date) => {
 };
 
 const convertDateToDateTimeString = (date) => {
-  return date.toLocaleString("ru-RU");
+  return date.toLocaleString("ru-RU", {timeZone: "Europe/Moscow"});
 };
 
 const useGetSortFunction = (name) => {

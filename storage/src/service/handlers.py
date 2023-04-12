@@ -7,6 +7,7 @@ from src.service import command_handlers, event_handlers
 
 
 EVENT_HANDLERS = {
+    events.CdnServerUpdated: [event_handlers.cdn_server_updated],
     events.FileStored: [event_handlers.file_stored],
     events.FileRemovedFromStorage: [event_handlers.file_removed_from_storage],
     events.FileDownloadedToTempStorage: [
@@ -21,6 +22,7 @@ COMMAND_HANDLERS = {
     commands.CreateCdnServer: command_handlers.create_cdn_server,
     commands.UpdateCdnServer: command_handlers.update_cdn_server,
     commands.DeleteCdnServer: command_handlers.delete_cdn_server,
+    commands.EnrichCdnServerByFiles: command_handlers.enrich_cdn_server_by_files,
     commands.DeleteFile: command_handlers.delete_file,
     commands.RenameFile: command_handlers.rename_file,
     commands.GetManyFiles: command_handlers.get_many_files,
@@ -36,6 +38,7 @@ COMMAND_HANDLERS = {
     commands.DownloadFileToTempStorage: command_handlers.download_file_to_temp_storage,
     commands.PublishMessage: command_handlers.publish_message,
     commands.CopyFile: command_handlers.copy_file,
+    commands.DistributeFileWithinZone: command_handlers.distribute_file_within_zone,
     commands.RemoveFileFromTempStorage: command_handlers.remove_file_from_temp_storage,
     commands.OrderFileToRemove: command_handlers.order_file_to_remove,
     commands.RemoveFile: command_handlers.remove_file,
@@ -63,4 +66,5 @@ RESULTS = {
     exceptions.UploadFileError: command_results.UploadFileError,
     exceptions.FileNotFoundInTempStorage: command_results.FileNotFoundInTempStorage,
     exceptions.RemoveFileError: command_results.RemoveFileError,
+    exceptions.CdnServerConnectionError: command_results.CdnServerConnectionError,
 }

@@ -233,7 +233,7 @@ class UserAction {
   }
 
   get _file_share_link_deleted_text() {
-    return `Общедоступная ссылка на файл "${this._data['name']}", созданная ${new Date(this._data['created']).toLocaleString()}, была удалена`;
+    return `Общедоступная ссылка на файл "${this._data['name']}", созданная ${new Date(this._data['created']).toLocaleString("ru-RU", {timeZone: "Europe/Moscow"})}, была удалена`;
   }
 
 }
@@ -279,7 +279,7 @@ class ShareLink {
   }
 
   get text() {
-    const expire_text = this._expire_at ? 'до ' + this._expire_at.toLocaleString() : 'бессрочно';
+    const expire_text = this._expire_at ? 'до ' + this._expire_at.toLocaleString("ru-RU", {timeZone: "Europe/Moscow"}) : 'бессрочно';
     return `${this._is_secured ? ', защищенная паролем' : ' без пароля'}. Действует ${expire_text}.`;
   }
 }

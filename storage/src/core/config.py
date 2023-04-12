@@ -5,6 +5,7 @@ from logging import config as logging_config
 
 from pydantic import BaseModel, BaseSettings, Field
 from src.core.logger import LOGGING
+from datetime import datetime, timedelta
 
 
 logging_config.dictConfig(LOGGING)
@@ -51,8 +52,6 @@ class GeoSettings(BaseSettings):
 class RabbitQueueSettings(BaseSettings):
     listen_s3_events: str
     file_operations: str
-    # send_emails: str
-    # send_sms: str
 
 
 class RabbitSettings(BaseSettings):
@@ -85,6 +84,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+def tz_now():
+    return datetime.now() + timedelta(hours=3)  # Moscow Time
 
 db_dsl = {
     "host": settings.storage_db.host,

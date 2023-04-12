@@ -19,11 +19,12 @@ class FileRepository:
                             name,
                             size,
                             user_id,
+                            has_deleted,
                             created,
                             updated
                         )
                     VALUES
-                        ($1, $2, $3, $4, $5, $6);
+                        ($1, $2, $3, $4, $5, $6, $7);
                     """
 
     UPDATE_QUERY = f"""
@@ -32,10 +33,11 @@ class FileRepository:
                             name,
                             size,
                             user_id,
+                            has_deleted,
                             created,
                             updated
                         ) = (
-                            $2, $3, $4, $5, $6
+                            $2, $3, $4, $5, $6, $7
                         )
                     WHERE id = $1;
                     """
@@ -44,12 +46,19 @@ class FileRepository:
 
     GET_BY_NAME_AND_USER_ID_QUERY = f"""
                         SELECT * FROM {__files_tablename__}
-                        WHERE name = $1 AND user_id = $2;
+                        WHERE name = $1 AND user_id = $2 AND has_deleted = false;
                         """
 
-    GET_ALL_QUERY = f"SELECT * FROM {__files_tablename__} WHERE user_id = $1;"
+    GET_NON_DELETED_QUERY = f"SELECT * FROM {__files_tablename__} WHERE user_id = $1 AND has_deleted = false;"
 
-    DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
+    GET_NON_DELETED_ON_SERVERS_QUERY = f"""
+                                    SELECT * FROM {__files_tablename__} WHERE id = ANY (
+                                        SELECT file_id FROM {__file_server_tablename__} WHERE server_id = ANY($1)
+                                    ) AND has_deleted = false;
+                                    """
+
+    DELETE_QUERY = f"UPDATE {__files_tablename__} SET has_deleted = true WHERE id = $1;"
+    # DELETE_QUERY = f"DELETE FROM {__files_tablename__} WHERE id = $1;"
 
     GET_IDS_OF_SERVERS = f"SELECT server_id FROM {__file_server_tablename__} WHERE file_id = $1;"
 
@@ -63,14 +72,14 @@ class FileRepository:
         f"DELETE FROM {__file_server_tablename__} WHERE file_id = $1;"
     )
 
-    IS_FILE_ON_ALL_SERVERS = f""" SELECT (
-                                    SELECT COUNT(server_id)
-                                    FROM {__file_server_tablename__}
-                                    WHERE file_id = $1 
-                                ) = (
-                                    SELECT COUNT(id) from {__servers_tablename__} 
-                                ) as result;
-                            """
+    # IS_FILE_ON_ALL_SERVERS = f""" SELECT (
+    #                                 SELECT COUNT(server_id)
+    #                                 FROM {__file_server_tablename__}
+    #                                 WHERE file_id = $1 
+    #                             ) = (
+    #                                 SELECT COUNT(id) from {__servers_tablename__} 
+    #                             ) as result;
+    #                         """
 
     def __init__(self, conn):
         self._conn = conn
@@ -86,6 +95,7 @@ class FileRepository:
             obj.name,
             obj.size,
             obj.user_id,
+            obj.has_deleted,
             obj.created,
             obj.updated,
         )
@@ -98,7 +108,7 @@ class FileRepository:
 
         return self._convert_row_to_obj(row)
 
-    async def get_by_name_and_user_id(self, name: str, user_id: UUID) -> UUID:
+    async def get_non_deleted_by_name_and_user_id(self, name: str, user_id: UUID) -> UUID:
         logger.debug(f"Get file with name {name} and user_id {user_id}")
         row = await self._conn.fetchrow(
             self.GET_BY_NAME_AND_USER_ID_QUERY, name, user_id
@@ -111,7 +121,12 @@ class FileRepository:
 
     async def get_non_deleted(self, user_id: UUID) -> list[File]:
         logger.debug(f"Get all files")
-        rows = await self._conn.fetch(self.GET_ALL_QUERY, user_id)
+        rows = await self._conn.fetch(self.GET_NON_DELETED_QUERY, user_id)
+        return [self._convert_row_to_obj(row) for row in rows]
+
+    async def get_non_deleted_on_servers(self, only_servers: list[UUID]) -> list[File]:
+        logger.debug(f"Get all files located on servers with ids {only_servers}")
+        rows = await self._conn.fetch(self.GET_NON_DELETED_ON_SERVERS_QUERY, only_servers)
         return [self._convert_row_to_obj(row) for row in rows]
 
     async def update(self, obj: File):
@@ -122,6 +137,7 @@ class FileRepository:
             obj.name,
             obj.size,
             obj.user_id,
+            obj.has_deleted,
             obj.created,
             obj.updated,
         )
@@ -149,7 +165,7 @@ class FileRepository:
         logger.debug(f"Remove all servers from file {file_id}")
         await self._conn.execute(self.REMOVE_ALL_SERVERS_FROM_FILE, file_id)
 
-    async def is_copied(self, file_id: UUID):
-        logger.debug(f"Check if file {file_id} located on all servers")
-        row = await self._conn.fetchrow(self.IS_FILE_ON_ALL_SERVERS, file_id)
-        return bool(row["result"])
+    # async def is_copied(self, file_id: UUID, server_id: UUID):
+    #     logger.debug(f"Check if file {file_id} located on all servers in zone of server {server_id}")
+    #     row = await self._conn.fetchrow(self.IS_FILE_ON_ALL_SERVERS, file_id, server_id)
+    #     return bool(row["result"])

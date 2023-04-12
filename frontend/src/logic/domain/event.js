@@ -1,4 +1,4 @@
-class Event {}
+class Event { }
 
 class ApiError extends Event {
   constructor(code) {
@@ -8,10 +8,10 @@ class ApiError extends Event {
 }
 
 // class AccessPagePermissionCheckFail extends Event {}
-class UserLoginSuccess extends Event {}
-class AccessTokenOutdated extends Event {}
-class RefreshTokenOutdated extends Event {}
-class UserLogoutSuccess extends Event {}
+class UserLoginSuccess extends Event { }
+class AccessTokenOutdated extends Event { }
+class RefreshTokenOutdated extends Event { }
+class UserLogoutSuccess extends Event { }
 
 class UploadFileError extends Event {
   constructor(filename) {
@@ -20,15 +20,19 @@ class UploadFileError extends Event {
   }
 }
 
-class UploadEmptyFileError extends UploadFileError {}
-class UploadFileTooBigError extends UploadFileError {}
-class UploadFileSuccess extends Event {}
-class DownloadFileSuccess extends Event {}
-class RenameFileSuccess extends Event {}
-class DeleteFileSuccess extends Event {}
+class UploadEmptyFileError extends UploadFileError { }
+class UploadFileTooBigError extends UploadFileError { }
+class UploadFileSuccess extends Event { }
+class DownloadFileSuccess extends Event { }
+class RenameFileSuccess extends Event { }
+class DeleteFileSuccess extends Event { }
 
-class FileShareLinkCopied extends Event {}
-class FileShareLinkDeleted extends Event {}
+class FileShareLinkCopied extends Event { }
+class FileShareLinkDeleted extends Event { }
+
+class CdnServerAdded extends Event { }
+class CdnServerUpdated extends Event { }
+class CdnServerDeleted extends Event { }
 
 export {
   Event,
@@ -52,4 +56,9 @@ export {
   // LINK
   FileShareLinkCopied,
   FileShareLinkDeleted,
+
+  // CDN SERVER
+  CdnServerAdded,
+  CdnServerUpdated,
+  CdnServerDeleted,
 };

@@ -23,6 +23,7 @@ const notify_api_error = (event, uow) => {
     "File.DoesNotExist": ["error", "Файл не существует"],
     "File.AlreadyExists": ["error", "Файл с таким именем уже существует"],
     "FileShareLink.DoesNotExist": ["error", "Ссылка на файл не существует либо ее срок действия истек"],
+    "CdnServer.ConnectionError": ["error", "CDN сервер не отвечает"],
     "CdnServer.AlreadyExists": ["error", "Сервер уже существует"],
     "Auth.Error.TokenMissed": ["error", null],
     "Auth.Error.TokenOutdated": ["error", null],

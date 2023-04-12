@@ -21,14 +21,14 @@ async def main():
     bus = await get_message_bus(["db"])
 
     cdn_servers = [
-        ("s1_1", "10.95.27.163", 9001, "Detroit", "USA", 42.3314, -83.0458, False, False),
+        ("s1_1", "10.95.27.163", 9001, "Detroit", "USA", 42.3314, -83.0458, True, False),
         ("s1_2", "10.95.27.163", 9002, "New York", "USA", 40.730610, -73.935242, True, True),
-        ("s1_3", "10.95.27.163", 9003, "Dallas", "USA", 32.7831, -96.8067, False, True),
+        ("s1_3", "10.95.27.163", 9003, "Dallas", "USA", 32.7831, -96.8067, True, True),
         ("s2_1", "10.95.27.163", 9004, "Vladivostok", "Russia",  43.1056200, 131.8735300, True, True),
         ("s3_1", "10.95.27.163", 9005, "Cape Town", "Africa", -33.918861, 18.423300, True, True),
     ]
 
-    for name, host, port, location, zone, latitude, longitude, on, ready in cdn_servers:
+    for name, host, port, location, zone, latitude, longitude, on, active in cdn_servers:
         await bus.handle(
             commands.CreateCdnServer(
                 name=name,
@@ -39,7 +39,7 @@ async def main():
                 latitude=latitude,
                 longitude=longitude,
                 is_on=on,
-                is_active=ready,
+                is_active=active,
             )
         )
 

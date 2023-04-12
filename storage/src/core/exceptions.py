@@ -77,6 +77,9 @@ class FileNotFoundInTempStorage(ApplicationException):
 class RemoveFileError(ApplicationException):
     pass
 
+class CdnServerConnectionError(ApplicationException):
+    pass
+
 
 # class WrongCredentials(ApplicationException):
 #     pass

@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 
 import orjson
 from pydantic import BaseModel, Field
-from src.core.config import settings
+from src.core.config import settings, tz_now
 
 
 def orjson_dumps(v, *, default):
@@ -21,7 +21,7 @@ class IdMixin(BaseModel):
 
 
 class CreatedMixin(BaseModel):
-    created: datetime = Field(default_factory=datetime.now)
+    created: datetime = Field(default_factory=tz_now)
 
 
 class UpdatedMixin(BaseModel):
@@ -54,6 +54,7 @@ class File(AbstractIdCreatedUpdatedModel):
     name: str
     size: int
     user_id: UUID
+    has_deleted: bool
 
 
 class FileShareLink(AbstractIdModel, CreatedMixin):

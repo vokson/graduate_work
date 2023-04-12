@@ -276,6 +276,7 @@ const add_file_share_link = async (event, uow) => {
 };
 
 const get_file_share_links = async (event, uow) => {
+  uow.link_repository.reset_keeping_refs();
   const request = new GetFileShareLinksRequest({
     file_id: event.file_id,
   });
@@ -288,7 +289,6 @@ const get_file_share_links = async (event, uow) => {
   }
 
   if (response instanceof GetFileShareLinksResponse) {
-    uow.link_repository.reset_keeping_refs();
     response.data.forEach((obj) => {
       const f = convert_file_link_response_obj_to_model(obj);
       uow.link_repository.set(f.id, f);
@@ -300,7 +300,7 @@ const get_file_share_links = async (event, uow) => {
 };
 
 const flush_file_share_links = async (event, uow) => {
-    uow.link_repository.reset();
+    uow.link_repository.reset_keeping_refs();
 };
 
 const get_file_share_link = async (event, uow) => {
@@ -337,6 +337,11 @@ const delete_file_share_link = async (event, uow) => {
   }
 
   if (response instanceof DeleteFileShareLinkResponse) {
+    console.log('LINK BEFORe', JSON.stringify(uow.link_repository.values().map(obj => obj.value.id)))
+    console.log('LINK BEFORe', JSON.stringify(uow.link_repository.pure_keys()))
+    console.log('DELETE LINK', event.link_id)
+    console.log('LINK AFTER', JSON.stringify(uow.link_repository.values().map(obj => obj.value.id)))
+    console.log('LINK AFTER', JSON.stringify(uow.link_repository.pure_keys()))
     uow.link_repository.delete(event.link_id);
     uow.push_message(new FileShareLinkDeleted());
     return;

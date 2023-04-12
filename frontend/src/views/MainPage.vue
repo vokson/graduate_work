@@ -116,7 +116,11 @@
             class="historycontainer__row history__row"
           >
             <div class="history__date">
-              {{ action.created.toLocaleString() }}
+              {{
+                action.created.toLocaleString("ru-RU", {
+                  timeZone: "Europe/Moscow",
+                })
+              }}
             </div>
             <div class="history__text">{{ action.text }}</div>
           </div>
@@ -133,7 +137,11 @@
           >
             <div class="link__delete" @click="handle_delete_link(link.id)" />
             <div class="link__date">
-              {{ link.created.toLocaleString() }}
+              {{
+                link.created.toLocaleString("ru-RU", {
+                  timeZone: "Europe/Moscow",
+                })
+              }}
             </div>
             <div v-if="link.is_expired" class="link__text link__text_expired">
               Истекло время жизни ссылки
@@ -157,11 +165,20 @@
           <div
             v-for="server in servers"
             :key="server.id"
-            class="filerow__server"
+            class="filerow__server server"
           >
+            <p>{{ server.name }}</p>
             <p>{{ server.location }}</p>
+            <p>{{ server.zone }}</p>
             <p>Ш: {{ server.latitude }}</p>
             <p>Д: {{ server.longitude }}</p>
+            <form-boolean-input
+              v-if="can_change_server"
+              class="server__activator"
+              :value="server.is_active"
+              :parameters="{ size: 20, hint: 'Активен' }"
+              @update="handle_activate_server(server, $event)"
+            />
           </div>
         </div>
 
@@ -174,7 +191,7 @@
           <div class="filerow__selector">
             <form-boolean-input
               :value="file.id === selected_file_id"
-              :parameters="{size: 26}"
+              :parameters="{ size: 26 }"
               @click="handle_select_file(file.id, file.name)"
             />
           </div>
@@ -194,11 +211,19 @@
           </div>
 
           <div class="filerow__date">
-            {{ file.created.toLocaleString() }}
+            {{
+              file.created.toLocaleString("ru-RU", {
+                timeZone: "Europe/Moscow",
+              })
+            }}
           </div>
 
           <div class="filerow__date">
-            {{ file.updated.toLocaleString() }}
+            {{
+              file.updated.toLocaleString("ru-RU", {
+                timeZone: "Europe/Moscow",
+              })
+            }}
           </div>
 
           <div
@@ -239,6 +264,7 @@ import {
   GetFileShareLinks,
   FlushFileShareLinks,
   DeleteFileShareLink,
+  UpdateCdnServer,
 } from "../logic/domain/command";
 import {
   UploadFileTooBigError,
@@ -281,9 +307,37 @@ export default {
     const max_file_size = 100; // MB
 
     // CDN SERVERS
-    const servers = computed(() =>
-      uow.cdn_server_repository.values().map((obj) => obj.value)
+    const can_change_server = computed(() =>
+      user.value
+        ? user.value.permissions.includes("can_change_cdnserver")
+        : false
     );
+
+    const servers = computed(() =>
+      uow.cdn_server_repository
+        .values()
+        .map((obj) => obj.value)
+        .filter((obj) => obj.is_on)
+        .toSorted((a, b) => a.zone.localeCompare(b.zone))
+    );
+
+    const handle_activate_server = async (server, is_active) => {
+      await MessageBus.handle(
+        new UpdateCdnServer(
+          server.id,
+          server.name,
+          server.host,
+          server.port,
+          server.location,
+          server.zone,
+          server.latitude,
+          server.longitude,
+          server.is_on,
+          is_active
+        ),
+        uow
+      );
+    };
 
     // HISTORY
     const user_actions = computed(() =>
@@ -331,9 +385,10 @@ export default {
     });
 
     const handle_delete = async (id) => {
+      await MessageBus.handle(new FlushFileShareLinks(), uow);
       await MessageBus.handle(new DeleteFile(id), uow);
-      selected_file_id.value = null
-      selected_file_name.value = ''
+      selected_file_id.value = null;
+      selected_file_name.value = "";
       await refresh_actions();
     };
 
@@ -413,7 +468,6 @@ export default {
         new DeleteFileShareLink(selected_file_id.value, link_id),
         uow
       );
-      await MessageBus.handle(new FlushFileShareLinks(), uow);
     };
 
     // FORM
@@ -514,7 +568,7 @@ export default {
     };
 
     uow.get_files_timer.set_callback(get_files);
-    uow.get_files_timer.start();
+    // uow.get_files_timer.start();
 
     const user = uow.user_repository.get_current(); // Ref
 
@@ -539,7 +593,9 @@ export default {
       ua_select_count_per_page,
 
       // SERVER
+      can_change_server,
       servers,
+      handle_activate_server,
 
       // FILE
       files,
@@ -719,7 +775,8 @@ export default {
   align-items: center;
 }
 
-.filerow__selector {
+.filerow__selector,
+.server__activator {
   min-width: 30px;
   max-width: 30px;
 }

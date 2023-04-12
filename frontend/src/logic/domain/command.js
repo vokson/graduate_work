@@ -69,8 +69,6 @@ class DeleteCdnServer extends Command {
 }
 
 
-
-
 class GetUserActions extends Command {
   constructor(page_num, page_size) {
     super();

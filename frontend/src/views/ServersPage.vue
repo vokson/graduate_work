@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <heading-component class="page__heading" text="S3 сервера" size="middle" />
+    <heading-component class="page__heading" text="CDNs" size="middle" />
     <div class="page__container">
       <div class="page__editblock">
         <base-form
@@ -152,6 +152,7 @@ export default {
       {
         name: "name",
         size: "w200",
+        grow: true,
         fields: [
           {
             placeholder: "Имя",
@@ -162,6 +163,7 @@ export default {
       {
         name: "location",
         size: "w200",
+        grow: true,
         fields: [
           {
             placeholder: "Расположение",
@@ -172,6 +174,7 @@ export default {
       {
         name: "zone",
         size: "w200",
+        grow: true,
         fields: [
           {
             placeholder: "Зона",
@@ -182,6 +185,7 @@ export default {
       {
         name: "host",
         size: "w200",
+        grow: true,
         fields: [
           {
             placeholder: "Host",

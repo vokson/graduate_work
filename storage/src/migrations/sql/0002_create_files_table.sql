@@ -4,10 +4,12 @@ CREATE TABLE files
     name TEXT NOT NULL,
     size INTEGER NOT NULL,
     user_id UUID NOT NULL,
+    has_deleted BOOLEAN NOT NULL,
     created TIMESTAMP NOT NULL,
-    updated TIMESTAMP NOT NULL,
-    UNIQUE (name, user_id)
+    updated TIMESTAMP NOT NULL
 );
+
+CREATE UNIQUE INDEX unique_name_user_id_idx ON files (name, user_id) WHERE (has_deleted = false);
 
 CREATE TABLE m2m_file_server
 (

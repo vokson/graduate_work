@@ -54,6 +54,9 @@ import {
   user_logout_success,
   file_share_link_copied,
   file_share_link_deleted,
+  cdn_server_added,
+  cdn_server_updated,
+  cdn_server_deleted
 } from "./event_handlers";
 
 const COMMAND_HANDLERS = {
@@ -107,6 +110,9 @@ const EVENT_HANDLERS = {
   RenameFileSuccess: [rename_file_success],
   FileShareLinkCopied: [file_share_link_copied],
   FileShareLinkDeleted: [file_share_link_deleted],
+  CdnServerAdded: [cdn_server_added],
+  CdnServerUpdated: [cdn_server_updated],
+  CdnServerDeleted: [cdn_server_deleted],
 };
 
 class NotImplementedError extends Error {}

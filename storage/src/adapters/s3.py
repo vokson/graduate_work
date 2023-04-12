@@ -140,7 +140,11 @@ class StoragePool:
         if name not in self._storages:
             storage = get_s3_conn(self._bucket, name)
             dsl = self._get_dsl(host, port)
-            await storage.startup(**dsl)
+            try:
+                await storage.startup(**dsl)
+            except Exception:
+                raise exceptions.CdnServerConnectionError
+                
             self._storages[name] = storage
 
         return self._storages[name]

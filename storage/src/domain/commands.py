@@ -32,6 +32,9 @@ class UpdateCdnServer(CreateCdnServer):
 class DeleteCdnServer(Command):
     id: UUID
 
+class EnrichCdnServerByFiles(Command):
+    id: UUID
+
 
 class RenameFile(Command):
     id: UUID
@@ -136,6 +139,9 @@ class DownloadFileToTempStorage(FileOperation):
 class OrderFileToCopy(FileOperation):
     pass
 
+class DistributeFileWithinZone(Command):
+    file_id: UUID
+    zone: str
 
 class CopyFile(FileOperation):
     pass

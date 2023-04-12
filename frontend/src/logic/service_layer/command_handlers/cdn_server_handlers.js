@@ -13,7 +13,7 @@ import {
 } from "../../adapters/api";
 
 import {
-  ApiError,
+  ApiError, CdnServerAdded, CdnServerDeleted, CdnServerUpdated,
 } from "../../domain/event";
 
 import { CdnServer } from "../../domain/model";
@@ -84,6 +84,7 @@ const add_cdn_server = async (event, uow) => {
     uow.cdn_server_repository.set(obj.id,
       convert_cdn_server_response_obj_to_model(obj)
     )
+    uow.push_message(new CdnServerAdded());
     return;
   }
 
@@ -116,6 +117,7 @@ const update_cdn_server = async (event, uow) => {
     uow.cdn_server_repository.set(obj.id,
       convert_cdn_server_response_obj_to_model(obj)
     )
+    uow.push_message(new CdnServerUpdated());
     return;
   }
 
@@ -136,6 +138,7 @@ const delete_cdn_server = async (event, uow) => {
 
   if (response instanceof DeleteCdnServerResponse) {
     uow.cdn_server_repository.delete(event.id)
+    uow.push_message(new CdnServerDeleted());
     return;
   }
 
