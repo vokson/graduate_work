@@ -337,6 +337,7 @@ export default {
         ),
         uow
       );
+      await refresh_actions();
     };
 
     // HISTORY
@@ -568,7 +569,7 @@ export default {
     };
 
     uow.get_files_timer.set_callback(get_files);
-    // uow.get_files_timer.start();
+    uow.get_files_timer.start();
 
     const user = uow.user_repository.get_current(); // Ref
 

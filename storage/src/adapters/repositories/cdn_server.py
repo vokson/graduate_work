@@ -165,13 +165,22 @@ class CdnServerRepository:
         self,
         coordinates: tuple[float, float] | None,
         only_servers: list[UUID] | None = None,
-    ) -> CdnServer:
+    ) -> CdnServer | None:
+        logger.info(
+            f"Getting nearest cdn servers for coordinated {coordinates} "
+            f"within servers {only_servers}",
+        )
+
         servers = await self.get_switched_on()
         filtered_servers = (
             [x for x in servers if x.id in only_servers]
             if only_servers
             else servers
         )
+
+        if not filtered_servers:
+            logger.debug("Can not find server")
+            return None
 
         if not coordinates:
             logger.debug("Get random cdn server")

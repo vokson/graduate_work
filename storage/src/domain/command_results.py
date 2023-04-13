@@ -63,7 +63,15 @@ class AuthNoPermissionException(NegativeCommandResult):
     pass
 
 
+class CdnServerConnectionError(NegativeCommandResult):
+    pass
+
+
 class CdnServerAlreadyExists(NegativeCommandResult):
+    pass
+
+
+class CdnServerDoesNotExist(NegativeCommandResult):
     pass
 
 
@@ -104,8 +112,4 @@ class FileNotFoundInTempStorage(NegativeCommandResult):
 
 
 class RemoveFileError(NegativeCommandResult):
-    pass
-
-
-class CdnServerConnectionError(NegativeCommandResult):
     pass

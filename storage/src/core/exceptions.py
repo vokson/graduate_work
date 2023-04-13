@@ -10,31 +10,15 @@ class AuthNoPermissionException(ApplicationException):
     pass
 
 
-# class AuthTokenMissedException(ApplicationException):
-#     pass
-
-
-# class AuthTokenWithWrongSignatureException(ApplicationException):
-#     pass
-
-
-# class AuthTokenOutdatedException(ApplicationException):
-#     pass
-
-
-# class AuthTokenWrongPayloadException(ApplicationException):
-#     pass
-
-
-# class AuthNoPermissionException(ApplicationException):
-#     pass
-
-
-# class UserDoesNotExist(ApplicationException):
-#     pass
+class CdnServerConnectionError(ApplicationException):
+    pass
 
 
 class CdnServerAlreadyExists(ApplicationException):
+    pass
+
+
+class CdnServerDoesNotExist(ApplicationException):
     pass
 
 
@@ -76,11 +60,3 @@ class FileNotFoundInTempStorage(ApplicationException):
 
 class RemoveFileError(ApplicationException):
     pass
-
-
-class CdnServerConnectionError(ApplicationException):
-    pass
-
-
-# class WrongCredentials(ApplicationException):
-#     pass

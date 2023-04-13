@@ -15,6 +15,7 @@ class GetManyCdnServers(Command):
 
 
 class CreateCdnServer(Command):
+    user_id: UUID
     name: str
     host: str
     port: int
@@ -31,6 +32,7 @@ class UpdateCdnServer(CreateCdnServer):
 
 
 class DeleteCdnServer(Command):
+    user_id: UUID
     id: UUID
 
 

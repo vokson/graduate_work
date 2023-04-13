@@ -172,8 +172,14 @@ class UserAction {
     if (this._event === 'FILE.DOWNLOADED') return this._file_downloaded_text;
     if (this._event === 'FILE.RENAMED') return this._file_renamed_text;
     if (this._event === 'FILE.DELETED') return this._file_deleted_text;
+
     if (this._event === 'FILE_SHARE_LINK.CREATED') return this._file_share_link_created_text;
     if (this._event === 'FILE_SHARE_LINK.DELETED') return this._file_share_link_deleted_text;
+
+    if (this._event === 'CDN_SERVER.CREATED') return this._cdn_server_created_text;
+    if (this._event === 'CDN_SERVER.UPDATED') return this._cdn_server_updated_text;
+    if (this._event === 'CDN_SERVER.DELETED') return this._cdn_server_deleted_text;
+
     return `Wrong event ${this._event}`;
   }
 
@@ -199,6 +205,18 @@ class UserAction {
 
   get _file_share_link_deleted_text() {
     return `Общедоступная ссылка на файл "${this._data['name']}", созданная ${new Date(this._data['created']).toLocaleString("ru-RU", {timeZone: "Europe/Moscow"})}, была удалена`;
+  }
+
+  get _cdn_server_created_text() {
+    return `Добавлен сервер ${this._data['name']}, расположенный в ${this._data['location']} (${this._data['zone']})`;
+  }
+
+  get _cdn_server_updated_text() {
+    return `Обновлен сервер ${this._data['name']}, расположенный в ${this._data['location']} (${this._data['zone']})`;
+  }
+
+  get _cdn_server_deleted_text() {
+    return `Удален сервер ${this._data['name']}, расположенный в ${this._data['location']} (${this._data['zone']})`;
   }
 
 }

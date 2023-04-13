@@ -8,7 +8,7 @@ import { AbstractTimer } from "../adapters/timer";
 import { VueCountableFlatRepository } from "../adapters/countable_flat_repository";
 
 const token_timer = new AbstractTimer(5000);
-const get_files_timer = new AbstractTimer(2000);
+const get_files_timer = new AbstractTimer(5000);
 
 class AbstractUnitOfWork {
   constructor() {

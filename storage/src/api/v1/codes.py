@@ -21,6 +21,7 @@ COMMAND_RESULTS_RESPONSE_CODES = {
         "CdnServer.ConnectionError",
     ),
     command_results.CdnServerAlreadyExists: (400, "CdnServer.AlreadyExists"),
+    command_results.CdnServerDoesNotExist: (400, "CdnServer.DoesNotExist"),
 }
 
 

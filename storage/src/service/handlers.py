@@ -57,7 +57,9 @@ RESULTS = {
     exceptions.FileDoesNotExist: command_results.FileDoesNotExist,
     exceptions.FileAlreadyExists: command_results.FileAlreadyExists,
     exceptions.FileShareLinkDoesNotExist: command_results.FileShareLinkDoesNotExist,  # noqa
+    exceptions.CdnServerConnectionError: command_results.CdnServerConnectionError,  # noqa
     exceptions.CdnServerAlreadyExists: command_results.CdnServerAlreadyExists,
+    exceptions.CdnServerDoesNotExist: command_results.CdnServerDoesNotExist,
     exceptions.BadS3Event: command_results.BadS3Event,
     exceptions.BadServiceEvent: command_results.BadServiceEvent,
     exceptions.PublishMessageError: command_results.PublishMessageError,
@@ -65,5 +67,4 @@ RESULTS = {
     exceptions.UploadFileError: command_results.UploadFileError,
     exceptions.FileNotFoundInTempStorage: command_results.FileNotFoundInTempStorage,  # noqa
     exceptions.RemoveFileError: command_results.RemoveFileError,
-    exceptions.CdnServerConnectionError: command_results.CdnServerConnectionError,  # noqa
 }

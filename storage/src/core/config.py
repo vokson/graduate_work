@@ -33,16 +33,10 @@ class CacheSettings(BaseSettings):
     port: int
 
 
-class LinkExpireTimeSettings(BaseSettings):
-    upload: str
-    download: str
-
-
 class S3Settings(BaseSettings):
     user: str
     password: str
     bucket: str
-    link_expire_time: LinkExpireTimeSettings
 
 
 class GeoSettings(BaseSettings):

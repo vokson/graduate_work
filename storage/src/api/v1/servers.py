@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 
 from src.api.decorators import auth
-from src.api.dependables import get_bus
+from src.api.dependables import extract_user_id, get_bus
 from src.api.transformers import transform_command_result
 from src.api.v1 import schemes
 from src.api.v1.codes import collect_reponses
@@ -37,10 +37,13 @@ async def get_servers(
 @auth(permissions=["can_add_cdnserver"])
 async def add_server(
     body: schemes.CdnServerRequest,
+    user_id: UUID = Depends(extract_user_id()),
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.CdnServerResponse:
     return transform_command_result(
-        await bus.handle(commands.CreateCdnServer(**body.dict())),
+        await bus.handle(
+            commands.CreateCdnServer(user_id=user_id, **body.dict()),
+        ),
     )
 
 
@@ -54,11 +57,16 @@ async def add_server(
 async def update_server(
     server_id: UUID,
     body: schemes.CdnServerRequest,
+    user_id: UUID = Depends(extract_user_id()),
     bus: MessageBus = Depends(get_bus()),
 ) -> schemes.CdnServerResponse:
     return transform_command_result(
         await bus.handle(
-            commands.UpdateCdnServer(id=server_id, **body.dict()),
+            commands.UpdateCdnServer(
+                id=server_id,
+                user_id=user_id,
+                **body.dict(),
+            ),
         ),
     )
 
@@ -72,8 +80,11 @@ async def update_server(
 @auth(permissions=["can_delete_cdnserver"])
 async def delete_server(
     server_id: UUID,
+    user_id: UUID = Depends(extract_user_id()),
     bus: MessageBus = Depends(get_bus()),
 ):
     return transform_command_result(
-        await bus.handle(commands.DeleteCdnServer(id=server_id)),
+        await bus.handle(
+            commands.DeleteCdnServer(id=server_id, user_id=user_id),
+        ),
     )

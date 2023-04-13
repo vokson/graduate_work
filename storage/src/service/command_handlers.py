@@ -43,6 +43,21 @@ async def create_cdn_server(
         )
 
         await uow.cdn_servers.add(obj)
+
+        await uow.history.add(
+            models.CdnServerCreatedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": cmd.user_id,
+                    "data": {
+                        "name": obj.name,
+                        "location": obj.location,
+                        "zone": obj.zone,
+                    },
+                },
+            ),
+        )
+
         await uow.commit()
 
     logger.info(f"CDN server {obj.dict()} has been created")
@@ -65,6 +80,21 @@ async def update_cdn_server(
         )
 
         await uow.cdn_servers.update(obj)
+
+        await uow.history.add(
+            models.CdnServerUpdatedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": cmd.user_id,
+                    "data": {
+                        "name": obj.name,
+                        "location": obj.location,
+                        "zone": obj.zone,
+                    },
+                },
+            ),
+        )
+
         await uow.commit()
 
     logger.info(f"CDN server {obj.dict()} has been updated")
@@ -84,6 +114,21 @@ async def delete_cdn_server(
             raise exceptions.CdnServerDoesNotExist
 
         await uow.cdn_servers.delete(cmd.id)
+
+        await uow.history.add(
+            models.CdnServerDeletedUserAction(
+                **{
+                    "obj_id": obj.id,
+                    "user_id": cmd.user_id,
+                    "data": {
+                        "name": obj.name,
+                        "location": obj.location,
+                        "zone": obj.zone,
+                    },
+                },
+            ),
+        )
+
         await uow.commit()
 
     logger.info(f"CDN server {cmd.id} has been deleted")
@@ -232,6 +277,13 @@ async def get_upload_link(
     async with uow:
         coordinates = await uow.geoip.get_info(cmd.ip)
         nearest_server = await uow.cdn_servers.get_nearest(coordinates)
+        if not nearest_server:
+            logger.warning(
+                f"Try to get upload link for file {cmd.name} when "
+                f"there are not active servers",
+            )
+            raise exceptions.CdnServerDoesNotExist
+
         logger.info(
             f"Get upload link for file {cmd.name} on "
             f"server {nearest_server.name}",
@@ -315,16 +367,25 @@ async def get_download_link(
             coordinates,
             only_servers=ids_of_servers,
         )
+
+        if not nearest_server:
+            logger.warning(
+                f"Try to get download link for file {cmd.file_id} when "
+                f"there are not active servers",
+            )
+            raise exceptions.CdnServerDoesNotExist
+
+        logger.info(
+            f"Get download link for file {cmd.file_id} on "
+            f"server {nearest_server.name}",
+        )
+
         storage = await uow.s3_pool.get(
             nearest_server.name,
             nearest_server.host,
             nearest_server.port,
         )
 
-        logger.info(
-            f"Get download link for file {cmd.file_id} on "
-            f"server {nearest_server.name}",
-        )
         link = await storage.get_download_url(str(obj.id))
 
         await uow.history.add(

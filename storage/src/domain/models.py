@@ -120,6 +120,28 @@ class FileShareLinkDeletedUserAction(FileShareLinkUserAction):
     event: str = Field("FILE_SHARE_LINK.DELETED")
 
 
+class CdnServerActionData(BaseModel):
+    name: str
+    location: str
+    zone: str
+
+
+class CdnServerUserAction(UserAction):
+    data: CdnServerActionData
+
+
+class CdnServerCreatedUserAction(CdnServerUserAction):
+    event: str = Field("CDN_SERVER.CREATED")
+
+
+class CdnServerUpdatedUserAction(CdnServerUserAction):
+    event: str = Field("CDN_SERVER.UPDATED")
+
+
+class CdnServerDeletedUserAction(CdnServerUserAction):
+    event: str = Field("CDN_SERVER.DELETED")
+
+
 # BROKER MESSAGES
 
 

@@ -20,7 +20,7 @@ async def main():
     await bus.handle(
         commands.CreateUser(  # noqa
             username="admin",
-            password="admin",
+            password="qwe123",
             email="admin@mail.ru",
             first_name="John",
             last_name="Doe",
@@ -45,7 +45,7 @@ async def main():
     await bus.handle(
         commands.CreateUser(  # noqa
             username="user",
-            password="user",
+            password="qwe123",
             email="user@mail.ru",
             first_name="Vasya",
             last_name="Pupkin",
