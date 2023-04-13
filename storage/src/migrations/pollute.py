@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import sys
+from uuid import uuid4
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
@@ -88,6 +89,7 @@ async def main():
     ) in cdn_servers:
         await bus.handle(
             commands.CreateCdnServer(
+                user_id=uuid4(),
                 name=name,
                 host=host,
                 port=port,
