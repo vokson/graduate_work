@@ -700,13 +700,12 @@ async def get_file_share_link(
 ):
     logger.info(
         f"Getting single share link {cmd.link_id} for "
-        f"file with id {cmd.file_id}"
+        f"file with id {cmd.file_id}",
     )
     async with uow:
         file = await uow.files.get_by_id(cmd.file_id)
         if not file:
             raise exceptions.FileDoesNotExist
-        
 
         link = await uow.file_share_links.get(cmd.file_id, cmd.link_id)
         if not link or (
