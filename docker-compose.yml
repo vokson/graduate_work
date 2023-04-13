@@ -57,8 +57,6 @@ services:
     volumes:
       - redis_data:/var/lib/redis
     restart: always
-    ports:
-      - "${CACHE__PORT}:${CACHE__PORT}"
 
   rabbit:
     image: rabbitmq:3.10-management
