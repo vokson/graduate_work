@@ -38,7 +38,7 @@ class FileShareLinkRepository:
         self._conn = conn
 
     def _convert_row_to_obj(self, row) -> FileShareLink:
-        return FileShareLink(dict(row.items()))
+        return FileShareLink(**dict(row.items()))
 
     async def add(self, obj: FileShareLink):
         logger.debug(f"Add share link for file: {obj.file_id}")

@@ -37,6 +37,7 @@ API доступно по адресу:
 
 OPENAPI
 DEPLOY YANDEX
+лИШНИЕ env
 README (UFW, IP FRONTEND)
 
 ##  Клиент (в данном случае фронтенд на VueJs)
