@@ -225,7 +225,7 @@ async def get_file_share_link(
     "/{file_id}/links/{link_id}/",
     responses=collect_reponses(),
     status_code=status.HTTP_200_OK,
-    summary="Получение ссылки для скачивания общедоступной ссылке",
+    summary="Получение ссылки для скачивания по общедоступной ссылке",
 )
 @auth(permissions=[])
 async def get_download_link_by_file_share_link(
