@@ -1,13 +1,11 @@
 import logging
 from typing import Callable, Type
 
-from src.domain import command_results, commands, events
+from src.domain import command_results, commands, events, messages
 from src.service.handlers import COMMAND_HANDLERS, EVENT_HANDLERS, RESULTS
 from src.service.uow import AbstractUnitOfWork, UnitOfWork
 
 logger = logging.getLogger(__name__)
-
-Message = commands.Command | events.Event
 
 
 from sys import exc_info
@@ -31,7 +29,7 @@ class MessageBus:
         self._event_handlers = event_handlers
         self._command_handlers = command_handlers
 
-    async def handle(self, message):
+    async def handle(self, message: messages.Message):
         queue = [message]
         results = command_results.CommandResults()
 
@@ -40,11 +38,11 @@ class MessageBus:
                 message = queue.pop(0)
 
                 if isinstance(message, events.Event):
-                    await self.handle_event(message)
+                    await self._handle_event(message)
                     queue.extend(self._uow.collect_new_messages())
 
                 elif isinstance(message, commands.Command):
-                    results.add(message, await self.handle_command(message))
+                    results.add(message, await self._handle_command(message))
                     queue.extend(self._uow.collect_new_messages())
 
                 else:
@@ -56,7 +54,7 @@ class MessageBus:
 
         return results
 
-    async def handle_event(self, event):
+    async def _handle_event(self, event: events.Event):
         for handler in self._event_handlers[type(event)]:
             try:
                 logger.debug(f"Handling event {event} with handler {handler}")
@@ -66,7 +64,7 @@ class MessageBus:
                 logger.error(f"Exception handling event {event}")
                 continue
 
-    async def handle_command(self, command):
+    async def _handle_command(self, command: commands.Command):
         logger.debug(f"Handling command {command}")
 
         try:
