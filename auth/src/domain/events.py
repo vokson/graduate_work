@@ -1,5 +1,5 @@
-from pydantic import BaseModel
+from src.domain.messages import Message
 
 
-class Event(BaseModel):
+class Event(Message):
     pass

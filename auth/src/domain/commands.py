@@ -1,9 +1,11 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from src.domain.messages import Message
 
 
-class Command(BaseModel):
+class Command(Message):
     pass
 
 

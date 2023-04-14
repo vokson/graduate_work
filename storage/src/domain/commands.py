@@ -1,12 +1,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
-
+from src.domain.messages import Message
 from src.domain.models import BrokerMessage
 
 
-class Command(BaseModel):
+class Command(Message):
     pass
 
 
