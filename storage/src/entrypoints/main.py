@@ -22,7 +22,7 @@ from src.api.v1 import files, servers, user_actions
 from src.core.config import settings
 
 app = FastAPI(
-    title="Auth API",
+    title="Storage API",
     docs_url="/storage/api/openapi",
     openapi_url="/storage/api/openapi.json",
     default_response_class=ORJSONResponse,
